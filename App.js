@@ -57,7 +57,7 @@ const App = () => {
   return (
     <>
       <Provider store={Store}>
-        <StatusBar backgroundColor="black" barStyle="dark-content"/>
+        <StatusBar style={[{styles.canvaupperBG}]}>
         <SafeAreaView>
           <NavigationContainer>
             {/* navigation screen here */}
