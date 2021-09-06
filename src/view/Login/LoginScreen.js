@@ -2,6 +2,8 @@ import React from "react";
 
 import { 
     View,
+    ScrollView,
+    KeyboardAvoidingView
 } from "react-native";
 
 import {
