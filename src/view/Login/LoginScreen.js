@@ -33,8 +33,8 @@ import {
 
 const LoginScreen = () => {
 
-    const [username, setUsername] = useState("admin")
-    const [password, setPassword] = useState("12345678")
+    const [username, setUsername] = useState("")
+    const [password, setPassword] = useState("")
 
     const getLogin = (username, pass) => {
         var data = {
