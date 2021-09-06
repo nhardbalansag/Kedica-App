@@ -57,7 +57,7 @@ const App = () => {
   return (
     <>
       <Provider store={Store}>
-        <StatusBar style={[{styles.canvaupperBG}]}>
+        <StatusBar style={[styles.canvaupperBG]}/>
         <SafeAreaView>
           <NavigationContainer>
             {/* navigation screen here */}
@@ -69,7 +69,6 @@ const App = () => {
         </SafeAreaView>
       </Provider>
     </>
-    
   );
 };
 
