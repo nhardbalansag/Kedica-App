@@ -320,6 +320,9 @@ const styles = StyleSheet.create({
     marginLeft: baseWidth * 5,
     marginRight: baseWidth * 5
   },
+  mAuto:{
+    margin:'auto'
+  },
   mYAuto: {
     marginBottom: 'auto',
     marginTop: 'auto'

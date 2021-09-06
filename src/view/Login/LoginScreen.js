@@ -1,4 +1,8 @@
-import React from "react";
+import React,
+{
+    useState,
+    useEffect
+} from "react";
 
 import { 
     View,
@@ -28,44 +32,65 @@ import {
   } from 'native-base';
 
 const LoginScreen = () => {
+
+    const [username, setUsername] = useState("admin")
+    const [password, setPassword] = useState("12345678")
+
+    const getLogin = (username, pass) => {
+        var data = {
+            username: username,
+            password: pass
+        }
+        console.warn(data)
+    }
+
     return(
         <NativeBaseProvider>
-            <Box
-                safeArea
-                flex={1}
-                p={2}
-                w="90%"
-                mx='auto'
-                my='auto'
-                justifyContent='center'
-            >
-                <Heading size="lg" color='primary.500'>
-                    Kedica Login
-                </Heading>
-                <Heading color="muted.400" size="xs">
-                    Sign in to continue!
-                </Heading>
-
-                <VStack space={2} mt={5}>
-                    <FormControl>
-                    <FormControl.Label _text={{color: 'muted.700', fontSize: 'sm', fontWeight: 600}}>
-                        Username
-                    </FormControl.Label>
-                    <Input />
-                    </FormControl>
-                    <FormControl mb={5}>
-                        <FormControl.Label  _text={{color: 'muted.700', fontSize: 'sm', fontWeight: 600}}>
-                            Password
-                        </FormControl.Label>
-                        <Input type="password" />
-                    </FormControl>
-                    <VStack  space={2}>
-                        <Button colorScheme="cyan" _text={{color: 'white' }}>
-                            Login
-                        </Button>
-                    </VStack>
-                </VStack>
-            </Box>
+            <KeyboardAvoidingView 
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                style={[styles.justifyCenter, styles.alignCenter, styles.flex1]}
+             > 
+                <View style={[styles.w90]}>
+                    <Heading size="lg" color='primary.500'>
+                        Kedica Login
+                    </Heading>
+                    <Heading color="muted.400" size="xs">
+                        Sign in to continue!
+                    </Heading>
+                    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
+                        <VStack space={2} mt={5}>
+                            <FormControl>
+                                <FormControl.Label _text={{color: 'muted.700', fontSize: 'sm', fontWeight: 600}}>
+                                    Username
+                                </FormControl.Label>
+                                <Input 
+                                    value={username}
+                                    onChangeText={(text) => setUsername(text)}
+                                />
+                            </FormControl>
+                            <FormControl mb={5}>
+                                <FormControl.Label  _text={{color: 'muted.700', fontSize: 'sm', fontWeight: 600}}>
+                                    Password
+                                </FormControl.Label>
+                                <Input 
+                                    type="password" 
+                                    value={password}
+                                    onChangeText={(text) => setPassword(text)}
+                                />
+                            </FormControl>
+                            
+                            <VStack  space={2}>
+                                <Button 
+                                    onPress={() => getLogin(username, password)}
+                                    colorScheme="cyan" _text={{color: 'white' }}
+                                >
+                                    Login
+                                </Button>
+                            </VStack>
+                        </VStack>
+                    </KeyboardAvoidingView>
+                </View>
+            </KeyboardAvoidingView>
         </NativeBaseProvider>
     );
 }

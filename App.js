@@ -8,7 +8,12 @@
  * @format
  */
 
-import React from 'react';
+import 
+React, 
+{
+  useState,
+  useEffect
+} from 'react';
 import {
   SafeAreaView,
   StatusBar,
@@ -42,6 +47,7 @@ import LoginReducer from './src/redux/Login/LoginReducer';
 
 //screen navigation
 import ScreensNavigation from "./src/navigator/ScreenNavigation";
+import AppStart from './src/view/AppStart/appstart';
 
 const RootReducer = combineReducers({
   Login: LoginReducer
@@ -54,20 +60,51 @@ const App = () => {
   const windowWidth = Dimensions.get('window').width;
   const windowHeight = Dimensions.get('window').height;
 
+  const [loaded, setload] = useState(false);
+
+  const appStart = () =>{
+    setTimeout(() => {
+      setload(true)
+    }, 5000);
+  }
+
+  useEffect(() =>{
+    appStart()
+  }, [loaded])
+
   return (
     <>
-      <Provider store={Store}>
-        <StatusBar style={[styles.canvaupperBG]}/>
-        <SafeAreaView>
-          <NavigationContainer>
-            {/* navigation screen here */}
-            <View style = {[{height:windowHeight}, styles.backgroundWhite]}>
-              <ScreensNavigation/>
+      {
+        loaded 
+        ? 
+          <>
+            <Provider store={Store}>
+              <StatusBar style={[styles.canvaupperBG]}/>
+              <SafeAreaView>
+                <NavigationContainer>
+                  {/* navigation screen here */}
+                  <View style = {[{height:windowHeight}, styles.backgroundWhite]}>
+                    <ScreensNavigation/>
+                  </View>
+                  {/* navigation screen end */}
+                </NavigationContainer>
+              </SafeAreaView>
+            </Provider>
+          </>
+        : 
+          <>
+            <View
+              style={[
+                {
+                  height:windowHeight
+                },
+                  styles.bgLightBlue
+                ]}
+            >
+              <AppStart/>
             </View>
-            {/* navigation screen end */}
-          </NavigationContainer>
-        </SafeAreaView>
-      </Provider>
+          </>
+      }
     </>
   );
 };
