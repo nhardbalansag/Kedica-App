@@ -1,4 +1,5 @@
 import { StyleSheet, Dimensions, Platform } from 'react-native';
+import { color } from 'styled-system';
 
 // colors
 const baseColor    = '#f4f4f4';
@@ -493,6 +494,21 @@ const styles = StyleSheet.create({
     paddingTop: baseWidth * 3,
     paddingBottom: baseWidth * 3
   },
+  border5:{
+    borderRadius: 5
+  },
+  border10:{
+    borderRadius: 10
+  },
+  border15:{
+    borderRadius: 15
+  },
+  border20:{
+    borderRadius: 20
+  },
+  border25:{
+    borderRadius: 25
+  },
   pY2_5: {
     paddingTop: baseWidth * 2.5,
     paddingBottom: baseWidth * 2.5
@@ -718,6 +734,12 @@ const styles = StyleSheet.create({
     color: dangerColor,
     fontSize: 12
   },
+  backgroundCanvaColorBlue: {
+    backgroundColor: canvaColorBlue
+  },
+  backgroundLightBlue: {
+    backgroundColor: canvaupperBG
+  },
   backgroundPrimary: {
     backgroundColor: primaryColor
   },
@@ -744,6 +766,9 @@ const styles = StyleSheet.create({
   },
   bgDarkGray: {
     backgroundColor: '#6c757d'
+  },
+  bgDark:{
+    backgroundColor: "black"
   },
   bgWarning: {
     backgroundColor: warningColor
