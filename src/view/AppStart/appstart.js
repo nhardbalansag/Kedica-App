@@ -32,7 +32,8 @@ const AppStart = () =>{
                         ]
                     }
                 >
-                    Kedica
+                    
+                    Process Management System
                 </Text>
             </View>
             <View style={
