@@ -1,11 +1,14 @@
 import React from "react";
 
 import LoginScreen from "../view/Login/LoginScreen";
+import MainScreen from "../view/menu/MainScreen";
+import ProductionWorkEntryScreen from "../view/menu/ProductionWorkEntryScreen";
 
-import { colors } from "../asset/css/BaseStyle";
+import { styles, colors } from "../asset/css/BaseStyle";
 
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { marginBottom } from "styled-system";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -21,7 +24,47 @@ const Login = () =>{
                     headerTintColor: colors.lightColor,
                     headerStyle: {
                         backgroundColor: colors.canvaupperBG,
-                    }
+                    },
+                    headerTitleStyle: {
+                        fontSize: 40,
+                    },
+                }}
+            />
+        </Stack.Navigator>
+    )
+}
+
+const Menu = () =>{
+    return(
+        <Stack.Navigator>
+            <Stack.Screen 
+                name="MainScreen" 
+                component={MainScreen} 
+                options={{ 
+                    title: 'Main Menu',
+                    headerTintColor: colors.lightColor,
+                    headerStyle: {
+                        backgroundColor: colors.canvaupperBG,
+                        height:100
+                    },
+                    headerTitleStyle: {
+                        fontSize: 40,
+                    },
+                }}
+            />
+            <Stack.Screen
+                name="ProductionWorkEntryScreen" 
+                component={ProductionWorkEntryScreen} 
+                options={{ 
+                    title: 'Production Work Entry',
+                    headerTintColor: colors.lightColor,
+                    headerStyle: {
+                        backgroundColor: colors.canvaupperBG,
+                        height:100
+                    },
+                    headerTitleStyle: {
+                        fontSize: 40,
+                    },
                 }}
             />
         </Stack.Navigator>
@@ -29,7 +72,7 @@ const Login = () =>{
 }
 
 const ScreenNavigation = () => {
-    return Login();
+    return Menu();
 }
 
 export default ScreenNavigation;

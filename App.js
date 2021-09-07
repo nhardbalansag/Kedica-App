@@ -65,7 +65,7 @@ const App = () => {
   const appStart = () =>{
     setTimeout(() => {
       setload(true)
-    }, 5000);
+    }, 1000);
   }
 
   useEffect(() =>{
