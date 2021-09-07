@@ -6,8 +6,11 @@ import React,
 
 import { 
     View,
-    ScrollView,
-    KeyboardAvoidingView
+    KeyboardAvoidingView,
+    Image,
+    TouchableOpacity,
+    FlatList,
+    ScrollView
 } from "react-native";
 
 import {
@@ -15,20 +18,15 @@ import {
     colors,
 } from "../../asset/css/BaseStyle";
 
+import { getHeaderTitle } from '@react-navigation/elements';
+
 import {
     NativeBaseProvider,
-    Box,
     Text,
     Heading,
     VStack,
     FormControl,
-    Input,
-    Link,
-    Button,
-    Icon,
-    IconButton,
-    HStack,
-    Divider
+    Input
   } from 'native-base';
 
 const LoginScreen = () => {
@@ -46,52 +44,81 @@ const LoginScreen = () => {
 
     return(
         <NativeBaseProvider>
-            <KeyboardAvoidingView 
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
-                style={[styles.justifyCenter, styles.alignCenter, styles.flex1]}
-             > 
-                <View style={[styles.w90]}>
-                    <Heading size="lg" color='primary.500'>
-                        Kedica Login
-                    </Heading>
-                    <Heading color="muted.400" size="xs">
-                        Sign in to continue!
-                    </Heading>
-                    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
-                        <VStack space={2} mt={5}>
-                            <FormControl>
-                                <FormControl.Label _text={{color: 'muted.700', fontSize: 'sm', fontWeight: 600}}>
-                                    Username
-                                </FormControl.Label>
-                                <Input 
-                                    value={username}
-                                    onChangeText={(text) => setUsername(text)}
-                                />
-                            </FormControl>
-                            <FormControl mb={5}>
-                                <FormControl.Label  _text={{color: 'muted.700', fontSize: 'sm', fontWeight: 600}}>
-                                    Password
-                                </FormControl.Label>
-                                <Input 
-                                    type="password" 
-                                    value={password}
-                                    onChangeText={(text) => setPassword(text)}
-                                />
-                            </FormControl>
-                            
-                            <VStack  space={2}>
-                                <Button 
-                                    onPress={() => getLogin(username, password)}
-                                    colorScheme="cyan" _text={{color: 'white' }}
-                                >
-                                    Login
-                                </Button>
+                <KeyboardAvoidingView 
+                    behavior={Platform.OS === "ios" ? "padding" : "height"}
+                    style={[styles.justifyCenter, styles.alignCenter, styles.flex1]}
+                > 
+                    <View style={[styles.w90]}>
+                        <View style={[
+                            styles.justifyCenter,
+                            styles.alignCenter
+                        ]}
+                        >
+                            <Text 
+                                style={[
+                                    styles.font40,
+                                    styles.textBold
+                                ]}
+                            >
+                                Process Management System
+                            </Text>
+                        </View>
+                        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
+                            <VStack >
+                                <FormControl>
+                                    <FormControl.Label _text={{color: 'muted.700', fontSize: 'xl', fontWeight: 600}}>
+                                        Username
+                                    </FormControl.Label>
+                                    <Input 
+                                        style={[
+                                            styles.font40,
+                                            styles.bordered
+                                        ]}
+                                        value={username}
+                                        onChangeText={(text) => setUsername(text)}
+                                    />
+                                </FormControl>
+                                <FormControl mb={5}>
+                                    <FormControl.Label  _text={{color: 'muted.700', fontSize: 'xl', fontWeight: 600}}>
+                                        Password
+                                    </FormControl.Label>
+                                    <Input 
+                                        style={[
+                                            styles.font40,
+                                            styles.bordered
+                                        ]}
+                                        type="password" 
+                                        value={password}
+                                        onChangeText={(text) => setPassword(text)}
+                                    />
+                                </FormControl>
+                                
+                                <VStack  space={2}>
+                                    <TouchableOpacity
+                                        onPress={() => getLogin(username, password)} 
+                                    >
+                                        <View 
+                                            style ={[
+                                                styles.backgroundLightBlue,
+                                                styles.border10,
+                                                styles.pY2
+                                            ]}
+                                        >
+                                            <Text style={[
+                                                styles.font40, 
+                                                styles.textWhite,
+                                                styles.textCenter
+                                            ]}>
+                                                Login
+                                            </Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                </VStack>
                             </VStack>
-                        </VStack>
-                    </KeyboardAvoidingView>
-                </View>
-            </KeyboardAvoidingView>
-        </NativeBaseProvider>
+                        </KeyboardAvoidingView>
+                    </View>
+                </KeyboardAvoidingView>
+            </NativeBaseProvider>
     );
 }
 
