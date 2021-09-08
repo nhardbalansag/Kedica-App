@@ -11,6 +11,10 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { marginBottom } from "styled-system";
 
+import { 
+    useSelector
+} from 'react-redux';
+
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -100,7 +104,15 @@ const Menu = () =>{
 }
 
 const ScreenNavigation = () => {
-    return Login();
+
+    const tokenresponse = useSelector(state => state.Login.tokenData);
+console.log(tokenresponse)
+    if(tokenresponse !== null){
+        return Menu();
+    }else{
+        return Login();
+    }
+    
 }
 
 export default ScreenNavigation;
