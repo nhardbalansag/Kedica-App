@@ -77,7 +77,7 @@ const MainScreen = ({navigation}) =>{
             ]}
         >
             <FlatList 
-                keyExtractor={item => console.log(item)} 
+                // keyExtractor={item => console.log(item)} 
                 data={testData} 
                 renderItem={ButtonComponent} 
                 numColumns={2}
