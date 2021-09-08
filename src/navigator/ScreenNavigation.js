@@ -3,6 +3,7 @@ import React from "react";
 import LoginScreen from "../view/Login/LoginScreen";
 import MainScreen from "../view/menu/MainScreen";
 import ProductionWorkEntryScreen from "../view/menu/ProductionWorkEntryScreen";
+import WorkResultInputScreen from "../view/menu/WorkResultInputScreen";
 
 import { styles, colors } from "../asset/css/BaseStyle";
 
@@ -20,10 +21,11 @@ const Login = () =>{
                 name="LoginScreen" 
                 component={LoginScreen} 
                 options={{ 
-                    title: 'Login',
+                    title: 'Kedica Login',
                     headerTintColor: colors.lightColor,
                     headerStyle: {
                         backgroundColor: colors.canvaupperBG,
+                        height: 100,
                     },
                     headerTitleStyle: {
                         fontSize: 40,
@@ -34,45 +36,71 @@ const Login = () =>{
     )
 }
 
+const menuScreens = [
+    {
+        name:"MainScreen", 
+        component: MainScreen, 
+        title: 'Main Menu', 
+        header:{
+            headerTintColor: colors.lightColor,
+            backgroundColor: colors.canvaupperBG,
+            height: 100,
+            fontSize: 40
+        }
+    },
+    {
+        name:"ProductionWorkEntryScreen", 
+        component: ProductionWorkEntryScreen, 
+        title: 'Production Work Entry', 
+        header:{
+            headerTintColor: colors.lightColor,
+            backgroundColor: colors.canvaupperBG,
+            height: 100,
+            fontSize: 40
+        }
+    },
+    {
+        name:"WorkResultInputScreen", 
+        component: WorkResultInputScreen, 
+        title: 'Work Result Input', 
+        header:{
+            headerTintColor: colors.lightColor,
+            backgroundColor: colors.canvaupperBG,
+            height: 100,
+            fontSize: 40
+        }
+    }
+]
+
 const Menu = () =>{
     return(
         <Stack.Navigator>
-            <Stack.Screen 
-                name="MainScreen" 
-                component={MainScreen} 
-                options={{ 
-                    title: 'Main Menu',
-                    headerTintColor: colors.lightColor,
-                    headerStyle: {
-                        backgroundColor: colors.canvaupperBG,
-                        height:100
-                    },
-                    headerTitleStyle: {
-                        fontSize: 40,
-                    },
-                }}
-            />
-            <Stack.Screen
-                name="ProductionWorkEntryScreen" 
-                component={ProductionWorkEntryScreen} 
-                options={{ 
-                    title: 'Production Work Entry',
-                    headerTintColor: colors.lightColor,
-                    headerStyle: {
-                        backgroundColor: colors.canvaupperBG,
-                        height:100
-                    },
-                    headerTitleStyle: {
-                        fontSize: 40,
-                    },
-                }}
-            />
+            {
+                menuScreens.map((screenData) => 
+                    <Stack.Screen 
+                        key={screenData.name}
+                        name={screenData.name}
+                        component={screenData.component} 
+                        options={{ 
+                            title: screenData.title,
+                            headerTintColor: screenData.header.headerTintColor,
+                            headerStyle: {
+                                backgroundColor: screenData.header.backgroundColor,
+                                height:screenData.header.height
+                            },
+                            headerTitleStyle: {
+                                fontSize: screenData.header.fontSize,
+                            },
+                        }}
+                    />
+                )
+            }
         </Stack.Navigator>
     )
 }
 
 const ScreenNavigation = () => {
-    return Menu();
+    return Login();
 }
 
 export default ScreenNavigation;
