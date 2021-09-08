@@ -10,7 +10,9 @@ import {
     Image,
     TouchableOpacity,
     FlatList,
-    ScrollView
+    ScrollView,
+    Alert,
+    ActivityIndicator 
 } from "react-native";
 
 import {
@@ -29,17 +31,35 @@ import {
     Input
   } from 'native-base';
 
+import * as LoginAction from "../../redux/Login/LoginAction";
+import { useDispatch } from "react-redux";
+
 const LoginScreen = () => {
 
-    const [username, setUsername] = useState("")
-    const [password, setPassword] = useState("")
+    const [username, setUsername] = useState("admin")
+    const [password, setPassword] = useState("12345678")
+    const [loadingstate, setloadingstate] = useState(false);
 
-    const getLogin = (username, pass) => {
-        var data = {
-            username: username,
-            password: pass
+    const dispatch = useDispatch()
+
+    const getLogin = async (username, pass) => {
+        setloadingstate(true);
+        try {
+            await dispatch(LoginAction.login(username, pass));
+            setloadingstate(false);
+        } catch (error) {
+            error.message == 'true' ? alertMessage("login Success") : alertMessage(error.message);
         }
-        console.warn(data)
+    }
+
+    const alertMessage = (message) =>{
+        Alert.alert(
+            "Note",
+            message,
+            [
+              { text: "OK"}
+            ]
+        );
     }
 
     return(
@@ -100,13 +120,22 @@ const LoginScreen = () => {
                                                 styles.pY2
                                             ]}
                                         >
-                                            <Text style={[
-                                                styles.font40, 
-                                                styles.textWhite,
-                                                styles.textCenter
-                                            ]}>
-                                                Login
-                                            </Text>
+                                            
+                                            {
+                                                loadingstate 
+                                                ? 
+                                                    <ActivityIndicator style={[{marginLeft:5}]} size="small" color={colors.lightColor}/> 
+                                                : 
+                                                    <>
+                                                        <Text style={[
+                                                            styles.font40, 
+                                                            styles.textWhite,
+                                                            styles.textCenter
+                                                        ]}>
+                                                            Login
+                                                        </Text>
+                                                    </>
+                                            }
                                         </View>
                                     </TouchableOpacity>
                                 </VStack>
