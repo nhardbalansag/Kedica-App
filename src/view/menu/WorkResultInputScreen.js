@@ -33,6 +33,7 @@ import {
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { style } from "styled-system";
+import { devToolsEnhancer } from "@reduxjs/toolkit/dist/devtoolsExtension";
 
 const WorkResultInputScreen = (props) =>{
 
@@ -40,19 +41,21 @@ const WorkResultInputScreen = (props) =>{
 
     const travelSheetNumber = props.route.params.dataContent.number;
 
-    const date = new Date();
-    const currentData = date.toDateString();
-    const Currenttime = date.toLocaleTimeString();
+    const [datetime, setDaytimes] =  useState();
+    const [currDate, setCurrDate] =  useState();
 
-var i;
-    const loopdata = () =>{
-        if (i < 10) {
-            i = "0" + i;
-        }
-        return i
+    const realtime = () =>{
+        setInterval(() => {
+            var dt = new Date().toLocaleTimeString();
+            var d = new Date().toDateString();
+            setDaytimes(dt);
+            setCurrDate(d);
+        }, 1000)
     }
 
-    console.log(loopdata())
+    useEffect(() =>{
+        realtime();
+    },[])
 
     return(
         <NativeBaseProvider>
@@ -89,7 +92,7 @@ var i;
                 <Text style={[
                     styles.font40
                 ]}>
-                    {currentData} {Currenttime}
+                    {currDate} {datetime}
                 </Text>
             </View>
             <View style={[
