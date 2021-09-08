@@ -66,9 +66,7 @@ const LoginScreen = () => {
                         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
                             <VStack >
                                 <FormControl>
-                                    <FormControl.Label _text={{color: 'muted.700', fontSize: 'xl', fontWeight: 600}}>
-                                        Username
-                                    </FormControl.Label>
+                                    <Text style={[styles.font30]}>Username</Text>
                                     <Input 
                                         style={[
                                             styles.font40,
@@ -79,9 +77,7 @@ const LoginScreen = () => {
                                     />
                                 </FormControl>
                                 <FormControl mb={5}>
-                                    <FormControl.Label  _text={{color: 'muted.700', fontSize: 'xl', fontWeight: 600}}>
-                                        Password
-                                    </FormControl.Label>
+                                    <Text style={[styles.font30]}>Password</Text>
                                     <Input 
                                         style={[
                                             styles.font40,

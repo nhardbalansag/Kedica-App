@@ -25,7 +25,7 @@ const AppStart = () =>{
                 <Text
                     style ={
                         [
-                            styles.font40,
+                            styles.font60,
                             styles.textBold,
                             styles.textWhite,
                             styles.textUppercase
@@ -46,7 +46,8 @@ const AppStart = () =>{
                 <Text style={
                     [
                         styles.textCenter,
-                        styles.textWhite
+                        styles.textWhite,
+                        styles.font25
                     ]
                 }>
                     © Copyright 2021 | All Rights Reserved | Powered by SEIKO-IT Solutions Inc.

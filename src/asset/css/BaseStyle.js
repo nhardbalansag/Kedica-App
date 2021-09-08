@@ -226,6 +226,18 @@ const styles = StyleSheet.create({
   mB10: {
     marginBottom: 10
   },
+  mB15: {
+    marginBottom: 15
+  },
+  mB20: {
+    marginBottom: 20
+  },
+  mB30: {
+    marginBottom: 30
+  },
+  mB40: {
+    marginBottom: 40
+  },
   mB200: {
     marginBottom: 80
   },
@@ -494,6 +506,45 @@ const styles = StyleSheet.create({
     paddingTop: baseWidth * 3,
     paddingBottom: baseWidth * 3
   },
+  pH10: {
+    paddingHorizontal: 10
+  },
+  pH20: {
+    paddingHorizontal: 20
+  },
+  pH30: {
+    paddingHorizontal: 30
+  },
+  pH40: {
+    paddingHorizontal: 40
+  },
+  pH50: {
+    paddingHorizontal: 50
+  },
+  pH60: {
+    paddingHorizontal: 60
+  },
+  pH70: {
+    paddingHorizontal: 70
+  },
+  pV10:{
+    paddingVertical:10
+  },
+  pV20:{
+    paddingVertical:20
+  },
+  pV30:{
+    paddingVertical:30
+  },
+  pV40:{
+    paddingVertical:40
+  },
+  pV50:{
+    paddingVertical:50
+  },
+  pV60:{
+    paddingVertical:60
+  },
   border5:{
     borderRadius: 5
   },
@@ -527,6 +578,10 @@ const styles = StyleSheet.create({
   pY10: {
     paddingTop: 10,
     paddingBottom: 10
+  },
+  pY100: {
+    paddingTop: 100,
+    paddingBottom: 100
   },
   pY3n: {
     paddingTop: 3,
@@ -850,6 +905,18 @@ const styles = StyleSheet.create({
   },
   font40: {
     fontSize: 40
+  },
+  font50: {
+    fontSize: 50
+  },
+  font60: {
+    fontSize: 60
+  },
+  font70: {
+    fontSize: 70
+  },
+  font80: {
+    fontSize: 80
   },
   rounded: {
     borderRadius: baseWidth / 3
