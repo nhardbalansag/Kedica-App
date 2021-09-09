@@ -5,6 +5,10 @@ import React,
 } from "react";
 
 import { 
+    useSelector
+} from 'react-redux';
+
+import { 
     View,
     Text,
     ScrollView,
@@ -34,15 +38,13 @@ import {
     Button
 } from 'native-base';
 
-import { 
-    useSelector
-} from "react-redux";
-
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { style } from "styled-system";
 import { devToolsEnhancer } from "@reduxjs/toolkit/dist/devtoolsExtension";
 
 const WorkResultInputScreen = (props) =>{
+
+    const domainSetting = useSelector(state => state.loginCredential.domainSetting);
 
     const { isOpen, onOpen, onClose } = useDisclose()
 
@@ -54,9 +56,9 @@ const WorkResultInputScreen = (props) =>{
     const [currDate, setCurrDate] =  useState();
     const [Qty, setQty] =  useState(0);
 
-    const search = async (tokendata, param) =>{
+    const search = async (tokendata, param, domainSetting) =>{
         try{
-            const response = await fetch(APP_URL + "api/ProductionWork/ProductionWorkEntry/travelsheet/" + param, {
+            const response = await fetch(domainSetting + "api/ProductionWork/ProductionWorkEntry/travelsheet/" + param, {
                 method:'GET',
                 headers:{
                     'Content-type': 'application/json',
@@ -109,7 +111,7 @@ const WorkResultInputScreen = (props) =>{
     }
 
     useEffect(() =>{
-        search(token, travelSheetNumber)
+        search(token, travelSheetNumber, domainSetting)
         realtime();
     },[])
 
@@ -166,7 +168,7 @@ const WorkResultInputScreen = (props) =>{
                 <Text style={[
                     styles.font40
                 ]}>
-                    2021-09-08 11:28:23 AM
+                    {currDate} {datetime}
                 </Text>
             </View>
             <View style={[
