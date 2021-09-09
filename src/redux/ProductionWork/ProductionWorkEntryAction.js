@@ -1,0 +1,29 @@
+import {APP_URL} from "../../config/AppConfig"
+
+export const GET_PRODUCTIONWORKENTRYLIST = 'GET_PRODUCTIONWORKENTRYLIST';
+
+import ProductionWorkEntry from "../../model/ProductionWork/ProductionWorkEntry";
+
+export const getProductionWorkEntryList = (token) =>{
+    
+    return async (dispatch) =>{
+        const response = await fetch(APP_URL + "api/ProductionWork/ProductionWorkEntry/get", {
+            method:'GET',
+            headers:{
+                'Content-type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            }
+        })
+
+        const responseData = await response.json();
+        const productionWorkEntryData = [];
+        console.warn(responseData[0])
+
+        dispatch({
+            type:       GET_PRODUCTIONWORKENTRYLIST,
+            Data:       responseData.data,
+            Message:    responseData.message,
+            Total:      responseData.total
+        })
+    }
+}

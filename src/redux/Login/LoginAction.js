@@ -1,4 +1,4 @@
-import APP_URL from "../../config/AppConfig"
+import {APP_URL} from "../../config/AppConfig"
 
 export const SET_CREDENTIALS = 'SET_CREDENTIALS';
 
@@ -21,7 +21,7 @@ export const login = (username, password) =>{
     formBody = formBody.join("&");
 
     return async (dispatch) =>{
-        const response = await fetch("http://192.168.200.100:1993/token", {
+        const response = await fetch(APP_URL + "token", {
             method : 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
