@@ -1,8 +1,8 @@
 
-import SET_CREDENTIALS from "./LoginAction"
+import {SET_CREDENTIALS} from "./LoginAction"
 
 const InitialStates ={
-    tokenData: null,
+    TokenData:null,
     data:[],
 }
 
@@ -11,12 +11,12 @@ export default (state = InitialStates, action) =>{
         case SET_CREDENTIALS:
             return{
                 ...state,
-                tokenData:action.TokenData
+                TokenData:action.TokenData
             }
         default :
             return{
                 ...state
             }
     }
-    return 
+    return state
 }
