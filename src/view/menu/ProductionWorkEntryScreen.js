@@ -64,10 +64,12 @@ const ProductionWorkEntryScreen = ({navigation}) =>{
    
     const token = useSelector(state => state.loginCredential.TokenData);
 
-    const getProductionWorkEntryList = async (tokendata) =>{
+    const domainSetting = useSelector(state => state.loginCredential.domainSetting);
+
+    const getProductionWorkEntryList = async (tokendata, domainSetting) =>{
         setRefreshing(true);
         try {
-            const response = await fetch(APP_URL + "api/ProductionWork/ProductionWorkEntry/getlist", {
+            const response = await fetch(domainSetting + "api/ProductionWork/ProductionWorkEntry/getlist", {
                 method:'GET',
                 headers:{
                     'Content-type': 'application/json',
@@ -76,11 +78,6 @@ const ProductionWorkEntryScreen = ({navigation}) =>{
             })
     
             const responseData = await response.json();
-
-            setProductionWorkEntryStatus(responseData[0].status)
-            setProductionWorkEntryMessage(responseData[0].message)
-            setProductionWorkEntryTotal(responseData[0].total)
-
             var datael = [];
 
             for (const key in responseData[0].dataContent){
@@ -156,11 +153,11 @@ const ProductionWorkEntryScreen = ({navigation}) =>{
     }
 
     const refreshPage = () =>{
-        getProductionWorkEntryList(token)
+        getProductionWorkEntryList(token, domainSetting)
     }
     
     useEffect(() =>{
-        getProductionWorkEntryList(token)
+        getProductionWorkEntryList(token, domainSetting)
         if(travelSheetNo != null && isEnable == false){
             goToWorkResult("WorkResultInputScreen", travelSheetNo)
             setTravelSheetNo(null)
