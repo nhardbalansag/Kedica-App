@@ -44,13 +44,15 @@ import ReduxThunk from 'redux-thunk';
 
 // Redux Reducers
 import LoginReducer from './src/redux/Login/LoginReducer';
+import ProductionWorkEntryReducer from './src/redux/ProductionWork/ProductionWorkEntryReducer';
 
 //screen navigation
 import ScreensNavigation from "./src/navigator/ScreenNavigation";
 import AppStart from './src/view/AppStart/appstart';
 
 const RootReducer = combineReducers({
-  loginCredential: LoginReducer
+  loginCredential:  LoginReducer,
+  ProductionWork:   ProductionWorkEntryReducer
 })
 
 const Store = createStore(RootReducer, applyMiddleware(ReduxThunk))
