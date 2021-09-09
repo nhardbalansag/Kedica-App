@@ -50,7 +50,7 @@ import ScreensNavigation from "./src/navigator/ScreenNavigation";
 import AppStart from './src/view/AppStart/appstart';
 
 const RootReducer = combineReducers({
-  Login: LoginReducer
+  loginCredential: LoginReducer
 })
 
 const Store = createStore(RootReducer, applyMiddleware(ReduxThunk))

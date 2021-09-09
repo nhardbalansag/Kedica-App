@@ -80,9 +80,9 @@ const Menu = () =>{
     return(
         <Stack.Navigator>
             {
-                menuScreens.map((screenData) => 
+                menuScreens.map((screenData, index) => 
                     <Stack.Screen 
-                        key={screenData.name}
+                        key={index}
                         name={screenData.name}
                         component={screenData.component} 
                         options={{ 
@@ -105,14 +105,13 @@ const Menu = () =>{
 
 const ScreenNavigation = () => {
 
-    const tokenresponse = useSelector(state => state.Login.tokenData);
-console.log(tokenresponse)
-    if(tokenresponse !== null){
+    const tokenresponse = useSelector(state => state.loginCredential.TokenData);
+
+    if(tokenresponse !== null && tokenresponse !== undefined){
         return Menu();
     }else{
         return Login();
     }
-    
 }
 
 export default ScreenNavigation;
