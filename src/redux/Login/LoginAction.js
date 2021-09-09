@@ -30,11 +30,9 @@ export const login = (username, password) =>{
         })
 
         const responseData = await response.json();
-
-        console.log()
-
+       
         if(Object.keys(responseData).length == 3){
-
+            
             dispatch({
                 type: SET_CREDENTIALS, 
                 TokenData: responseData.access_token
