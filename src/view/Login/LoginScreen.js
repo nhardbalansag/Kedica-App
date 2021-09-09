@@ -48,7 +48,7 @@ const LoginScreen = () => {
             await dispatch(LoginAction.login(username, pass));
             setloadingstate(false);
         } catch (error) {
-            error.message == 'true' ? alertMessage("login Success") : alertMessage(error.message);
+            alertMessage(error.message);
         }
     }
 
@@ -124,7 +124,7 @@ const LoginScreen = () => {
                                             {
                                                 loadingstate 
                                                 ? 
-                                                    <ActivityIndicator style={[{marginLeft:5}]} size="small" color={colors.lightColor}/> 
+                                                    <ActivityIndicator style={[{marginLeft:5}]} size="large" color={colors.lightColor}/> 
                                                 : 
                                                     <>
                                                         <Text style={[

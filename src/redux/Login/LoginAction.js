@@ -38,8 +38,6 @@ export const login = (username, password) =>{
                 TokenData: responseData.access_token
             });
 
-            throw new Error(true)
-
         }else if(Object.keys(responseData).length < 3){
 
             throw new Error(false)
