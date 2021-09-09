@@ -13,7 +13,10 @@ import {
     TouchableOpacity,
     Switch,
     FlatList,
+    Alert
 } from "react-native";
+
+import { APP_URL } from "../../config/AppConfig";
 
 import {
     styles,
@@ -31,6 +34,10 @@ import {
     Button
 } from 'native-base';
 
+import { 
+    useSelector
+} from "react-redux";
+
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { style } from "styled-system";
 import { devToolsEnhancer } from "@reduxjs/toolkit/dist/devtoolsExtension";
@@ -41,8 +48,56 @@ const WorkResultInputScreen = (props) =>{
 
     const travelSheetNumber = props.route.params.dataContent.number;
 
+    const token = useSelector(state => state.loginCredential.TokenData);
+
     const [datetime, setDaytimes] =  useState();
     const [currDate, setCurrDate] =  useState();
+    const [Qty, setQty] =  useState(0);
+
+    const search = async (tokendata, param) =>{
+        try{
+            const response = await fetch(APP_URL + "api/ProductionWork/ProductionWorkEntry/travelsheet/" + param, {
+                method:'GET',
+                headers:{
+                    'Content-type': 'application/json',
+                    'Authorization': 'Bearer ' + tokendata
+                }
+            })
+
+            const responseData = await response.json();
+            if(responseData.total > 0 && responseData.status == true){
+                var tempvar = {
+                    ID:             responseData[0].dataContent[0].ID,
+                    TravelSheetID:  responseData[0].dataContent[0].TravelSheetID,
+                    TravelSheetNo:  responseData[0].dataContent[0].TravelSheetNo,
+                    ItemCode:       responseData[0].dataContent[0].ItemCode,
+                    ItemName:       responseData[0].dataContent[0].ItemName,
+                    Qty:            responseData[0].dataContent[0].Qty,
+                    DateFrom:       responseData[0].dataContent[0].DateFrom,
+                    DateTo:         responseData[0].dataContent[0].DateTo
+               }
+   
+               setQty(tempvar.Qty)
+            }else{
+                    
+                alertMessage("No Data Available");
+                
+            }
+            
+        }catch(error){
+            alertMessage(error.message);
+        }
+    }
+
+    const alertMessage = (message) =>{
+        Alert.alert(
+            "Note",
+            message,
+            [
+              { text: "OK", onPress: () => props.navigation.navigate('ProductionWorkEntryScreen')}
+            ]
+        );
+    }
 
     const realtime = () =>{
         setInterval(() => {
@@ -54,6 +109,7 @@ const WorkResultInputScreen = (props) =>{
     }
 
     useEffect(() =>{
+        search(token, travelSheetNumber)
         realtime();
     },[])
 
@@ -157,7 +213,7 @@ const WorkResultInputScreen = (props) =>{
                 <Text style={[
                     styles.font40
                 ]}>
-                    1000
+                    {Qty}
                 </Text>
             </View>
             <Actionsheet isOpen={isOpen} onClose={onClose}>
