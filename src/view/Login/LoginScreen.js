@@ -52,7 +52,7 @@ const LoginScreen = () => {
     const [loadingstate, setloadingstate] = useState(false);
     const [modalVisible, setModalVisible] = useState(false)
     const [showModal, setShowModal] = useState(false)
-    const [setting, setSetting] = useState("http://192.168.200.100:1993/")
+    const [setting, setSetting] = useState("192.168.43.198:8016/")
 
     const handleSizeClick = (newSize) => {
         setSize(newSize)
@@ -74,6 +74,7 @@ const LoginScreen = () => {
     const changesetting = async (dataset) => {
         try {
             await dispatch(LoginAction.changeDomain(dataset));
+            setShowModal(false)
         } catch (error) {
             alertMessage(error.message);
         }
@@ -84,7 +85,10 @@ const LoginScreen = () => {
             "Note",
             message,
             [
-              { text: "OK"}
+                { 
+                  text: "OK",
+                  onPress: () => setloadingstate(false)
+                }
             ]
         );
     }
@@ -93,40 +97,42 @@ const LoginScreen = () => {
         return(
             <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
                 <Modal.Content>
-                <Modal.CloseButton />
-                <Modal.Header>Modal Title</Modal.Header>
-                <Modal.Body>
-                <FormControl>
-                    <Text style={[styles.font20]}>Set your Domain Here</Text>
-                    <Input 
-                        style={[
-                            styles.font20,
-                            styles.mB2
-                        ]}
-                        placeholder="ex: http://192.168.200.100:1993/"
-                        value={setting}
-                        onChangeText={(text) => setSetting(text)}
-                    />
-                    <View>
-                        <TouchableOpacity onPress={() => changesetting(setting)}>
-                            <View style={[
-                                styles.backgroundPrimary,
-                                styles.justifyCenter,
-                                styles.alignCenter,
-                                styles.flexRow,
-                                styles.border10,
-                                styles.pY1,
-                                styles.pX2
-                            ]}>
-                                <Icon name="plus" size={20} color={colors.lightColor} />
-                                <Text style={[styles.font20, styles.textWhite, styles.mL1]}>Add Domain</Text>
+                    <ScrollView>
+                        <Modal.CloseButton />
+                        <Modal.Header>Domain Configuration</Modal.Header>
+                        <Modal.Body>
+                        <FormControl>
+                            <Text style={[styles.font20]}>Domain / IP Address</Text>
+                            <Input 
+                                style={[
+                                    styles.font20,
+                                    styles.mB2
+                                ]}
+                                placeholder="ex: http://192.168.200.100:1993/"
+                                value={setting}
+                                onChangeText={(text) => setSetting(text)}
+                            />
+                            <View>
+                                <TouchableOpacity onPress={() => changesetting(setting)}>
+                                    <View style={[
+                                        styles.backgroundPrimary,
+                                        styles.justifyCenter,
+                                        styles.alignCenter,
+                                        styles.flexRow,
+                                        styles.border10,
+                                        styles.pY1,
+                                        styles.pX2
+                                    ]}>
+                                        <Icon name="plus" size={20} color={colors.lightColor} />
+                                        <Text style={[styles.font20, styles.textWhite, styles.mL1]}>Add Domain</Text>
+                                    </View>
+                                </TouchableOpacity>
                             </View>
-                        </TouchableOpacity>
-                    </View>
-                </FormControl>
-                </Modal.Body>
-                <Modal.Footer>
-                </Modal.Footer>
+                        </FormControl>
+                        </Modal.Body>
+                            <Modal.Footer>
+                        </Modal.Footer>
+                    </ScrollView>
                 </Modal.Content>
             </Modal>
         )

@@ -67,7 +67,7 @@ const WorkResultInputScreen = (props) =>{
             })
 
             const responseData = await response.json();
-            if(responseData.total > 0 && responseData.status == true){
+            if(responseData[0].total > 0){
                 var tempvar = {
                     ID:             responseData[0].dataContent[0].ID,
                     TravelSheetID:  responseData[0].dataContent[0].TravelSheetID,
