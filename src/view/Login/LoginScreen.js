@@ -52,7 +52,7 @@ const LoginScreen = () => {
     const [loadingstate, setloadingstate] = useState(false);
     const [modalVisible, setModalVisible] = useState(false)
     const [showModal, setShowModal] = useState(false)
-    const [setting, setSetting] = useState("192.168.43.198:8016/")
+    const [setting, setSetting] = useState("http:/192.168.200.100:1993/")
 
     const handleSizeClick = (newSize) => {
         setSize(newSize)

@@ -62,7 +62,7 @@ const ProductionWorkEntryScreen = ({navigation}) =>{
     const getProductionWorkEntryList = async (tokendata, domainSetting) =>{
         setRefreshing(true);
         try {
-            const response = await fetch(domainSetting + "api/ProductionWork/ProductionWorkEntry/getlist", {
+            const response = await fetch(domainSetting + "api/production-work/production-work-entry/index", {
                 method:'GET',
                 headers:{
                     'Content-type': 'application/json',
@@ -243,9 +243,12 @@ const ProductionWorkEntryScreen = ({navigation}) =>{
                         styles.justifySpaceAround
                     ]}>
                         <View>
-                            <TouchableOpacity onPress={() => goToWorkResult("WorkResultInputScreen", travelSheetNo)}>
+                            <TouchableOpacity 
+                                disabled={!isEnable ? true : false}
+                                onPress={() => goToWorkResult("WorkResultInputScreen", travelSheetNo)}
+                            >
                                 <View style={[
-                                    styles.backgroundPrimary,
+                                    !isEnable ? styles.bgGray200 : styles.backgroundPrimary ,
                                     styles.justifyCenter,
                                     styles.alignCenter,
                                     styles.flexRow,

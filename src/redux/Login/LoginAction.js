@@ -20,7 +20,6 @@ export const login = (username, password, domainSetting) =>{
     }
 
     formBody = formBody.join("&");
-
     return async (dispatch) =>{
         const response = await fetch(domainSetting + "token", {
             method : 'POST',
