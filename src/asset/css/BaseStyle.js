@@ -831,6 +831,9 @@ const styles = StyleSheet.create({
   bgGray: {
     backgroundColor: gray
   },
+  bgDisable: {
+    backgroundColor: color.disableColor
+  },
   bgGray100: {
     backgroundColor: gray100
   },
