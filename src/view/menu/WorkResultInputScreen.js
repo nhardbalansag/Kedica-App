@@ -11,16 +11,9 @@ import {
 import { 
     View,
     Text,
-    ScrollView,
-    KeyboardAvoidingView,
-    Image,
     TouchableOpacity,
-    Switch,
-    FlatList,
     Alert
 } from "react-native";
-
-import { APP_URL } from "../../config/AppConfig";
 
 import {
     styles,
@@ -31,16 +24,11 @@ import CustomStyle from "../../asset/css/CustomStyle";
 
 import {
     NativeBaseProvider,
-    FormControl,
-    Input,
     Actionsheet,
     useDisclose,
-    Button
 } from 'native-base';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { style } from "styled-system";
-import { devToolsEnhancer } from "@reduxjs/toolkit/dist/devtoolsExtension";
 
 const WorkResultInputScreen = (props) =>{
 
