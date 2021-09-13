@@ -8,15 +8,12 @@ import {
     View,
     Text,
     ScrollView,
-    KeyboardAvoidingView,
-    Image,
     TouchableOpacity,
     Switch,
     FlatList,
     Alert,
     ActivityIndicator,
     RefreshControl,
-    TextInput 
 } from "react-native";
 
 import { 
@@ -47,10 +44,6 @@ import {
 import { 
     useSelector
 } from "react-redux";
-
-import { useDispatch } from "react-redux";
-
-import * as ProductionWork from "../../redux/ProductionWork/ProductionWorkEntryAction";
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 
