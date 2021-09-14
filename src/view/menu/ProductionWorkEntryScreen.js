@@ -84,7 +84,7 @@ const ProductionWorkEntryScreen = ({navigation}) =>{
                         responseData[0].dataContent[key].StartProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].StartProcess,
                         responseData[0].dataContent[key].EndProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].EndProcess,
                         responseData[0].dataContent[key].TravelSheetNo,
-                        responseData[0].dataContent[key].ItemCode + "—" + responseData[0].dataContent[key].ItemName,
+                        responseData[0].dataContent[key].ItemCode + "\n" + responseData[0].dataContent[key].ItemName,
                         responseData[0].dataContent[key].PriorityNo,
                         responseData[0].dataContent[key].Age + " Days",
                         responseData[0].dataContent[key].StartDate,
@@ -171,15 +171,18 @@ const ProductionWorkEntryScreen = ({navigation}) =>{
     const tableComponent = () =>{
         return(
             <NativeBaseProvider>
-                <ScrollView style={[CustomStyle.tableScroll]}>
+                <ScrollView horizontal={true} style={[CustomStyle.tableScroll]}>
                     <Table borderStyle={{borderWidth: 2, borderColor: '#c8e1ff'}}>
                         <Row 
                             data={table.tableHead} 
                             textStyle={CustomStyle.tableText}
+                            widthArr={[280, 280, 250, 400, 150, 170, 200, 200]}
                         />
                         <Rows 
                             data={WorkEntry} 
                             textStyle={CustomStyle.tableDataText}
+                            widthArr={[280, 280, 250, 400, 150, 170, 200, 200]}
+
                         />
                     </Table>
                 </ScrollView>
