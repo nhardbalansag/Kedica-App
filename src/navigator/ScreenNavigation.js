@@ -1,5 +1,7 @@
 import React from "react";
 
+import {Button} from "react-native"
+
 import LoginScreen from "../view/Login/LoginScreen";
 import MainScreen from "../view/menu/MainScreen";
 import ProductionWorkEntryScreen from "../view/menu/ProductionWorkEntryScreen";
@@ -10,10 +12,12 @@ import { styles, colors } from "../asset/css/BaseStyle";
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { marginBottom } from "styled-system";
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 import { 
     useSelector
 } from 'react-redux';
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -85,7 +89,7 @@ const Menu = () =>{
                         key={index}
                         name={screenData.name}
                         component={screenData.component} 
-                        options={{ 
+                        options={({ navigation, route }) => ({ 
                             title: screenData.title,
                             headerTintColor: screenData.header.headerTintColor,
                             headerStyle: {
@@ -95,7 +99,21 @@ const Menu = () =>{
                             headerTitleStyle: {
                                 fontSize: screenData.header.fontSize,
                             },
-                        }}
+                            headerLeft: () => (
+                                index !== 0 
+                                ?
+                                    <TouchableOpacity 
+                                        style={[
+                                            styles.pX2,
+                                        ]}
+                                        onPress={() => navigation.goBack()}
+                                    >
+                                        <Icon name="arrow-left" size={40} color={colors.lightColor} />
+                                    </TouchableOpacity>
+                                :
+                                    <></>
+                            ),
+                        })}
                     />
                 )
             }
