@@ -14,6 +14,7 @@ import {
     Alert,
     ActivityIndicator,
     RefreshControl,
+    TextInput 
 } from "react-native";
 
 import { 
@@ -35,6 +36,8 @@ import CustomStyle from "../../asset/css/CustomStyle";
 
 import { APP_URL } from "../../config/AppConfig";
 
+import { useIsFocused } from "@react-navigation/native";
+
 import {
     NativeBaseProvider,
     FormControl,
@@ -49,6 +52,8 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 const ProductionWorkEntryScreen = ({navigation}) =>{
 
+    const isFocused = useIsFocused();
+
     const [isEnable, setIsEnable] = useState(false);
     const [travelSheetNo, setTravelSheetNo] = useState(null);
     const [refreshing, setRefreshing] = useState(false);
@@ -62,7 +67,7 @@ const ProductionWorkEntryScreen = ({navigation}) =>{
     const getProductionWorkEntryList = async (tokendata, domainSetting) =>{
         setRefreshing(true);
         try {
-            const response = await fetch(domainSetting + "api/ProductionWork/ProductionWorkEntry/getlist", {
+            const response = await fetch(domainSetting + "api/production-work/production-work-entry/index", {
                 method:'GET',
                 headers:{
                     'Content-type': 'application/json',
@@ -76,15 +81,14 @@ const ProductionWorkEntryScreen = ({navigation}) =>{
             for (const key in responseData[0].dataContent){
                 datael.push(
                     [
-                        responseData[0].dataContent[key].Age,
-                        responseData[0].dataContent[key].PriorityNo,
-                        responseData[0].dataContent[key].ShipDate,
-                        responseData[0].dataContent[key].TravelSheetNo,
-                        responseData[0].dataContent[key].ItemCode,
-                        responseData[0].dataContent[key].ItemName,
-                        responseData[0].dataContent[key].StartDate,
                         responseData[0].dataContent[key].StartProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].StartProcess,
-                        responseData[0].dataContent[key].EndProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].EndProcess
+                        responseData[0].dataContent[key].EndProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].EndProcess,
+                        responseData[0].dataContent[key].TravelSheetNo,
+                        responseData[0].dataContent[key].ItemCode + "—" + responseData[0].dataContent[key].ItemName,
+                        responseData[0].dataContent[key].PriorityNo,
+                        responseData[0].dataContent[key].Age + " Days",
+                        responseData[0].dataContent[key].StartDate,
+                        responseData[0].dataContent[key].ShipDate,
                     ]
                 )
             }
@@ -150,16 +154,18 @@ const ProductionWorkEntryScreen = ({navigation}) =>{
     }
     
     useEffect(() =>{
-        getProductionWorkEntryList(token, domainSetting)
-        if(travelSheetNo != null && isEnable == false){
-            goToWorkResult("WorkResultInputScreen", travelSheetNo)
-            setTravelSheetNo(null)
-            setIsEnable(false)
+        if(isFocused){ 
+            getProductionWorkEntryList(token, domainSetting)
+            if(travelSheetNo != null && isEnable == false){
+                goToWorkResult("WorkResultInputScreen", travelSheetNo)
+                setTravelSheetNo(null)
+                setIsEnable(false)
+            }
         }
-    },[travelSheetNo])
+    },[travelSheetNo, isFocused])
 
     const table = {
-        tableHead: ['Age', 'Priority No.', 'Ship Date', 'Travel Sheet No.', 'Item  Code', 'Item Name', 'Start Date', 'Start Process', 'End Process'],
+        tableHead: ['Start Process', 'End Process', 'Travel Sheet No.', 'Product Name', 'Priority No.', 'Age', 'Start Date', 'Ship Date'],
     }
 
     const tableComponent = () =>{
@@ -223,11 +229,11 @@ const ProductionWorkEntryScreen = ({navigation}) =>{
                             ]}>
                                 Travel Sheet No.
                             </Text>
-                            <Input 
+                            <TextInput  
                                 style={[
                                     styles.font40,
-                                    styles.bordered,
-                                    styles.textDark
+                                    styles.borderedNoRadius,
+                                    styles.textDark,
                                 ]}
                                 showSoftInputOnFocus={isEnable}
                                 autoFocus={true}
@@ -243,9 +249,12 @@ const ProductionWorkEntryScreen = ({navigation}) =>{
                         styles.justifySpaceAround
                     ]}>
                         <View>
-                            <TouchableOpacity onPress={() => goToWorkResult("WorkResultInputScreen", travelSheetNo)}>
+                            <TouchableOpacity 
+                                disabled={!isEnable ? true : false}
+                                onPress={() => goToWorkResult("WorkResultInputScreen", travelSheetNo)}
+                            >
                                 <View style={[
-                                    styles.backgroundPrimary,
+                                    !isEnable ? styles.bgGray200 : styles.backgroundPrimary ,
                                     styles.justifyCenter,
                                     styles.alignCenter,
                                     styles.flexRow,
