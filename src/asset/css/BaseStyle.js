@@ -831,6 +831,9 @@ const styles = StyleSheet.create({
   bgGray: {
     backgroundColor: gray
   },
+  bgDisable: {
+    backgroundColor: color.disableColor
+  },
   bgGray100: {
     backgroundColor: gray100
   },
@@ -960,6 +963,10 @@ const styles = StyleSheet.create({
   },
   bordered: {
     borderRadius: 15,
+    borderColor: 'black',
+    borderWidth: 2,
+  },
+  borderedNoRadius: {
     borderColor: 'black',
     borderWidth: 2,
   },
