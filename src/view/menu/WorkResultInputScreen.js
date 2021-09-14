@@ -29,6 +29,7 @@ import {
     NativeBaseProvider,
     Actionsheet,
     useDisclose,
+    Modal
 } from 'native-base';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -337,7 +338,7 @@ const WorkResultInputScreen = (props) =>{
                         {Qty}
                     </Text>
                 </View>
-                <Actionsheet isOpen={isOpen} onClose={onClose}>
+                <Actionsheet isOpen={isOpen} onClose={onClose}  >
                     <Actionsheet.Content>
                         {
                             productionLine != null?
@@ -386,54 +387,25 @@ const WorkResultInputScreen = (props) =>{
                                 styles.pY100,
                                 styles.pX2
                             ]}>
-                                {
-                                    startedDatetime == null
-                                    ?
-                                        boolStartProcess 
-                                        ?
-                                            // activity indicator
-                                            <ActivityIndicator  size="large" color={colors.lightColor}/>
-                                        : 
-                                            <>
-                                                <Icon 
-                                                    name={
-                                                        startedDatetime == null
-                                                        ?
-                                                            "hourglass-start"
-                                                        :
-                                                            "exclamation-circle"
-                                                    }
-                                                    size={70} 
-                                                    color={colors.lightColor} 
-                                                />
-                                            </>
-                                    :
-                                        (
-                                            endDatetime == null 
-                                            ? <ActivityIndicator  size="large" color={colors.lightColor}/> 
-                                            : 
-                                                <>
-                                                    <Icon 
-                                                        name={
-                                                            startedDatetime == null
-                                                            ?
-                                                                "hourglass-start"
-                                                            :
-                                                                "exclamation-circle"
-                                                        }
-                                                        size={70} 
-                                                        color={colors.lightColor} 
-                                                    />
-                                                </>
-                                        )
-                                        
-                                }
+                               <>
+                                    <Icon 
+                                        name={
+                                            startedDatetime == null
+                                            ?
+                                                "hourglass-start"
+                                            :
+                                                "exclamation-circle"
+                                        }
+                                        size={70} 
+                                        color={colors.lightColor} 
+                                    />
+                                </>
                                 
                                 <Text style={[styles.font60, styles.mL2, styles.textWhite]}> 
                                     {
                                         startedDatetime == null
                                         ?
-                                            boolStartProcess ? "Starting Process..." : "START PROCESS"
+                                            boolStartProcess ? "Process has started" : "START PROCESS"
                                         :
                                             (endDatetime == null ? "Processing..." : "Process Ended")
                                             
