@@ -966,6 +966,10 @@ const styles = StyleSheet.create({
     borderColor: 'black',
     borderWidth: 2,
   },
+  borderedNoRadius: {
+    borderColor: 'black',
+    borderWidth: 2,
+  },
   flexShrink: {
     flexShrink: 1,
     marginTop:'auto',

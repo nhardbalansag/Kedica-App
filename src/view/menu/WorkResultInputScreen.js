@@ -12,7 +12,8 @@ import {
     View,
     Text,
     TouchableOpacity,
-    Alert
+    Alert,
+    ActivityIndicator
 } from "react-native";
 
 import {
@@ -42,39 +43,78 @@ const WorkResultInputScreen = (props) =>{
 
     const token = useSelector(state => state.loginCredential.TokenData);
 
-    const [datetime, setDaytimes] =  useState();
     const [boolStartProcess, setBoolStartProcess] =  useState(false);
-    const [currDate, setCurrDate] =  useState();
+    const [boolEndProcess, setBoolEndProcess] =  useState(false);
+    const [startProcessDateTime, setstartProcessDateTime] =  useState("");
+    const [DisplayTime, setDisplayTime] =  useState();
     const [factoryId, setfactoryId] =  useState(0);
     const [TravelSheetID, setTravelSheetID] =  useState(null);
     const [lineId, setLineID] =  useState(null);
     const [productionLine, setProductionLine] =  useState(null);
     const [Qty, setQty] =  useState(0);
-    const [FromDate, setFromDate] =  useState("");
-    const [ToDate, setToDate] =  useState("");
+    const [AMPM, setAMPM] =  useState();
+    const [startedDatetime, setstartedDatetime] =  useState(null);
+    const [endDatetime, setendDatetime] =  useState(null);
+    const [loading, setloading] =  useState(true);
+
+    const getcurrentdate = () =>{
+
+        const formatYmd = date => date.toISOString().slice(0, 10);
+
+        let date_ob = new Date();
+        
+        // current hours
+        let hours = date_ob.getHours();
+        // current minutes
+        let minutes = date_ob.getMinutes();
+        // current seconds
+        let seconds = date_ob.getSeconds();
+
+        var ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // the hour '0' should be '12'
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        seconds = seconds < 10 ? '0' + seconds : seconds;
+        setAMPM(ampm)
+        var dateTimeNow = formatYmd(new Date()) + " " + hours + ":" + minutes + ":" + seconds
+
+        return dateTimeNow;
+    }
+
+    const realtime = () =>{
+        setInterval(() => {
+            setDisplayTime(getcurrentdate())
+        }, 1000)
+    }
 
     const startProcess = async () =>{
-        setBoolStartProcess(true)
-        try{
-            const response = await fetch(domainSetting + "api/production-work/production-work-entry/save-production", {
-                method:'POST',
-                headers:{
-                    'Content-type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                },
-                body: JSON.stringify({
-                    TravelSheetID: TravelSheetID,
-                    LineID: lineId,
-                    DateFrom: FromDate,
-                    DateTo : ToDate
+        if(lineId !== null){
+            setBoolStartProcess(true)
+            setBoolEndProcess(false)
+            setstartProcessDateTime(getcurrentdate())
+            
+            try{
+                const response = await fetch(domainSetting + "api/production-work/production-work-entry/save-production", {
+                    method:'POST',
+                    headers:{
+                        'Content-type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({
+                        TravelSheetID: TravelSheetID,
+                        LineID: lineId,
+                        DateFrom: getcurrentdate(),
+                        DateTo : "1900-01-01 00:00:00"
+                    })
                 })
-            })
 
-            const responseData = await response.json();
-            console.warn(responseData)
+                const responseData = await response.json();
 
-        }catch(error){
-            alertMessage(error.message);
+            }catch(error){
+                alertMessage(error.message);
+            }
+        }else{
+            alertMessageNote("Please Select Production Line");
         }
     }
     
@@ -88,14 +128,12 @@ const WorkResultInputScreen = (props) =>{
                 },
                 body: JSON.stringify({
                     TravelSheetID: TravelSheetID,
-                    DateTo : ToDate
+                    DateTo : getcurrentdate()
                 })
             })
             setBoolStartProcess(false)
             props.navigation.navigate('ProductionWorkEntryScreen')
             const responseData = await response.json();
-            console.warn(responseData)
-            
         }catch(error){
             alertMessage(error.message);
         }
@@ -120,6 +158,7 @@ const WorkResultInputScreen = (props) =>{
     }
 
     const search = async (tokendata, param, domainSetting) =>{
+        setloading(true)
         try{
             const response = await fetch(domainSetting + "api/production-work/production-work-entry/search-travelsheet-details/" + param, {
                 method:'GET',
@@ -141,15 +180,17 @@ const WorkResultInputScreen = (props) =>{
                     DateFrom:       responseData[0].dataContent[0].DateFrom,
                     DateTo:         responseData[0].dataContent[0].DateTo
                }
-   
+
+               tempvar.DateFrom == "1900-01-01 00:00:00" ? setBoolStartProcess(false) : setBoolStartProcess(true)
+               tempvar.DateTo == "1900-01-01 00:00:00" ? setBoolEndProcess(false) : setBoolEndProcess(true)
+               setstartedDatetime(tempvar.DateFrom == "1900-01-01 00:00:00" ? null : tempvar.DateFrom)
+               setendDatetime(tempvar.DateTo == "1900-01-01 00:00:00" ? null : tempvar.DateTo)
                setQty(tempvar.Qty)
                setTravelSheetID(tempvar.TravelSheetID)
+               setloading(false)
             }else{
-                    
                 alertMessage("No Data Available");
-                
             }
-            
         }catch(error){
             alertMessage(error.message);
         }
@@ -165,15 +206,14 @@ const WorkResultInputScreen = (props) =>{
         );
     }
 
-    const realtime = () =>{
-        setInterval(() => {
-            var dt = new Date().toLocaleTimeString();
-            var d = new Date().toDateString();
-            setDaytimes(dt);
-            setCurrDate(d);
-            setFromDate(currDate + " " + datetime)
-            setToDate(currDate + " " + datetime)
-        }, 1000)
+    const alertMessageNote = (message) =>{
+        Alert.alert(
+            "Note",
+            message,
+            [
+              { text: "OK"}
+            ]
+        );
     }
 
     useEffect(() =>{
@@ -182,186 +222,282 @@ const WorkResultInputScreen = (props) =>{
         realtime();
     },[])
 
-    return(
-        <NativeBaseProvider>
-            <View style={[
-                styles.flexRow,
-                styles.alignCenter,
-                styles.mL2
-            ]}>
-                <Text style={[
-                    styles.font30,
-                    styles.textBold,
-                    styles.mR1
-                ]}>
-                    Travel Sheet No. :
-                </Text>
-                <Text style={[
-                    styles.font40
-                ]}>
-                    {travelSheetNumber}
-                </Text>
-            </View>
-            <View style={[
-                styles.flexRow,
-                styles.alignCenter,
-                styles.mL2
-            ]}>
-                <Text style={[
-                    styles.font30,
-                    styles.textBold,
-                    styles.mR1
-                ]}>
-                    From(Datetime) :
-                </Text>
-                <Text style={[
-                    styles.font40
-                ]}>
-                    {currDate} {datetime}
-                </Text>
-            </View>
-            <View style={[
-                styles.flexRow,
-                styles.alignCenter,
-                styles.mL2
-            ]}>
-                <Text style={[
-                    styles.font30,
-                    styles.textBold,
-                    styles.mR1
-                ]}>
-                    To(Datetime) :
-                </Text>
-                <Text style={[
-                    styles.font40
-                ]}>
-                    {/* {currDate} {datetime} */}
-                    <Moment format="YYYY-MM-DD HH:mm:ss A">
-                        1976-04-19T12:59-0500
-                    </Moment>
-                </Text>
-            </View>
-            <View style={[
-                styles.flexRow,
-                styles.alignCenter,
-                styles.mL2
-            ]}>
-                <Text style={[
-                    styles.font30,
-                    styles.textBold,
-                    styles.mR1
-                ]}>
-                    Prod. Line :
-                </Text>
-                <View>
-                    <TouchableOpacity onPress={onOpen}>
-                        <View style={[
-                            styles.backgroundPrimary,
-                            styles.justifyCenter,
-                            styles.alignCenter,
-                            styles.flexRow,
-                            styles.border10,
-                            styles.pY1,
-                            styles.pX2
-                        ]}>
-                            <Icon name="search" size={30} color={colors.lightColor} />
-                            <Text style={[styles.font30, styles.textWhite, styles.mL1]}>Select Prod. Line</Text>
-                        </View>
-                    </TouchableOpacity>
-                </View>
-            </View>
-            <View style={[
-                styles.flexRow,
-                styles.alignCenter,
-                styles.mL2
-            ]}>
-                <Text style={[
-                    styles.font30,
-                    styles.textBold,
-                    styles.mR1
-                ]}>
-                    Total Qty :
-                </Text>
-                <Text style={[
-                    styles.font40
-                ]}>
-                    {Qty}
-                </Text>
-            </View>
-            <Actionsheet isOpen={isOpen} onClose={onClose}>
-                <Actionsheet.Content>
-                    {
-                        productionLine != null?
-                        productionLine.map((data, index)=>
-                            <Actionsheet.Item key={index}>
-                                <View>
-                                    <TouchableOpacity onPress={() => setLineID(data.LineID)}>
-                                        <View style={[
-                                            styles.flexRow,
-                                            styles.justifySpaceBetween,
-                                            styles.alignCenter,
-                                        ]}>
-                                            <Icon name="circle" size={20} color={lineId == data.LineID ? colors.primaryColor : colors.gray200} />
-                                            <Text style={[styles.font40, styles.mL2]}>{data.Line}</Text>
-                                        </View>
-                                    </TouchableOpacity>
-                                </View>
-                            </Actionsheet.Item>
-                        )
-                        :
-                        <></>
-                    }
-                </Actionsheet.Content>
-            </Actionsheet>
-
-            <View style={[
-                styles.mX2,
-                styles.flexRow,
-                styles.alignCenter,
-                styles.justifySpaceAround
-            ]}>
+    const mainContent = () =>{
+        return(
+            <NativeBaseProvider>
                 <View style={[
-                    styles.mY1
+                    styles.flexRow,
+                    styles.alignCenter,
+                    styles.mL2
                 ]}>
-                    <TouchableOpacity
-                        disabled={boolStartProcess}
-                        onPress={() => startProcess()}
-                    >
-                        <View style={[
-                            boolStartProcess ? styles.bgGray200 :styles.bgSuccess ,
-                            styles.justifyCenter,
+                    <Text style={[
+                        styles.font30,
+                        styles.textBold,
+                        styles.mR1
+                    ]}>
+                        Travel Sheet No. :
+                    </Text>
+                    <Text style={[
+                        styles.font40
+                    ]}>
+                        {travelSheetNumber}
+                    </Text>
+                </View>
+                <View style={[
+                    styles.flexRow,
+                    styles.alignCenter,
+                    styles.mL2
+                ]}>
+                    <Text style={[
+                        styles.font30,
+                        styles.textBold,
+                        styles.mR1
+                    ]}>
+                        From(Datetime) :
+                    </Text>
+                    <Text style={[
+                        styles.font40
+                    ]}>
+                        {
+                            startedDatetime == null
+                            ?
+                                (boolStartProcess ? startProcessDateTime + " " + AMPM : DisplayTime + " " + AMPM)
+                            :
+                                startedDatetime
+                        }
+                        
+                    </Text>
+                </View>
+                <View style={[
+                    styles.flexRow,
+                    styles.alignCenter,
+                    styles.mL2
+                ]}>
+                    <Text style={[
+                        styles.font30,
+                        styles.textBold,
+                        styles.mR1
+                    ]}>
+                        To(Datetime) :
+                    </Text>
+                    <Text style={[
+                        styles.font40
+                    ]}>
+                        {
+                            endDatetime == null ? DisplayTime + " " + AMPM : endDatetime
+                        }
+                        
+                    </Text>
+                </View>
+                
+                <View style={[
+                    styles.flexRow,
+                    styles.alignCenter,
+                    styles.mL2
+                ]}>
+                    <Text style={[
+                        styles.font30,
+                        styles.textBold,
+                        styles.mR1
+                    ]}>
+                        Prod. Line :
+                    </Text>
+                    <View>
+                        <TouchableOpacity onPress={onOpen}>
+                            <View style={[
+                                styles.backgroundPrimary,
+                                styles.justifyCenter,
+                                styles.alignCenter,
+                                styles.flexRow,
+                                styles.border10,
+                                styles.pY1,
+                                styles.pX2
+                            ]}>
+                                <Text style={[styles.font30, styles.textWhite, styles.mR1]}>Select Production Line</Text>
+                                <Icon name="mouse-pointer" size={30} color={colors.lightColor} />
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+                <View style={[
+                    styles.flexRow,
+                    styles.alignCenter,
+                    styles.mL2
+                ]}>
+                    <Text style={[
+                        styles.font30,
+                        styles.textBold,
+                        styles.mR1
+                    ]}>
+                        Total Qty :
+                    </Text>
+                    <Text style={[
+                        styles.font40
+                    ]}>
+                        {Qty}
+                    </Text>
+                </View>
+                <Actionsheet isOpen={isOpen} onClose={onClose}>
+                    <Actionsheet.Content>
+                        {
+                            productionLine != null?
+                            productionLine.map((data, index)=>
+                                <Actionsheet.Item key={index}>
+                                    <View>
+                                        <TouchableOpacity onPress={() => setLineID(data.LineID)}>
+                                            <View style={[
+                                                styles.flexRow,
+                                                styles.justifySpaceBetween,
+                                                styles.alignCenter,
+                                                styles.pL5,
+                                            ]}>
+                                                <Icon name="circle" size={20} color={lineId == data.LineID ? colors.primaryColor : colors.gray200} />
+                                                <Text style={[styles.font40, styles.mL2]}>{data.Line}</Text>
+                                            </View>
+                                        </TouchableOpacity>
+                                    </View>
+                                </Actionsheet.Item>
+                            )
+                            :
+                            <></>
+                        }
+                    </Actionsheet.Content>
+                </Actionsheet>
+
+                <View style={[
+                    styles.mX2,
+                    styles.flexRow,
+                    styles.alignCenter,
+                    styles.justifySpaceAround
+                ]}>
+                    <View style={[
+                        styles.mY1
+                    ]}>
+                        <TouchableOpacity
+                            disabled={boolStartProcess}
+                            onPress={() => startProcess()}
+                        >
+                            <View style={[
+                                boolStartProcess ? styles.bgGray200 :styles.bgSuccess ,
+                                styles.justifyCenter,
+                                styles.alignCenter,
+                                styles.flexRow,
+                                styles.border10,
+                                styles.pY100,
+                                styles.pX2
+                            ]}>
+                                {
+                                    startedDatetime == null
+                                    ?
+                                        boolStartProcess 
+                                        ?
+                                            // activity indicator
+                                            <ActivityIndicator  size="large" color={colors.lightColor}/>
+                                        : 
+                                            <>
+                                                <Icon 
+                                                    name={
+                                                        startedDatetime == null
+                                                        ?
+                                                            "hourglass-start"
+                                                        :
+                                                            "exclamation-circle"
+                                                    }
+                                                    size={70} 
+                                                    color={colors.lightColor} 
+                                                />
+                                            </>
+                                    :
+                                        (
+                                            endDatetime == null 
+                                            ? <ActivityIndicator  size="large" color={colors.lightColor}/> 
+                                            : 
+                                                <>
+                                                    <Icon 
+                                                        name={
+                                                            startedDatetime == null
+                                                            ?
+                                                                "hourglass-start"
+                                                            :
+                                                                "exclamation-circle"
+                                                        }
+                                                        size={70} 
+                                                        color={colors.lightColor} 
+                                                    />
+                                                </>
+                                        )
+                                        
+                                }
+                                
+                                <Text style={[styles.font60, styles.mL2, styles.textWhite]}> 
+                                    {
+                                        startedDatetime == null
+                                        ?
+                                            boolStartProcess ? "Starting Process..." : "START PROCESS"
+                                        :
+                                            (endDatetime == null ? "Processing..." : "Process Ended")
+                                            
+                                    }
+                                </Text>
+                            </View>
+                        </TouchableOpacity>
+                    </View> 
+                    <View>
+                        <TouchableOpacity 
+                            onPress={() => endProcess()}
+                            disabled={
+                                !boolStartProcess ? true : (boolEndProcess)
+                            }
+                        >
+                            <View style={[
+                                !boolStartProcess ? styles.bgGray200 : (boolEndProcess ? styles.bgGray200 :styles.backgroundPrimary),
+                                styles.justifyCenter,
+                                styles.alignCenter,
+                                styles.flexRow,
+                                styles.border10,
+                                styles.pY100,
+                                styles.pX2
+                            ]}>
+                                <Icon 
+                                    name={
+                                        boolEndProcess == null
+                                        ?
+                                            "hourglass-end"
+                                        :
+                                            "exclamation-circle"
+                                    }
+                                    size={70} 
+                                    color={colors.lightColor} 
+                                />
+                                <Text style={[styles.font60, styles.mL2, styles.textWhite]}>
+                                    {boolEndProcess ? "Process Ended" : "END PROCESS"}
+                                </Text>
+                            </View>
+                        </TouchableOpacity>
+                    </View> 
+                </View>
+            </NativeBaseProvider>
+        )
+    }
+
+     return(
+        <>
+        {
+            !loading  
+            ?
+                mainContent()
+            :
+                <>
+                    <View style={[
                             styles.alignCenter,
-                            styles.flexRow,
-                            styles.border10,
-                            styles.pY100,
-                            styles.pX2
-                        ]}>
-                            <Icon name="hourglass-start" size={70} color={colors.lightColor} />
-                            <Text style={[styles.font60, styles.mL2, styles.textWhite]}> 
-                                {boolStartProcess ? "Starting Process..." : "START PROCESS"}</Text>
-                        </View>
-                    </TouchableOpacity>
-                </View> 
-                <View>
-                    <TouchableOpacity
-                        onPress={() => endProcess()}
-                    >
-                        <View style={[
-                            styles.backgroundPrimary,
                             styles.justifyCenter,
-                            styles.alignCenter,
-                            styles.flexRow,
-                            styles.border10,
-                            styles.pY100,
-                            styles.pX2
+                            styles.flex1
                         ]}>
-                            <Icon name="hourglass-end" size={70} color={colors.lightColor} />
-                            <Text style={[styles.font60, styles.mL2, styles.textWhite]}>END PROCESS</Text>
-                        </View>
-                    </TouchableOpacity>
-                </View> 
-            </View>
-        </NativeBaseProvider>
+                        <ActivityIndicator  size="large" color={colors.primaryColor}/>
+                    </View>
+                </>
+        }
+        </>
     )
 }
 
