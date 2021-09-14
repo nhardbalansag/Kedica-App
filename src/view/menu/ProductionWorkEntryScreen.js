@@ -84,10 +84,9 @@ const ProductionWorkEntryScreen = ({navigation}) =>{
                         responseData[0].dataContent[key].StartProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].StartProcess,
                         responseData[0].dataContent[key].EndProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].EndProcess,
                         responseData[0].dataContent[key].TravelSheetNo,
-                        responseData[0].dataContent[key].ItemCode,
-                        responseData[0].dataContent[key].ItemName,
+                        responseData[0].dataContent[key].ItemCode + "—" + responseData[0].dataContent[key].ItemName,
                         responseData[0].dataContent[key].PriorityNo,
-                        responseData[0].dataContent[key].Age,
+                        responseData[0].dataContent[key].Age + " Days",
                         responseData[0].dataContent[key].StartDate,
                         responseData[0].dataContent[key].ShipDate,
                     ]
@@ -166,7 +165,7 @@ const ProductionWorkEntryScreen = ({navigation}) =>{
     },[travelSheetNo, isFocused])
 
     const table = {
-        tableHead: ['Start Process', 'End Process', 'Travel Sheet No.', 'Item  Code', 'Item Name', 'Priority No.', 'Age', 'Start Date', 'Ship Date'],
+        tableHead: ['Start Process', 'End Process', 'Travel Sheet No.', 'Product Name', 'Priority No.', 'Age', 'Start Date', 'Ship Date'],
     }
 
     const tableComponent = () =>{
