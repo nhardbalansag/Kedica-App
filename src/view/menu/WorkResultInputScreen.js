@@ -57,6 +57,7 @@ const WorkResultInputScreen = (props) =>{
     const [startedDatetime, setstartedDatetime] =  useState(null);
     const [endDatetime, setendDatetime] =  useState(null);
     const [loading, setloading] =  useState(true);
+    const [activeActionSheet, setactiveActionSheet] =  useState(false);
 
     const getcurrentdate = () =>{
 
@@ -217,6 +218,15 @@ const WorkResultInputScreen = (props) =>{
         );
     }
 
+    const actionsheet = () =>{
+        setactiveActionSheet(true)
+    }
+
+    const closeActionSheet = (prodline) =>{
+        setactiveActionSheet(false)
+        setLineID(prodline)
+    }
+
     useEffect(() =>{
         getProductLine()
         search(token, travelSheetNumber, domainSetting)
@@ -304,7 +314,7 @@ const WorkResultInputScreen = (props) =>{
                         Prod. Line :
                     </Text>
                     <View>
-                        <TouchableOpacity onPress={onOpen}>
+                        <TouchableOpacity onPress={ () => actionsheet()}>
                             <View style={[
                                 styles.backgroundPrimary,
                                 styles.justifyCenter,
@@ -338,14 +348,14 @@ const WorkResultInputScreen = (props) =>{
                         {Qty}
                     </Text>
                 </View>
-                <Actionsheet isOpen={isOpen} onClose={onClose}  >
+                <Actionsheet isOpen={activeActionSheet} onClose={onClose}  >
                     <Actionsheet.Content>
                         {
                             productionLine != null?
                             productionLine.map((data, index)=>
                                 <Actionsheet.Item key={index}>
                                     <View>
-                                        <TouchableOpacity onPress={() => setLineID(data.LineID)}>
+                                        <TouchableOpacity onPress={() => closeActionSheet(data.LineID)}>
                                             <View style={[
                                                 styles.flexRow,
                                                 styles.justifySpaceBetween,
