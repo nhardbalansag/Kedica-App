@@ -51,7 +51,7 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 const ProductionWorkEntryScreen = (props) =>{
-
+    
     const isFocused = useIsFocused();
     const [isEnable, setIsEnable] = useState(false);
     const [travelSheetNo, setTravelSheetNo] = useState(null);
@@ -118,7 +118,7 @@ const ProductionWorkEntryScreen = (props) =>{
         if(travelsheetno != null ){
             props.navigation.navigate(component, 
                 {
-                    title: "Work Result Input",
+                    title: component === "WorkResultInputScreen" ? "Work Result Input" : "Inspection Details",
                     dataContent: {
                       number: travelsheetno,
                     },
@@ -161,7 +161,12 @@ const ProductionWorkEntryScreen = (props) =>{
         if(isFocused){ 
             getProductionWorkEntryList(token, domainSetting)
             if(travelSheetNo != null && isEnable == false){
-                goToWorkResult("WorkResultInputScreen", travelSheetNo)
+                props.route.params.title === "Outgoing Inspection"
+                ?
+                    goToWorkResult("InscpectionDetails", travelSheetNo)
+                :
+                    goToWorkResult("WorkResultInputScreen", travelSheetNo)
+
                 setTravelSheetNo(null)
                 setIsEnable(false)
             }
