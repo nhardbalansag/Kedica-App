@@ -50,10 +50,9 @@ import {
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-const ProductionWorkEntryScreen = ({navigation}) =>{
+const ProductionWorkEntryScreen = (props) =>{
 
     const isFocused = useIsFocused();
-
     const [isEnable, setIsEnable] = useState(false);
     const [travelSheetNo, setTravelSheetNo] = useState(null);
     const [refreshing, setRefreshing] = useState(false);
@@ -65,10 +64,12 @@ const ProductionWorkEntryScreen = ({navigation}) =>{
     const domainSetting = useSelector(state => state.loginCredential.domainSetting);
 
     const getProductionWorkEntryList = async (tokendata, domainSetting) =>{
+        const apiUrl = props.route.params.url;
+
         setRefreshing(true);
         try {
-            const response = await fetch(domainSetting + "api/production-work/production-work-entry/index", {
-                method:'GET',
+            const response = await fetch(domainSetting + apiUrl, {
+                method:"GET",
                 headers:{
                     'Content-type': 'application/json',
                     'Authorization': 'Bearer ' + tokendata
@@ -78,23 +79,25 @@ const ProductionWorkEntryScreen = ({navigation}) =>{
             const responseData = await response.json();
             var datael = [];
 
-            for (const key in responseData[0].dataContent){
-                datael.push(
-                    [
-                        responseData[0].dataContent[key].StartProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].StartProcess,
-                        responseData[0].dataContent[key].EndProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].EndProcess,
-                        responseData[0].dataContent[key].TravelSheetNo,
-                        responseData[0].dataContent[key].ItemCode + "\n" + responseData[0].dataContent[key].ItemName,
-                        responseData[0].dataContent[key].PriorityNo,
-                        responseData[0].dataContent[key].Age + " Days",
-                        responseData[0].dataContent[key].StartDate,
-                        responseData[0].dataContent[key].ShipDate,
-                    ]
-                )
+            if(!responseData[0].status){
+                alertMessage("An Error Occured: No data fetched");
+            }else{
+                for (const key in responseData[0].dataContent){
+                    datael.push(
+                        [
+                            responseData[0].dataContent[key].StartProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].StartProcess,
+                            responseData[0].dataContent[key].EndProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].EndProcess,
+                            responseData[0].dataContent[key].TravelSheetNo,
+                            responseData[0].dataContent[key].ItemCode + "\n" + responseData[0].dataContent[key].ItemName,
+                            responseData[0].dataContent[key].PriorityNo,
+                            responseData[0].dataContent[key].Age + " Days",
+                            responseData[0].dataContent[key].StartDate,
+                            responseData[0].dataContent[key].ShipDate,
+                        ]
+                    )
+                }
+                setWorkEntry(datael)
             }
-
-            setWorkEntry(datael)
-
             setRefreshing(false);
         } catch (error) {
             alertMessage(error.message);
@@ -113,8 +116,9 @@ const ProductionWorkEntryScreen = ({navigation}) =>{
 
     const goToWorkResult = (component, travelsheetno) =>{
         if(travelsheetno != null ){
-            navigation.navigate(component, 
+            props.navigation.navigate(component, 
                 {
+                    title: "Work Result Input",
                     dataContent: {
                       number: travelsheetno,
                     },

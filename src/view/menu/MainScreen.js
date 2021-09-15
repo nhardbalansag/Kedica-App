@@ -20,28 +20,49 @@ import {
 } from "../../asset/css/BaseStyle";
 
 import {
-    NativeBaseProvider, usePropsResolution,
+    NativeBaseProvider, 
+    usePropsResolution,
 } from 'native-base';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { fontSize } from "styled-system";
 
 const MainScreen = ({navigation}) =>{
 
-    const testData = [
+    const ProductionScreen = [
         {
-            id: 1,
-            title: "test title",
-            toptitle: "test top",
-            iconuse: "cube"
+            title: "Production Work Entry",
+            toptitle: "Production Work",
+            iconuse: "cube",
+            navigationScreen: "ProductionWorkEntryScreen",
+            api: {
+                url: "api/production-work/production-work-entry/index",
+                method: "GET"
+            }
         },
+        {
+            title: "Outgoing Inspection",
+            toptitle: "Outgoing Quality Inspection",
+            iconuse: "search",
+            navigationScreen: "ProductionWorkEntryScreen",
+            api: {
+                url: "api/quality-inspection/outgoing-inspection/get",
+                method: "GET"
+            }
+        }
     ];
 
     const ButtonComponent = ({item}) => {
         return(
             <View>
                 <TouchableOpacity
-                    onPress={() => navigation.navigate("ProductionWorkEntryScreen")}
+                    onPress={() => navigation.navigate(
+                        item.navigationScreen,
+                        {
+                            url: item.api.url,
+                            method: item.api.method,
+                            title: item.title
+                        }
+                    )}
                 >
                     <View 
                         style={[
@@ -57,11 +78,11 @@ const MainScreen = ({navigation}) =>{
                     >
                         <View>
                             <View>
-                                <Text style={[styles.textWhite, styles.font20]}>Production Work</Text>
+                                <Text style={[styles.textWhite, styles.font20]}>{item.toptitle}</Text>
                             </View>
                             <View style={[styles.flexRow, styles.justifyStart, styles.alignCenter]}>
-                                <Icon name="cube" size={30} color={colors.lightColor} />
-                                <Text style={[styles.textWhite, styles.mL1, styles.font40]}>Production Work Entry</Text>
+                                <Icon name={item.iconuse} size={30} color={colors.lightColor} />
+                                <Text style={[styles.textWhite, styles.mL1, styles.font40]}>{item.title}</Text>
                             </View>
                         </View>
                     </View>
@@ -78,7 +99,7 @@ const MainScreen = ({navigation}) =>{
         >
             <FlatList 
                 // keyExtractor={item => console.log(item)} 
-                data={testData} 
+                data={ProductionScreen} 
                 renderItem={ButtonComponent} 
                 numColumns={2}
             />
