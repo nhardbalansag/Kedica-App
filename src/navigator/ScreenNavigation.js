@@ -1,6 +1,6 @@
 import React from "react";
 
-import {Button} from "react-native"
+import {View, Text} from "react-native"
 
 import LoginScreen from "../view/Login/LoginScreen";
 import MainScreen from "../view/menu/MainScreen";
@@ -81,6 +81,7 @@ const menuScreens = [
 ]
 
 const Menu = () =>{
+
     return(
         <Stack.Navigator>
             {
@@ -90,7 +91,7 @@ const Menu = () =>{
                         name={screenData.name}
                         component={screenData.component} 
                         options={({ navigation, route }) => ({ 
-                            title: screenData.title,
+                            title: index === 0 ? screenData.title :  false,
                             headerTintColor: screenData.header.headerTintColor,
                             headerStyle: {
                                 backgroundColor: screenData.header.backgroundColor,
@@ -102,14 +103,30 @@ const Menu = () =>{
                             headerLeft: () => (
                                 index !== 0 
                                 ?
+                                <View style={[
+                                    styles.justifyCenter,
+                                    styles.alignCenter,
+                                    styles.flexRow
+                                ]}>
                                     <TouchableOpacity 
                                         style={[
                                             styles.pX2,
                                         ]}
                                         onPress={() => navigation.goBack()}
                                     >
-                                        <Icon name="arrow-left" size={40} color={colors.lightColor} />
+                                        <Icon name="arrow-left" size={40} color={colors.lightColor}/>
                                     </TouchableOpacity>
+                                    <Text style={[
+                                            styles.font40,
+                                            styles.textBold,
+                                            styles.textWhite,
+                                            styles.mX2
+                                        ]}
+                                        >
+                                            {route.params.title}
+                                    </Text>
+                                </View>
+                                    
                                 :
                                     <></>
                             ),

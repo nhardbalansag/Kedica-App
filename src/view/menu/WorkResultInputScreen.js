@@ -21,10 +21,6 @@ import {
     colors,
 } from "../../asset/css/BaseStyle";
 
-import Moment from 'react-moment';
-
-import CustomStyle from "../../asset/css/CustomStyle";
-
 import {
     NativeBaseProvider,
     Actionsheet,
@@ -198,12 +194,34 @@ const WorkResultInputScreen = (props) =>{
         }
     }
 
+    const ProductionScreen = [
+        {
+            api: {
+                url: "api/production-work/production-work-entry/index",
+                method: "GET"
+            }
+        },
+        {
+            api: {
+                url: "api/quality-inspection/outgoing-inspection/get",
+                method: "GET"
+            }
+        }
+    ];
+
     const alertMessage = (message) =>{
         Alert.alert(
             "Note",
             message,
             [
-              { text: "OK", onPress: () => props.navigation.navigate('ProductionWorkEntryScreen')}
+              { 
+                  text: "OK", 
+                  onPress: () => props.navigation.navigate('ProductionWorkEntryScreen',
+                  {
+                    url: "api/production-work/production-work-entry/index",
+                    method: "GET",
+                    title: "Production Work Entry"
+                })}
             ]
         );
     }
