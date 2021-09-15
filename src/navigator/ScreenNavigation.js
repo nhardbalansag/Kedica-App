@@ -6,6 +6,7 @@ import LoginScreen from "../view/Login/LoginScreen";
 import MainScreen from "../view/menu/MainScreen";
 import ProductionWorkEntryScreen from "../view/menu/ProductionWorkEntryScreen";
 import WorkResultInputScreen from "../view/menu/WorkResultInputScreen";
+import InscpectionDetails from "../view/menu/InspectionDetails";
 
 import { styles, colors } from "../asset/css/BaseStyle";
 
@@ -71,6 +72,17 @@ const menuScreens = [
         name:"WorkResultInputScreen", 
         component: WorkResultInputScreen, 
         title: 'Work Result Input', 
+        header:{
+            headerTintColor: colors.lightColor,
+            backgroundColor: colors.canvaupperBG,
+            height: 100,
+            fontSize: 40
+        }
+    },
+    {
+        name:"InscpectionDetails", 
+        component: InscpectionDetails, 
+        title: 'Inspection Details', 
         header:{
             headerTintColor: colors.lightColor,
             backgroundColor: colors.canvaupperBG,
