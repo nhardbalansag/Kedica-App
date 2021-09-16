@@ -366,8 +366,24 @@ const WorkResultInputScreen = (props) =>{
                         {Qty}
                     </Text>
                 </View>
-                <Actionsheet isOpen={activeActionSheet} onClose={onClose}  >
+                
+                <Actionsheet isOpen={activeActionSheet} onClose={onClose}  hideDragIndicator={true}>
                     <Actionsheet.Content>
+                        <Actionsheet.Item>
+                            <View>
+                                <TouchableOpacity onPress={() => setactiveActionSheet(false)}>
+                                    <View style={[
+                                        styles.flexRow,
+                                        styles.justifySpaceBetween,
+                                        styles.alignCenter,
+                                        styles.pL5,
+                                    ]}>
+                                        <Icon name="times" size={40} color={colors.dangerColor} />
+                                        <Text style={[styles.font40, styles.mL2, styles.textDanger]}>Cancel</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            </View>
+                        </Actionsheet.Item>
                         {
                             productionLine != null?
                             productionLine.map((data, index)=>

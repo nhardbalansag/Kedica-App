@@ -86,8 +86,23 @@ const InscpectionDetails = (props, {navigation}) =>{
                         <Icon name="mouse-pointer" size={30} color={colors.lightColor} />
                     </View>
                 </TouchableOpacity>
-                <Actionsheet isOpen={activeActionSheet} onClose={onClose}  >
+                <Actionsheet isOpen={activeActionSheet} onClose={onClose} hideDragIndicator={true} >
                     <Actionsheet.Content>
+                        <Actionsheet.Item>
+                            <View>
+                                <TouchableOpacity onPress={() => setactiveActionSheet(false)}>
+                                    <View style={[
+                                        styles.flexRow,
+                                        styles.justifySpaceBetween,
+                                        styles.alignCenter,
+                                        styles.pL5,
+                                    ]}>
+                                        <Icon name="times" size={40} color={colors.dangerColor} />
+                                        <Text style={[styles.font40, styles.mL2, styles.textDanger]}>Cancel</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            </View>
+                        </Actionsheet.Item>
                         {
                             dataremarks != null?
                             dataremarks.map((data, index)=>
@@ -259,34 +274,40 @@ const InscpectionDetails = (props, {navigation}) =>{
     const ButtonSaveCancel = () =>{
         return(
             <View style={[
+                styles.flex1,
                 styles.flexRow,
                 styles.alignCenter,
-                styles.justifyCenter,
+                styles.justifySpaceAround,
             ]}>
                 <View style={[
-                    styles.mY1
+                    styles.mY1,
+                    styles.alignCenter,
+                    styles.justifyCenter,
+                    styles.flexRow,
                 ]}>
                     <TouchableOpacity>
                         <View style={[
                             styles.backgroundPrimary,
                             styles.justifyCenter,
                             styles.alignCenter,
-                            styles.flexRow,
                             styles.border10,
                             styles.pY100,
-                            styles.w85
+                            styles.w100,
+                            styles.pX9,
                         ]}>
-                           <>
+                            <View style={[
+                                styles.flexRow
+                            ]}>
                                 <Icon 
                                     name={"save"}
                                     size={70} 
                                     color={colors.lightColor} 
                                 />
-                            </>
-                            
-                            <Text style={[styles.font60, styles.mL2, styles.textWhite]}> 
-                                Save
-                            </Text>
+                                
+                                <Text style={[styles.font60, styles.mL2, styles.textWhite]}> 
+                                    Save
+                                </Text>
+                            </View>
                         </View>
                     </TouchableOpacity>
                 </View> 
@@ -298,19 +319,23 @@ const InscpectionDetails = (props, {navigation}) =>{
                             styles.bgWarning,
                             styles.justifyCenter,
                             styles.alignCenter,
-                            styles.flexRow,
                             styles.border10,
                             styles.pY100,
-                            styles.w85
+                            styles.w100,
+                            styles.pX8
                         ]}>
-                            <Icon 
-                                name={"times"}
-                                size={70} 
-                                color={colors.lightColor} 
-                            />
-                            <Text style={[styles.font60, styles.mL2, styles.textWhite]}>
-                                Cancel
-                            </Text>
+                            <View style={[
+                                styles.flexRow
+                            ]}>
+                                <Icon 
+                                    name={"times"}
+                                    size={70} 
+                                    color={colors.lightColor} 
+                                />
+                                <Text style={[styles.font60, styles.mL2, styles.textWhite]}>
+                                    Cancel
+                                </Text>
+                            </View>
                         </View>
                     </TouchableOpacity>
                 </View> 
