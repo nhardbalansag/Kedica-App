@@ -41,7 +41,9 @@ import { useIsFocused } from "@react-navigation/native";
 import {
     NativeBaseProvider,
     FormControl,
-    Input
+    Input,
+    useDisclose,
+    Actionsheet
 } from 'native-base';
 
 import { 
@@ -51,11 +53,16 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 const ProductionWorkEntryScreen = (props) =>{
+
+    const { isOpen, onOpen, onClose } = useDisclose()
     
     const isFocused = useIsFocused();
     const [isEnable, setIsEnable] = useState(false);
     const [travelSheetNo, setTravelSheetNo] = useState(null);
     const [refreshing, setRefreshing] = useState(false);
+    const [activeActionSheet, setactiveActionSheet] =  useState(false);
+    const [filterData, setfilterData] =  useState("");
+    const [currentComponent, setcurrentComponent] =  useState("");
 
     const [WorkEntry, setWorkEntry] = useState();
    
@@ -63,9 +70,24 @@ const ProductionWorkEntryScreen = (props) =>{
 
     const domainSetting = useSelector(state => state.loginCredential.domainSetting);
 
+    const dataFilter = [
+        {filterType: "Ongoing", value: "Ongoing"},
+        {filterType: "Pending", value: "Pending"},
+    ]
+
+    const actionsheet = () =>{
+        setactiveActionSheet(true)
+    }
+
+    const closeActionSheet = (filter) =>{
+        setactiveActionSheet(false)
+        setfilterData(filter)
+    }
+
     const getProductionWorkEntryList = async (tokendata, domainSetting) =>{
         const apiUrl = props.route.params.url;
-
+        const componentTitle = props.route.params.title;
+        setcurrentComponent(componentTitle)
         setRefreshing(true);
         try {
             const response = await fetch(domainSetting + apiUrl, {
@@ -83,17 +105,45 @@ const ProductionWorkEntryScreen = (props) =>{
                 alertMessage("An Error Occured: No data fetched");
             }else{
                 for (const key in responseData[0].dataContent){
-                    datael.push(
-                        [
-                            responseData[0].dataContent[key].StartProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].StartProcess,
-                            responseData[0].dataContent[key].EndProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].EndProcess,
-                            responseData[0].dataContent[key].TravelSheetNo,
-                            responseData[0].dataContent[key].ItemCode + "\n" + responseData[0].dataContent[key].ItemName,
-                            responseData[0].dataContent[key].PriorityNo,
-                            responseData[0].dataContent[key].Age + " Days",
-                            responseData[0].dataContent[key].ShipDate,
-                        ]
-                    )
+                    if(componentTitle !== "Outgoing Inspection"){
+                        if(filterData === "Ongoing" && responseData[0].dataContent[key].StartProcess !== "1900-01-01 00:00:00" && responseData[0].dataContent[key].EndProcess === "1900-01-01 00:00:00"){
+                            datael.push(
+                                [
+                                    responseData[0].dataContent[key].StartProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].StartProcess,
+                                    responseData[0].dataContent[key].EndProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].EndProcess,
+                                    responseData[0].dataContent[key].TravelSheetNo,
+                                    responseData[0].dataContent[key].ItemCode + "\n" + responseData[0].dataContent[key].ItemName,
+                                    responseData[0].dataContent[key].Priority,
+                                    responseData[0].dataContent[key].Age + " Days",
+                                    responseData[0].dataContent[key].ShipDate,
+                                ]
+                            )
+                        }else if(filterData === "Pending" && responseData[0].dataContent[key].StartProcess === "1900-01-01 00:00:00" && responseData[0].dataContent[key].EndProcess === "1900-01-01 00:00:00"){
+                            datael.push(
+                                [
+                                    responseData[0].dataContent[key].StartProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].StartProcess,
+                                    responseData[0].dataContent[key].EndProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].EndProcess,
+                                    responseData[0].dataContent[key].TravelSheetNo,
+                                    responseData[0].dataContent[key].ItemCode + "\n" + responseData[0].dataContent[key].ItemName,
+                                    responseData[0].dataContent[key].Priority,
+                                    responseData[0].dataContent[key].Age + " Days",
+                                    responseData[0].dataContent[key].ShipDate,
+                                ]
+                            )
+                        }
+                    }else{
+                        datael.push(
+                            [
+                                responseData[0].dataContent[key].StartProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].StartProcess,
+                                responseData[0].dataContent[key].EndProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].EndProcess,
+                                responseData[0].dataContent[key].TravelSheetNo,
+                                responseData[0].dataContent[key].ItemCode + "\n" + responseData[0].dataContent[key].ItemName,
+                                responseData[0].dataContent[key].Priority,
+                                responseData[0].dataContent[key].Age + " Days",
+                                responseData[0].dataContent[key].ShipDate,
+                            ]
+                        )
+                    }
                 }
                 setWorkEntry(datael)
             }
@@ -170,7 +220,7 @@ const ProductionWorkEntryScreen = (props) =>{
                 setIsEnable(false)
             }
         }
-    },[travelSheetNo, isFocused])
+    },[travelSheetNo, isFocused, filterData])
 
     const table = {
         tableHead: ['Start Process', 'End Process', 'Travel Sheet No.', 'Product Name', 'Priority No.', 'Age', 'Ship Date'],
@@ -229,10 +279,12 @@ const ProductionWorkEntryScreen = (props) =>{
             <View style={[styles.mT1]}>
                 <View style={[
                     styles.flexRow,
-                    styles.justifySpaceAround
+                    styles.justifySpaceAround,
+                    styles.alignFlexEnd
+
                 ]}>
                     <View style={[
-                        styles.w50
+                        styles.w50,
                     ]}>
                         <FormControl>
                             <Text style={[
@@ -259,6 +311,18 @@ const ProductionWorkEntryScreen = (props) =>{
                         styles.alignFlexEnd,
                         styles.justifySpaceAround
                     ]}>
+                        <View style={[
+                            styles.flexRow
+                        ]}>
+                            <Text style={[styles.font30, styles.textDark, styles.mR2]}>Keyboard</Text>
+                            <Switch
+                                trackColor={{ false: "#767577", true: colors.primaryColor }}
+                                thumbColor={isEnable ? colors.canvaupperBG : "#f4f3f4"}
+                                onValueChange={() => toggleSwitch()}
+                                style={{ transform: [{ scaleX: 2 }, { scaleY: 2 }] }}
+                                value={isEnable}
+                            />
+                        </View>
                         <View>
                             <TouchableOpacity 
                                 disabled={!isEnable ? true : false}
@@ -277,18 +341,29 @@ const ProductionWorkEntryScreen = (props) =>{
                                     <Text style={[styles.font30, styles.textWhite, styles.mL1]}>Search</Text>
                                 </View>
                             </TouchableOpacity>
-                        </View>
-                        <View style={[
-                            styles.flexRow
-                        ]}>
-                            <Text style={[styles.font30, styles.textDark, styles.mR2]}>Keyboard</Text>
-                            <Switch
-                                trackColor={{ false: "#767577", true: colors.primaryColor }}
-                                thumbColor={isEnable ? colors.canvaupperBG : "#f4f3f4"}
-                                onValueChange={() => toggleSwitch()}
-                                style={{ transform: [{ scaleX: 2 }, { scaleY: 2 }] }}
-                                value={isEnable}
-                            />
+                            {
+                                currentComponent === "Outgoing Inspection" 
+                                ? <></> 
+                                :
+                                <TouchableOpacity 
+                                    onPress={() => actionsheet()}
+                                >
+                                    <View style={[
+                                        styles.backgroundLightBlue ,
+                                        styles.justifyCenter,
+                                        styles.alignCenter,
+                                        styles.flexRow,
+                                        styles.border10,
+                                        styles.pY1,
+                                        styles.pX2,
+                                        styles.mT1
+                                    ]}>
+                                        <Icon name="filter" size={30} color={colors.lightColor} />
+                                        <Text style={[styles.font30, styles.textWhite, styles.mL1]}>Filter</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            }
+                            
                         </View>
                     </View>
                 </View>
@@ -317,6 +392,47 @@ const ProductionWorkEntryScreen = (props) =>{
                         />
                     </>
             }
+            <Actionsheet isOpen={activeActionSheet} onClose={onClose}  hideDragIndicator={true}>
+                <Actionsheet.Content>
+                    <Actionsheet.Item>
+                        <View>
+                            <TouchableOpacity onPress={() => setactiveActionSheet(false)}>
+                                <View style={[
+                                    styles.flexRow,
+                                    styles.justifySpaceBetween,
+                                    styles.alignCenter,
+                                    styles.pL5,
+                                ]}>
+                                    <Icon name="times" size={40} color={colors.dangerColor} />
+                                    <Text style={[styles.font40, styles.mL2, styles.textDanger]}>Cancel</Text>
+                                </View>
+                            </TouchableOpacity>
+                        </View>
+                    </Actionsheet.Item>
+                    {
+                        dataFilter != null?
+                        dataFilter.map((data, index)=>
+                            <Actionsheet.Item key={index}>
+                                <View>
+                                    <TouchableOpacity onPress={() => closeActionSheet(data.value)}>
+                                        <View style={[
+                                            styles.flexRow,
+                                            styles.justifySpaceBetween,
+                                            styles.alignCenter,
+                                            styles.pL5,
+                                        ]}>
+                                            <Icon name="circle" size={20} color={filterData == data.value ? colors.primaryColor : colors.gray200} />
+                                            <Text style={[styles.font40, styles.mL2]}>{data.filterType}</Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                </View>
+                            </Actionsheet.Item>
+                        )
+                        :
+                        <></>
+                    }
+                </Actionsheet.Content>
+            </Actionsheet>
         </NativeBaseProvider>
     );
 }
