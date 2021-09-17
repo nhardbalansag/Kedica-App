@@ -36,17 +36,16 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 const InscpectionDetails = (props, {navigation}) =>{
 
-    const [thicknessFrom, setThicknessFrom] = useState("")
-    const [thicknessTo, setThicknessTo] = useState("")
-    const [NGQTY, setNGQTY] = useState("")
-    const [From, setFrom] = useState("")
-    const [To, setTo] = useState("")
-    const [ActualThickness, setActualThickness] = useState("")
-    const [NGRemarks, setNGRemarks] = useState("")
+    const [thicknessFrom, setThicknessFrom] = useState(0)
+    const [thicknessTo, setThicknessTo] = useState(0) 
+    const [NGQTY, setNGQTY] = useState(0)
+    const [ActualThickness, setActualThickness] = useState(0)
+    const [NGRemarks, setNGRemarks] = useState(null)
     const [activeActionSheet, setactiveActionSheet] = useState(false)
     const [OutgoingData, setOutgoingData] = useState(null)
     const [dataRemarks, setdataRemarks] = useState(null)
     const [loading, setloading] =  useState(true);
+    const [NGRemarksTitle, setNGRemarksTitle] =  useState(null);
 
     const travelSheetNumber = props.route.params.dataContent.number;
     const token = useSelector(state => state.loginCredential.TokenData);
@@ -54,9 +53,10 @@ const InscpectionDetails = (props, {navigation}) =>{
 
     const { isOpen, onOpen, onClose } = useDisclose()
 
-    const closeActionSheet = (remarks) =>{
+    const closeActionSheet = (remarks, title) =>{
         setactiveActionSheet(false)
         setNGRemarks(remarks)
+        setNGRemarksTitle(title)
     }
 
     const actionsheet = () =>{
@@ -125,6 +125,40 @@ const InscpectionDetails = (props, {navigation}) =>{
         }
     }
 
+     const saveInspectionDetails = async () =>{
+        if((NGQTY > 0 && NGRemarks !== null) || (NGQTY === 0 && NGRemarks === null) || (NGQTY === "" && NGRemarks === null)){
+            setloading(true)
+            try{
+                const response = await fetch(domainSetting + "api/quality-inspection/save", {
+                    method:'POST',
+                    headers:{
+                        'Content-type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({
+                        ProductionWorkID: OutgoingData[0].ProductionWorkID,
+                        ThicknessFrom: thicknessFrom,
+                        ThicknessTo: thicknessTo,
+                        ActualThickness : ActualThickness,
+                        NGQty : NGQTY,
+                        NGRemarksID : NGRemarks
+                    })
+                })
+                const responseData = await response.json();
+                setloading(false)
+                if(responseData[0].status === true){
+                    props.navigation.goBack()
+                }else{
+                    alertMessage(responseData[0].message)
+                }
+            }catch(error){
+                alertMessage(error.message)
+            }
+        }else{
+            alertMessage("NG Remarks and NG Quantity Cannot be empty")
+        }
+    }
+
     useEffect(() =>{
         getOutgoingTravelSheetDetails(travelSheetNumber)
         getRemarks()
@@ -153,7 +187,7 @@ const InscpectionDetails = (props, {navigation}) =>{
                         styles.pY1,
                         styles.pX2
                     ]}>
-                        <Text style={[styles.font30, styles.textWhite, styles.mR1]}>Select Production Line</Text>
+                        <Text style={[styles.font30, styles.textWhite, styles.mR1]}>{NGRemarksTitle !== null ? NGRemarksTitle : "Select Remarks"}</Text>
                         <Icon name="mouse-pointer" size={30} color={colors.lightColor} />
                     </View>
                 </TouchableOpacity>
@@ -175,19 +209,34 @@ const InscpectionDetails = (props, {navigation}) =>{
                             </View>
                         </Actionsheet.Item>
                         <ScrollView>
+                            <Actionsheet.Item>
+                                <View>
+                                    <TouchableOpacity onPress={() => closeActionSheet(null, "Select Remarks")}>
+                                        <View style={[
+                                            styles.flexRow,
+                                            styles.justifySpaceBetween,
+                                            styles.alignCenter,
+                                            styles.pL5,
+                                        ]}>
+                                            <Icon name="circle" size={40} color={NGRemarks == null ? colors.primaryColor : colors.gray200} />
+                                            <Text style={[styles.font40, styles.mL2, styles.warningColor]}>None</Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                </View>
+                            </Actionsheet.Item>
                             {
                                 dataRemarks != null?
                                 dataRemarks.map((data, index)=>
                                     <Actionsheet.Item key={index}>
                                         <View>
-                                            <TouchableOpacity onPress={() => closeActionSheet(data.ID)}>
+                                            <TouchableOpacity onPress={() => closeActionSheet(data.ID, data.NGRemarks)}>
                                                 <View style={[
                                                     styles.flexRow,
                                                     styles.justifySpaceBetween,
                                                     styles.alignCenter,
                                                     styles.pL5,
                                                 ]}>
-                                                    <Icon name="circle" size={20} color={NGRemarks == data.ID ? colors.primaryColor : colors.gray200} />
+                                                    <Icon name="circle" size={40} color={NGRemarks == data.ID ? colors.primaryColor : colors.gray200} />
                                                     <Text style={[styles.font40, styles.mL2]}>{data.NGRemarks}</Text>
                                                 </View>
                                             </TouchableOpacity>
@@ -208,6 +257,7 @@ const InscpectionDetails = (props, {navigation}) =>{
         return(
             <View>
                 <Input
+                    disableFullscreenUI={true}
                     size="2xl"
                     placeholder=" Actual Thickness "
                     _light={{
@@ -229,6 +279,7 @@ const InscpectionDetails = (props, {navigation}) =>{
         return(
             <View>
                 <Input
+                    disableFullscreenUI={true}
                     size="2xl"
                     placeholder=" Quantity "
                     _light={{
@@ -258,6 +309,7 @@ const InscpectionDetails = (props, {navigation}) =>{
                         From :
                     </Text>
                     <Input
+                        disableFullscreenUI={true}
                         size="2xl"
                         placeholder=" From "
                         _light={{
@@ -281,6 +333,7 @@ const InscpectionDetails = (props, {navigation}) =>{
                         To :
                     </Text>
                     <Input
+                        disableFullscreenUI={true}
                         size="2xl"
                         placeholder=" To "
                         _light={{
@@ -366,9 +419,12 @@ const InscpectionDetails = (props, {navigation}) =>{
                     styles.justifyCenter,
                     styles.flexRow,
                 ]}>
-                    <TouchableOpacity>
+                    <TouchableOpacity 
+                        onPress={() => saveInspectionDetails()}
+                        disabled ={thicknessFrom !== 0 ? (thicknessTo !== 0 ? (ActualThickness !== 0 ? false : true): true) : true}
+                    >
                         <View style={[
-                            styles.backgroundPrimary,
+                            thicknessFrom !== 0 ? (thicknessTo !== 0 ? (ActualThickness !== 0 ? styles.backgroundPrimary : styles.bgGray200): styles.bgGray200) : styles.bgGray200,
                             styles.justifyCenter,
                             styles.alignCenter,
                             styles.border10,
@@ -395,7 +451,7 @@ const InscpectionDetails = (props, {navigation}) =>{
                 <View style={[
                     styles.mY1
                 ]}>
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={() => props.navigation.goBack()}>
                         <View style={[
                             styles.bgWarning,
                             styles.justifyCenter,
