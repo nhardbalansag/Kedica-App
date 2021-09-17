@@ -61,7 +61,7 @@ const ProductionWorkEntryScreen = (props) =>{
     const [travelSheetNo, setTravelSheetNo] = useState(null);
     const [refreshing, setRefreshing] = useState(false);
     const [activeActionSheet, setactiveActionSheet] =  useState(false);
-    const [filterData, setfilterData] =  useState("");
+    const [filterData, setfilterData] =  useState("All");
     const [currentComponent, setcurrentComponent] =  useState("");
 
     const [WorkEntry, setWorkEntry] = useState();
@@ -73,6 +73,7 @@ const ProductionWorkEntryScreen = (props) =>{
     const dataFilter = [
         {filterType: "Ongoing", value: "Ongoing"},
         {filterType: "Pending", value: "Pending"},
+        {filterType: "All", value: "All"},
     ]
 
     const actionsheet = () =>{
@@ -119,6 +120,18 @@ const ProductionWorkEntryScreen = (props) =>{
                                 ]
                             )
                         }else if(filterData === "Pending" && responseData[0].dataContent[key].StartProcess === "1900-01-01 00:00:00" && responseData[0].dataContent[key].EndProcess === "1900-01-01 00:00:00"){
+                            datael.push(
+                                [
+                                    responseData[0].dataContent[key].StartProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].StartProcess,
+                                    responseData[0].dataContent[key].EndProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].EndProcess,
+                                    responseData[0].dataContent[key].TravelSheetNo,
+                                    responseData[0].dataContent[key].ItemCode + "\n" + responseData[0].dataContent[key].ItemName,
+                                    responseData[0].dataContent[key].Priority,
+                                    responseData[0].dataContent[key].Age + " Days",
+                                    responseData[0].dataContent[key].ShipDate,
+                                ]
+                            )
+                        }else{
                             datael.push(
                                 [
                                     responseData[0].dataContent[key].StartProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].StartProcess,
