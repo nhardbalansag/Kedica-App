@@ -164,8 +164,9 @@ const ProductionWorkEntryScreen = (props) =>{
     }
 
     const goToWorkResult = (component, travelsheetno) =>{
+        const componentTitle = props.route.params.title;
         if(travelsheetno != null ){
-            props.navigation.navigate(component, 
+            props.navigation.navigate(componentTitle === "Outgoing Inspection" ? "InscpectionDetails": component, 
                 {
                     title: component === "WorkResultInputScreen" ? "Work Result Input" : "Inspection Details",
                     dataContent: {
@@ -427,28 +428,30 @@ const ProductionWorkEntryScreen = (props) =>{
                             </TouchableOpacity>
                         </View>
                     </Actionsheet.Item>
-                    {
-                        dataFilter != null?
-                        dataFilter.map((data, index)=>
-                            <Actionsheet.Item key={index}>
-                                <View>
-                                    <TouchableOpacity onPress={() => closeActionSheet(data.value)}>
-                                        <View style={[
-                                            styles.flexRow,
-                                            styles.justifySpaceBetween,
-                                            styles.alignCenter,
-                                            styles.pL5,
-                                        ]}>
-                                            <Icon name="circle" size={20} color={filterData == data.value ? colors.primaryColor : colors.gray200} />
-                                            <Text style={[styles.font40, styles.mL2]}>{data.filterType}</Text>
-                                        </View>
-                                    </TouchableOpacity>
-                                </View>
-                            </Actionsheet.Item>
-                        )
-                        :
-                        <></>
-                    }
+                    <ScrollView>
+                        {
+                            dataFilter != null?
+                            dataFilter.map((data, index)=>
+                                <Actionsheet.Item key={index}>
+                                    <View>
+                                        <TouchableOpacity onPress={() => closeActionSheet(data.value)}>
+                                            <View style={[
+                                                styles.flexRow,
+                                                styles.justifySpaceBetween,
+                                                styles.alignCenter,
+                                                styles.pL5,
+                                            ]}>
+                                                <Icon name="circle" size={20} color={filterData == data.value ? colors.primaryColor : colors.gray200} />
+                                                <Text style={[styles.font40, styles.mL2]}>{data.filterType}</Text>
+                                            </View>
+                                        </TouchableOpacity>
+                                    </View>
+                                </Actionsheet.Item>
+                            )
+                            :
+                            <></>
+                        }
+                    </ScrollView>
                 </Actionsheet.Content>
             </Actionsheet>
         </NativeBaseProvider>
