@@ -28,7 +28,8 @@ import {
     Actionsheet,
     useDisclose,
     Modal,
-    Input
+    Input,
+    ScrollView
 } from 'native-base';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -37,10 +38,19 @@ const InscpectionDetails = (props, {navigation}) =>{
 
     const [thicknessFrom, setThicknessFrom] = useState("")
     const [thicknessTo, setThicknessTo] = useState("")
+    const [NGQTY, setNGQTY] = useState("")
+    const [From, setFrom] = useState("")
+    const [To, setTo] = useState("")
+    const [ActualThickness, setActualThickness] = useState("")
     const [NGRemarks, setNGRemarks] = useState("")
     const [activeActionSheet, setactiveActionSheet] = useState(false)
+    const [OutgoingData, setOutgoingData] = useState(null)
+    const [dataRemarks, setdataRemarks] = useState(null)
+    const [loading, setloading] =  useState(true);
 
     const travelSheetNumber = props.route.params.dataContent.number;
+    const token = useSelector(state => state.loginCredential.TokenData);
+    const domainSetting = useSelector(state => state.loginCredential.domainSetting);
 
     const { isOpen, onOpen, onClose } = useDisclose()
 
@@ -54,20 +64,81 @@ const InscpectionDetails = (props, {navigation}) =>{
     }
 
     const inspectionDataDetails = [
-        { label: "Travel Sheet No.", data: travelSheetNumber },
-        { label: "Item Code", data: "test" },
-        { label: "Lot No", data: "test" },
-        { label: "Output Qty", data: "test" },
+        { label: "Travel Sheet No.", data: travelSheetNumber ? travelSheetNumber : "-" },
+        { label: "Item Code", data: OutgoingData !== null ? (OutgoingData[0].ItemCode ? OutgoingData[0].ItemCode : "-") : "-" },
+        { label: "Lot No", data: OutgoingData !== null ? (OutgoingData[0].LotNo ? OutgoingData[0].LotNo : "-") : "-"  },
+        { label: "Output Qty", data: OutgoingData !== null ? (OutgoingData[0].Qty ? OutgoingData[0].Qty : "-") : "-"  },
         { label: "Thickness", data: "" },
         { label: "Actual Thickness", data: "test" },
         { label: "NG Qty", data: "test" },
         { label: "NG Remarks", data: "test" },
     ]
 
-    const dataremarks = [
-        {id: 1, remarkTitle: "test 1"},
-        {id: 2, remarkTitle: "test 2"},
-    ]
+    const getOutgoingTravelSheetDetails = async (travelsheet) =>{
+        setloading(true)
+        try{
+            const response = await fetch(domainSetting + "api/quality-inspection/get-travelsheet-details/" + travelsheet, {
+                method:"GET",
+                headers:{
+                    'Content-type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                }
+            })
+    
+            const responseData = await response.json();
+
+            setOutgoingData([
+                {
+                    ID: responseData[0].dataContent.ID,
+                    ProductionWorkID: responseData[0].dataContent.ProductionWorkID,
+                    TravelSheetNo: responseData[0].dataContent.TravelSheetNo,
+                    ItemCode: responseData[0].dataContent.ItemCode,
+                    LotNo: responseData[0].dataContent.LotNo,
+                    Qty: responseData[0].dataContent.Qty,
+                    UpdateDate: responseData[0].dataContent.UpdateDate,
+                }
+            ])
+            setloading(false)
+        }catch(error){
+            alertMessage(error.message)
+        }
+    }
+
+    const getRemarks = async () =>{
+        setloading(true)
+        try{
+            const response = await fetch(domainSetting + "api/remarks/get-remarks", {
+                method:"GET",
+                headers:{
+                    'Content-type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                }
+            })
+    
+            const responseData = await response.json();
+
+            setdataRemarks(responseData[0].dataContent)
+            setloading(false)
+           
+        }catch(error){
+            alertMessage(error.message)
+        }
+    }
+
+    useEffect(() =>{
+        getOutgoingTravelSheetDetails(travelSheetNumber)
+        getRemarks()
+    },[])
+
+    const alertMessage = (message) =>{
+        Alert.alert(
+            "Note",
+            message,
+            [
+              { text: "OK"}
+            ]
+        );
+    }
 
     const RemarksComponent = () =>{
         return(
@@ -87,7 +158,7 @@ const InscpectionDetails = (props, {navigation}) =>{
                     </View>
                 </TouchableOpacity>
                 <Actionsheet isOpen={activeActionSheet} onClose={onClose} hideDragIndicator={true} >
-                    <Actionsheet.Content>
+                    <Actionsheet.Content  style={[styles.alignFlexStart]}>
                         <Actionsheet.Item>
                             <View>
                                 <TouchableOpacity onPress={() => setactiveActionSheet(false)}>
@@ -103,28 +174,30 @@ const InscpectionDetails = (props, {navigation}) =>{
                                 </TouchableOpacity>
                             </View>
                         </Actionsheet.Item>
-                        {
-                            dataremarks != null?
-                            dataremarks.map((data, index)=>
-                                <Actionsheet.Item key={index}>
-                                    <View>
-                                        <TouchableOpacity onPress={() => closeActionSheet(data.id)}>
-                                            <View style={[
-                                                styles.flexRow,
-                                                styles.justifySpaceBetween,
-                                                styles.alignCenter,
-                                                styles.pL5,
-                                            ]}>
-                                                <Icon name="circle" size={20} color={NGRemarks == data.id ? colors.primaryColor : colors.gray200} />
-                                                <Text style={[styles.font40, styles.mL2]}>{data.remarkTitle}</Text>
-                                            </View>
-                                        </TouchableOpacity>
-                                    </View>
-                                </Actionsheet.Item>
-                            )
-                            :
-                            <></>
-                        }
+                        <ScrollView>
+                            {
+                                dataRemarks != null?
+                                dataRemarks.map((data, index)=>
+                                    <Actionsheet.Item key={index}>
+                                        <View>
+                                            <TouchableOpacity onPress={() => closeActionSheet(data.ID)}>
+                                                <View style={[
+                                                    styles.flexRow,
+                                                    styles.justifySpaceBetween,
+                                                    styles.alignCenter,
+                                                    styles.pL5,
+                                                ]}>
+                                                    <Icon name="circle" size={20} color={NGRemarks == data.ID ? colors.primaryColor : colors.gray200} />
+                                                    <Text style={[styles.font40, styles.mL2]}>{data.NGRemarks}</Text>
+                                                </View>
+                                            </TouchableOpacity>
+                                        </View>
+                                    </Actionsheet.Item>
+                                )
+                                :
+                                <></>
+                            }
+                        </ScrollView>
                     </Actionsheet.Content>
                 </Actionsheet>
             </View>
@@ -145,6 +218,8 @@ const InscpectionDetails = (props, {navigation}) =>{
                     }}
                     keyboardType={'numeric'}
                     minLength={0}
+                    onChangeText={(text) => setActualThickness(text)}
+                    value={ActualThickness}
                 />
             </View>
         )
@@ -164,6 +239,8 @@ const InscpectionDetails = (props, {navigation}) =>{
                     }}
                     keyboardType='numeric'
                     minLength={0}
+                    onChangeText={(text) => setNGQTY(text)}
+                    value={NGQTY}
                 />
             </View>
         )
@@ -191,6 +268,8 @@ const InscpectionDetails = (props, {navigation}) =>{
                         }}
                         keyboardType={'numeric'}
                         minLength={0}
+                        onChangeText={(text) => setThicknessFrom(text)}
+                        value={thicknessFrom}
                     />
                 </View>
                 <View style={[styles.flexRow , styles.justifyCenter, styles.alignFlexEnd]}>
@@ -212,6 +291,8 @@ const InscpectionDetails = (props, {navigation}) =>{
                         }}
                         keyboardType={'numeric'}
                         minLength={0}
+                        onChangeText={(text) => setThicknessTo(text)}
+                        value={thicknessTo}
                     />
                 </View>
             </View>
@@ -345,14 +426,28 @@ const InscpectionDetails = (props, {navigation}) =>{
 
     return(
         <NativeBaseProvider>
-            <View>
-                <FlatList 
-                    data={inspectionDataDetails}
-                    renderItem={components} 
-                    ListFooterComponent={ButtonSaveCancel}
-                    numColumns={2}
-                />
-            </View>
+            {
+                loading 
+                ? 
+                    <>
+                        <View style={[
+                                styles.alignCenter,
+                                styles.justifyCenter,
+                                styles.flex1
+                            ]}>
+                            <ActivityIndicator  size="large" color={colors.primaryColor}/>
+                        </View>
+                    </>
+                :
+                    <View>
+                        <FlatList 
+                            data={inspectionDataDetails}
+                            renderItem={components} 
+                            ListFooterComponent={ButtonSaveCancel}
+                            numColumns={2}
+                        />
+                    </View>    
+            }  
         </NativeBaseProvider>
     )
 }
