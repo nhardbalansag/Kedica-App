@@ -413,7 +413,7 @@ const ProductionWorkEntryScreen = (props) =>{
                     </>
             }
             <Actionsheet isOpen={activeActionSheet} onClose={onClose}  hideDragIndicator={true}>
-                <Actionsheet.Content>
+                <Actionsheet.Content style={[styles.alignFlexStart]}>
                     <Actionsheet.Item>
                         <View>
                             <TouchableOpacity onPress={() => setactiveActionSheet(false)}>
@@ -442,7 +442,7 @@ const ProductionWorkEntryScreen = (props) =>{
                                                 styles.alignCenter,
                                                 styles.pL5,
                                             ]}>
-                                                <Icon name="circle" size={20} color={filterData == data.value ? colors.primaryColor : colors.gray200} />
+                                                <Icon name="circle" size={40} color={filterData == data.value ? colors.primaryColor : colors.gray200} />
                                                 <Text style={[styles.font40, styles.mL2]}>{data.filterType}</Text>
                                             </View>
                                         </TouchableOpacity>
