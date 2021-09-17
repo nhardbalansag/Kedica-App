@@ -54,6 +54,7 @@ const WorkResultInputScreen = (props) =>{
     const [endDatetime, setendDatetime] =  useState(null);
     const [loading, setloading] =  useState(true);
     const [activeActionSheet, setactiveActionSheet] =  useState(false);
+    const [activeActionSheetlabel, setactiveActionSheetlabel] =  useState(null);
 
     const getcurrentdate = () =>{
 
@@ -240,9 +241,10 @@ const WorkResultInputScreen = (props) =>{
         setactiveActionSheet(true)
     }
 
-    const closeActionSheet = (prodline) =>{
+    const closeActionSheet = (prodline, labelTitle) =>{
         setactiveActionSheet(false)
         setLineID(prodline)
+        setactiveActionSheetlabel(labelTitle)
     }
 
     useEffect(() =>{
@@ -342,7 +344,7 @@ const WorkResultInputScreen = (props) =>{
                                 styles.pY1,
                                 styles.pX2
                             ]}>
-                                <Text style={[styles.font30, styles.textWhite, styles.mR1]}>Select Production Line</Text>
+                                <Text style={[styles.font30, styles.textWhite, styles.mR1]}>{activeActionSheetlabel !== null ? activeActionSheetlabel : "Select Production Line"}</Text>
                                 <Icon name="mouse-pointer" size={30} color={colors.lightColor} />
                             </View>
                         </TouchableOpacity>
@@ -389,14 +391,14 @@ const WorkResultInputScreen = (props) =>{
                             productionLine.map((data, index)=>
                                 <Actionsheet.Item key={index}>
                                     <View>
-                                        <TouchableOpacity onPress={() => closeActionSheet(data.LineID)}>
+                                        <TouchableOpacity onPress={() => closeActionSheet(data.LineID, data.Line)}>
                                             <View style={[
                                                 styles.flexRow,
                                                 styles.justifySpaceBetween,
                                                 styles.alignCenter,
                                                 styles.pL5,
                                             ]}>
-                                                <Icon name="circle" size={20} color={lineId == data.LineID ? colors.primaryColor : colors.gray200} />
+                                                <Icon name="circle" size={40} color={lineId == data.LineID ? colors.primaryColor : colors.gray200} />
                                                 <Text style={[styles.font40, styles.mL2]}>{data.Line}</Text>
                                             </View>
                                         </TouchableOpacity>
