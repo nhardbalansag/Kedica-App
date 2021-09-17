@@ -63,6 +63,7 @@ const ProductionWorkEntryScreen = (props) =>{
     const [activeActionSheet, setactiveActionSheet] =  useState(false);
     const [filterData, setfilterData] =  useState("All");
     const [currentComponent, setcurrentComponent] =  useState("");
+    const [checkTravelSheet, setcheckTravelSheet] =  useState(false);
 
     const [WorkEntry, setWorkEntry] = useState();
    
@@ -176,21 +177,42 @@ const ProductionWorkEntryScreen = (props) =>{
         );
     }
 
-    const goToWorkResult = (component, travelsheetno) =>{
-        const componentTitle = props.route.params.title;
-        if(travelsheetno != null ){
-            props.navigation.navigate(componentTitle === "Outgoing Inspection" ? "InscpectionDetails": component, 
-                {
-                    title: component === "WorkResultInputScreen" ? "Work Result Input" : "Inspection Details",
-                    dataContent: {
-                      number: travelsheetno,
-                    },
+    const goToWorkResult = async (component, travelsheetno) =>{
+        try{
+            const response = await fetch(domainSetting + "api/production-work/production-work-entry/search-travelsheet-details/" + travelsheetno, {
+                method:'GET',
+                headers:{
+                    'Content-type': 'application/json',
+                    'Authorization': 'Bearer ' + token
                 }
-            )
-            setTravelSheetNo(null)
-            setIsEnable(false)
-        }else{
-            AlertNull()
+            })
+
+            const responseData = await response.json();
+
+            const componentTitle = props.route.params.title;
+            
+            if(responseData[0].total === 0 && componentTitle !== "Outgoing Inspection"){
+                alertMessage("Please scan valid Travel Sheet.")
+            }else if(responseData[0].total >= 1 && responseData[0].dataContent.EndProcess !== "1900-01-01 00:00:00"  && componentTitle !== "Outgoing Inspection"){
+                alertMessage("Please scan Pending/On-Going Travel Sheet.")
+            }else{
+                if(travelsheetno != null ){
+                    props.navigation.navigate(componentTitle === "Outgoing Inspection" ? "InscpectionDetails": component, 
+                        {
+                            title: component === "WorkResultInputScreen" ? "Work Result Input" : "Inspection Details",
+                            dataContent: {
+                            number: travelsheetno,
+                            },
+                        }
+                    )
+                    setTravelSheetNo(null)
+                    setIsEnable(false)
+                }else{
+                    AlertNull()
+                }
+            }
+        }catch(error){
+            alertMessage(error.message);
         }
     }
 
