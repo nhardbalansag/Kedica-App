@@ -312,6 +312,7 @@ const ProductionWorkEntryScreen = (props) =>{
                                 Travel Sheet No.
                             </Text>
                             <TextInput  
+                                disableFullscreenUI={true}
                                 style={[
                                     styles.font40,
                                     styles.borderedNoRadius,

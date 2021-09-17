@@ -104,6 +104,7 @@ const LoginScreen = () => {
                         <FormControl>
                             <Text style={[styles.font20]}>Domain / IP Address</Text>
                             <Input 
+                                disableFullscreenUI={true}
                                 style={[
                                     styles.font20,
                                     styles.mB2
@@ -183,6 +184,7 @@ const LoginScreen = () => {
                                 <FormControl>
                                     <Text style={[styles.font30]}>Username</Text>
                                     <Input 
+                                        disableFullscreenUI={true}
                                         style={[
                                             styles.font40,
                                             styles.bordered
@@ -194,6 +196,7 @@ const LoginScreen = () => {
                                 <FormControl mb={5}>
                                     <Text style={[styles.font30]}>Password</Text>
                                     <Input 
+                                        disableFullscreenUI={true}
                                         style={[
                                             styles.font40,
                                             styles.bordered
