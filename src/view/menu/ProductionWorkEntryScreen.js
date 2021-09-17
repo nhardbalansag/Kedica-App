@@ -132,7 +132,7 @@ const ProductionWorkEntryScreen = (props) =>{
                                     responseData[0].dataContent[key].ShipDate,
                                 ]
                             )
-                        }else{
+                        }else if(filterData === "All"){
                             datael.push(
                                 [
                                     responseData[0].dataContent[key].StartProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].StartProcess,
