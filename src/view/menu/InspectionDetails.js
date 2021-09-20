@@ -116,7 +116,7 @@ const InscpectionDetails = (props, {navigation}) =>{
     }
 
      const saveInspectionDetails = async () =>{
-        if((NGQTY > 0 && NGRemarks !== null) || NGQTY === null || (NGQTY === 0 && NGRemarks === null) || (NGQTY === "" && NGRemarks === null)){
+        if(FactoryID === 2 && ((NGQTY > 0 && NGRemarks !== null) || (NGQTY === 0 && NGRemarks === null) || (NGQTY === "" && NGRemarks === null))){
             setloading(true)
             try{
                 const response = await fetch(domainSetting + "api/quality-inspection/save", {
