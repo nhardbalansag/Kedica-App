@@ -36,10 +36,10 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 const InscpectionDetails = (props, {navigation}) =>{
 
-    const [thicknessFrom, setThicknessFrom] = useState(0)
-    const [thicknessTo, setThicknessTo] = useState(0) 
-    const [NGQTY, setNGQTY] = useState(0)
-    const [ActualThickness, setActualThickness] = useState(0)
+    const [thicknessFrom, setThicknessFrom] = useState()
+    const [thicknessTo, setThicknessTo] = useState() 
+    const [NGQTY, setNGQTY] = useState()
+    const [ActualThickness, setActualThickness] = useState()
     const [NGRemarks, setNGRemarks] = useState(null)
     const [activeActionSheet, setactiveActionSheet] = useState(false)
     const [OutgoingData, setOutgoingData] = useState(null)
@@ -50,6 +50,7 @@ const InscpectionDetails = (props, {navigation}) =>{
     const travelSheetNumber = props.route.params.dataContent.number;
     const token = useSelector(state => state.loginCredential.TokenData);
     const domainSetting = useSelector(state => state.loginCredential.domainSetting);
+    const FactoryID = useSelector(state => state.loginCredential.FactoryId);
 
     const { isOpen, onOpen, onClose } = useDisclose()
 
@@ -62,17 +63,6 @@ const InscpectionDetails = (props, {navigation}) =>{
     const actionsheet = () =>{
         setactiveActionSheet(true)
     }
-
-    const inspectionDataDetails = [
-        { label: "Travel Sheet No.", data: travelSheetNumber ? travelSheetNumber : "-" },
-        { label: "Item Code", data: OutgoingData !== null ? (OutgoingData[0].ItemCode ? OutgoingData[0].ItemCode : "-") : "-" },
-        { label: "Lot No", data: OutgoingData !== null ? (OutgoingData[0].LotNo ? OutgoingData[0].LotNo : "-") : "-"  },
-        { label: "Output Qty", data: OutgoingData !== null ? (OutgoingData[0].Qty ? OutgoingData[0].Qty : "-") : "-"  },
-        { label: "Thickness", data: "" },
-        { label: "Actual Thickness", data: "test" },
-        { label: "NG Qty", data: "test" },
-        { label: "NG Remarks", data: "test" },
-    ]
 
     const getOutgoingTravelSheetDetails = async (travelsheet) =>{
         setloading(true)
@@ -352,63 +342,9 @@ const InscpectionDetails = (props, {navigation}) =>{
         )
     }
 
-    const components = ({item}) =>{
-        return(
-            <NativeBaseProvider>
-                <View style={[
-                    styles.flexRow,
-                    styles.alignFlexEnd,
-                    styles.mL2,
-                    {marginBottom:10}
-                ]}>
-                    <Text style={[
-                        styles.font30,
-                        styles.textBold,
-                        styles.mR1,
-                        styles.textGray300
-                    ]}>
-                        {item.label} : 
-                    </Text>
-                        {
-                            item.label == "Thickness" 
-                            ? 
-                                ThicknessComponent()
-                            : 
-                                (
-                                    item.label == "NG Qty" 
-                                    ?
-                                        NGQuantityComponent()
-                                    :
-                                        (
-                                            item.label == "Actual Thickness"
-                                            ?
-                                                ActualThicknessComponent()
-                                            :
-                                                (
-                                                    item.label == "NG Remarks"
-                                                    ? 
-                                                        RemarksComponent()
-                                                    :
-                                                        <>
-                                                            <Text style={[
-                                                                styles.font40
-                                                            ]}>    
-                                                                {item.data}
-                                                            </Text> 
-                                                        </>
-                                                )
-                                        )
-                                )
-                        }
-                </View>
-            </NativeBaseProvider>
-        )
-    }
-
     const ButtonSaveCancel = () =>{
         return(
             <View style={[
-                styles.flex1,
                 styles.flexRow,
                 styles.alignCenter,
                 styles.justifySpaceAround,
@@ -495,13 +431,78 @@ const InscpectionDetails = (props, {navigation}) =>{
                         </View>
                     </>
                 :
-                    <View>
-                        <FlatList 
-                            data={inspectionDataDetails}
-                            renderItem={components} 
-                            ListFooterComponent={ButtonSaveCancel}
-                            numColumns={2}
-                        />
+                    <View style={[styles.mX3]}>
+                        <View style={[styles.flexRow, styles.alignFlexEnd, styles.justifySpaceBetween, styles.mX1]}>
+                            <View style={[styles.flexRow, styles.alignFlexEnd, {marginBottom:10}]}>
+                                <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300]}>
+                                    Travel Sheet No. : 
+                                </Text>
+                                <Text style={[styles.font40]}>
+                                    { travelSheetNumber ? travelSheetNumber : "-" }
+                                </Text> 
+                            </View>
+                            <View style={[styles.flexRow, styles.alignFlexEnd, styles.mL2, {marginBottom:10}]}>
+                                <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300]}>
+                                    Item Code : 
+                                </Text>
+                                <Text style={[styles.font40]}>
+                                    { OutgoingData !== null ? (OutgoingData[0].ItemCode ? OutgoingData[0].ItemCode : "-") : "-"  }
+                                </Text> 
+                            </View>
+                        </View>
+                        <View style={[styles.flexRow, styles.alignFlexEnd, styles.justifySpaceBetween, styles.mX1]}>
+                            <View style={[styles.flexRow, styles.alignFlexEnd, {marginBottom:10}]}>
+                                <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300]}>
+                                    Lot No. : 
+                                </Text>
+                                <Text style={[styles.font40]}>
+                                    { OutgoingData !== null ? (OutgoingData[0].LotNo ? OutgoingData[0].LotNo : "-") : "-" }
+                                </Text>
+                            </View> 
+                            <View style={[styles.flexRow, styles.alignFlexEnd, {marginBottom:10}]}>
+                                <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300]}>
+                                    Output Qty : 
+                                </Text>
+                                <Text style={[styles.font40]}>
+                                    { OutgoingData !== null ? (OutgoingData[0].ItemCode ? OutgoingData[0].ItemCode : "-") : "-"  }
+                                </Text> 
+                            </View>
+                        </View>
+                        {
+                            FactoryID === 2
+                            ?
+                                <View style={[styles.flexRow, styles.alignFlexEnd, styles.justifySpaceBetween, styles.mX1]}>
+                                    <View style={[styles.flexRow, styles.alignFlexEnd, styles.justifySpaceBetween, {marginBottom:10}]}>
+                                        <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300]}>
+                                            Thickness : 
+                                        </Text>
+                                        {ThicknessComponent()}
+                                    </View>
+                                    <View style={[styles.flexRow, styles.alignFlexEnd, styles.justifySpaceBetween, {marginBottom:10}]}>
+                                        <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300]}>
+                                            Actual Thickness : 
+                                        </Text>
+                                        {ActualThicknessComponent()}
+                                    </View>
+                                </View>
+                            :
+                                <></>
+                        }
+                        <View style={[styles.flexRow, styles.alignFlexEnd, styles.justifySpaceBetween, styles.mX1]}>
+                            <View style={[styles.flexRow, styles.alignFlexEnd]}>
+                                <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300]}>
+                                    NG Qty : 
+                                </Text>
+                                {NGQuantityComponent()}
+                            </View>
+                            <View style={[styles.flexRow, styles.alignFlexEnd]}>
+                                <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300]}>
+                                    NG Remarks : 
+                                </Text>
+                                {RemarksComponent()}
+                            </View>
+                        </View>
+                        {ButtonSaveCancel()}
                     </View>    
             }  
         </NativeBaseProvider>
