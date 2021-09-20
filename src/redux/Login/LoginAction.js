@@ -62,7 +62,7 @@ export const getUserDetails = (username, password, domainSetting) =>{
         })
 
         const responseData = await response.json();
-console.warn(responseData[0].FactoryID)
+
         dispatch({
             type: SET_USER_INFORMATION, 
             FactoryId: responseData[0].FactoryID
