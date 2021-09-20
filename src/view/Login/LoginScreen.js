@@ -65,6 +65,7 @@ const LoginScreen = () => {
         setloadingstate(true);
         try {
             await dispatch(LoginAction.login(username, pass, domainSetting));
+            await dispatch(LoginAction.getUserDetails(username, pass, domainSetting));
             setloadingstate(false);
         } catch (error) {
             alertMessage(error.message);
