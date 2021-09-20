@@ -131,7 +131,12 @@ const WorkResultInputScreen = (props) =>{
                 })
             })
             setBoolStartProcess(false)
-            props.navigation.navigate('ProductionWorkEntryScreen')
+            props.navigation.navigate('ProductionWorkEntryScreen',
+                {
+                    title: "Work Result Input",
+                    url: "api/production-work/production-work-entry/index",
+                }
+            )
             const responseData = await response.json();
         }catch(error){
             alertMessage(error.message);
@@ -451,7 +456,7 @@ const WorkResultInputScreen = (props) =>{
                                     {
                                         startedDatetime == null
                                         ?
-                                            boolStartProcess ? "Process has started" : "START PROCESS"
+                                            boolStartProcess ? "Process started" : "START PROCESS"
                                         :
                                             (endDatetime == null ? "Processing..." : "Process Ended")
                                             
