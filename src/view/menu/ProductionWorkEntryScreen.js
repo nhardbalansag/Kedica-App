@@ -177,9 +177,14 @@ const ProductionWorkEntryScreen = (props) =>{
         );
     }
 
-    const goToWorkResult = async (component, travelsheetno) =>{
-        try{
-            const response = await fetch(domainSetting + "api/production-work/production-work-entry/search-travelsheet-details/" + travelsheetno, {
+    const goToWorkResult = async(component, travelsheetno) =>{
+
+        const componentTitle = props.route.params.title;
+        var productionWork =  domainSetting + "api/production-work/production-work-entry/search-production-work-table-entry/" + travelsheetno;
+        var outgoing =  domainSetting + "api/quality-inspection/get-travelsheet-details/" + travelsheetno;
+        
+        try {
+            const response = await fetch(componentTitle === "Outgoing Inspection" ? outgoing : productionWork, {
                 method:'GET',
                 headers:{
                     'Content-type': 'application/json',
@@ -189,12 +194,12 @@ const ProductionWorkEntryScreen = (props) =>{
 
             const responseData = await response.json();
 
-            const componentTitle = props.route.params.title;
-            
-            if(responseData[0].total === 0 && componentTitle !== "Outgoing Inspection"){
-                alertMessage("Please scan valid Travel Sheet.")
-            }else if(responseData[0].total >= 1 && responseData[0].dataContent.EndProcess !== "1900-01-01 00:00:00"  && componentTitle !== "Outgoing Inspection"){
+            if(componentTitle === "Outgoing Inspection" && responseData[0].dataContent.IsProcess === 1){
                 alertMessage("Please scan Pending/On-Going Travel Sheet.")
+            }else if(responseData[0].total === 0 && componentTitle === "Production Work Entry"){
+                alertMessage("Please scan Pending/On-Going Travel Sheet.")
+            }else if(!responseData[0].status && componentTitle === "Outgoing Inspection"){
+                alertMessage("Please scan a valid Travel Sheet")
             }else{
                 if(travelsheetno != null ){
                     props.navigation.navigate(componentTitle === "Outgoing Inspection" ? "InscpectionDetails": component, 
@@ -211,11 +216,11 @@ const ProductionWorkEntryScreen = (props) =>{
                     AlertNull()
                 }
             }
-        }catch(error){
+        } catch (error) {
             alertMessage(error.message);
         }
     }
-
+ 
     const AlertNull = () =>{
         Alert.alert(
             "Note",
