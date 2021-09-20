@@ -206,7 +206,7 @@ const ProductionWorkEntryScreen = (props) =>{
                         {
                             title: component === "WorkResultInputScreen" ? "Work Result Input" : "Inspection Details",
                             dataContent: {
-                            number: travelsheetno,
+                                number: travelsheetno,
                             },
                         }
                     )

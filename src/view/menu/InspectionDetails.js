@@ -36,10 +36,10 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 const InscpectionDetails = (props, {navigation}) =>{
 
-    const [thicknessFrom, setThicknessFrom] = useState()
-    const [thicknessTo, setThicknessTo] = useState() 
-    const [NGQTY, setNGQTY] = useState()
-    const [ActualThickness, setActualThickness] = useState()
+    const [thicknessFrom, setThicknessFrom] = useState(null)
+    const [thicknessTo, setThicknessTo] = useState(null) 
+    const [NGQTY, setNGQTY] = useState(null)
+    const [ActualThickness, setActualThickness] = useState(null)
     const [NGRemarks, setNGRemarks] = useState(null)
     const [activeActionSheet, setactiveActionSheet] = useState(false)
     const [OutgoingData, setOutgoingData] = useState(null)
@@ -116,7 +116,7 @@ const InscpectionDetails = (props, {navigation}) =>{
     }
 
      const saveInspectionDetails = async () =>{
-        if((NGQTY > 0 && NGRemarks !== null) || (NGQTY === 0 && NGRemarks === null) || (NGQTY === "" && NGRemarks === null)){
+        if((NGQTY > 0 && NGRemarks !== null) || NGQTY === null || (NGQTY === 0 && NGRemarks === null) || (NGQTY === "" && NGRemarks === null)){
             setloading(true)
             try{
                 const response = await fetch(domainSetting + "api/quality-inspection/save", {
@@ -464,7 +464,7 @@ const InscpectionDetails = (props, {navigation}) =>{
                                     Output Qty : 
                                 </Text>
                                 <Text style={[styles.font40]}>
-                                    { OutgoingData !== null ? (OutgoingData[0].ItemCode ? OutgoingData[0].ItemCode : "-") : "-"  }
+                                    { OutgoingData !== null ? (OutgoingData[0].Qty ? OutgoingData[0].Qty : "-") : "-"  }
                                 </Text> 
                             </View>
                         </View>
