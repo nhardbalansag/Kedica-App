@@ -116,7 +116,7 @@ const InscpectionDetails = (props, {navigation}) =>{
     }
 
      const saveInspectionDetails = async () =>{
-        if(FactoryID === 2 && ((NGQTY > 0 && NGRemarks !== null) || (NGQTY === 0 && NGRemarks === null) || (NGQTY === "" && NGRemarks === null))){
+        if((NGQTY > 0 && NGRemarks !== null) || (NGQTY === 0 && NGRemarks === null) || (NGQTY === "" && NGRemarks === null)){
             setloading(true)
             try{
                 const response = await fetch(domainSetting + "api/quality-inspection/save", {
@@ -144,6 +144,8 @@ const InscpectionDetails = (props, {navigation}) =>{
             }catch(error){
                 alertMessage(error.message)
             }
+        }else if(FactoryID === 2 && (thicknessFrom == null || thicknessTo == null || ActualThickness == null)){
+            alertMessage("Thickness must not be null")
         }else{
             alertMessage("NG Remarks and NG Quantity Cannot be empty")
         }
