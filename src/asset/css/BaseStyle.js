@@ -463,6 +463,26 @@ const styles = StyleSheet.create({
     paddingLeft: baseWidth * 5,
     paddingRight: baseWidth * 5
   },
+  pX6: {
+    paddingLeft: baseWidth * 6,
+    paddingRight: baseWidth * 6
+  },
+  pX7: {
+    paddingLeft: baseWidth * 7,
+    paddingRight: baseWidth * 7
+  },
+  pX8: {
+    paddingLeft: baseWidth * 8,
+    paddingRight: baseWidth * 8
+  },
+  pX9: {
+    paddingLeft: baseWidth * 9,
+    paddingRight: baseWidth * 9
+  },
+  pX10: {
+    paddingLeft: baseWidth * 10,
+    paddingRight: baseWidth * 10
+  },
   pX3n: {
     paddingRight: 3,
     paddingLeft: 3
@@ -831,6 +851,9 @@ const styles = StyleSheet.create({
   bgGray: {
     backgroundColor: gray
   },
+  bgDisable: {
+    backgroundColor: color.disableColor
+  },
   bgGray100: {
     backgroundColor: gray100
   },
@@ -960,6 +983,10 @@ const styles = StyleSheet.create({
   },
   bordered: {
     borderRadius: 15,
+    borderColor: 'black',
+    borderWidth: 2,
+  },
+  borderedNoRadius: {
     borderColor: 'black',
     borderWidth: 2,
   },

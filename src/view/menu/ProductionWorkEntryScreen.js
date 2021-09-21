@@ -8,8 +8,6 @@ import {
     View,
     Text,
     ScrollView,
-    KeyboardAvoidingView,
-    Image,
     TouchableOpacity,
     Switch,
     FlatList,
@@ -38,27 +36,34 @@ import CustomStyle from "../../asset/css/CustomStyle";
 
 import { APP_URL } from "../../config/AppConfig";
 
+import { useIsFocused } from "@react-navigation/native";
+
 import {
     NativeBaseProvider,
     FormControl,
-    Input
+    Input,
+    useDisclose,
+    Actionsheet
 } from 'native-base';
 
 import { 
     useSelector
 } from "react-redux";
 
-import { useDispatch } from "react-redux";
-
-import * as ProductionWork from "../../redux/ProductionWork/ProductionWorkEntryAction";
-
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-const ProductionWorkEntryScreen = ({navigation}) =>{
+const ProductionWorkEntryScreen = (props) =>{
 
+    const { isOpen, onOpen, onClose } = useDisclose()
+    
+    const isFocused = useIsFocused();
     const [isEnable, setIsEnable] = useState(false);
     const [travelSheetNo, setTravelSheetNo] = useState(null);
     const [refreshing, setRefreshing] = useState(false);
+    const [activeActionSheet, setactiveActionSheet] =  useState(false);
+    const [filterData, setfilterData] =  useState("All");
+    const [currentComponent, setcurrentComponent] =  useState("");
+    const [checkTravelSheet, setcheckTravelSheet] =  useState(false);
 
     const [WorkEntry, setWorkEntry] = useState();
    
@@ -66,11 +71,29 @@ const ProductionWorkEntryScreen = ({navigation}) =>{
 
     const domainSetting = useSelector(state => state.loginCredential.domainSetting);
 
+    const dataFilter = [
+        {filterType: "Ongoing", value: "Ongoing"},
+        {filterType: "Pending", value: "Pending"},
+        {filterType: "All", value: "All"},
+    ]
+
+    const actionsheet = () =>{
+        setactiveActionSheet(true)
+    }
+
+    const closeActionSheet = (filter) =>{
+        setactiveActionSheet(false)
+        setfilterData(filter)
+    }
+
     const getProductionWorkEntryList = async (tokendata, domainSetting) =>{
+        const apiUrl = props.route.params.url;
+        const componentTitle = props.route.params.title;
+        setcurrentComponent(componentTitle)
         setRefreshing(true);
         try {
-            const response = await fetch(domainSetting + "api/ProductionWork/ProductionWorkEntry/getlist", {
-                method:'GET',
+            const response = await fetch(domainSetting + apiUrl, {
+                method:"GET",
                 headers:{
                     'Content-type': 'application/json',
                     'Authorization': 'Bearer ' + tokendata
@@ -80,24 +103,64 @@ const ProductionWorkEntryScreen = ({navigation}) =>{
             const responseData = await response.json();
             var datael = [];
 
-            for (const key in responseData[0].dataContent){
-                datael.push(
-                    [
-                        responseData[0].dataContent[key].Age,
-                        responseData[0].dataContent[key].PriorityNo,
-                        responseData[0].dataContent[key].ShipDate,
-                        responseData[0].dataContent[key].TravelSheetNo,
-                        responseData[0].dataContent[key].ItemCode,
-                        responseData[0].dataContent[key].ItemName,
-                        responseData[0].dataContent[key].StartDate,
-                        responseData[0].dataContent[key].StartProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].StartProcess,
-                        responseData[0].dataContent[key].EndProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].EndProcess
-                    ]
-                )
+            if(!responseData[0].status){
+                alertMessage("An Error Occured: No data fetched");
+            }else{
+                for (const key in responseData[0].dataContent){
+                    if(componentTitle !== "Outgoing Inspection"){
+                        if(filterData === "Ongoing" && responseData[0].dataContent[key].StartProcess !== "1900-01-01 00:00:00" && responseData[0].dataContent[key].EndProcess === "1900-01-01 00:00:00"){
+                            datael.push(
+                                [
+                                    responseData[0].dataContent[key].StartProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].StartProcess,
+                                    responseData[0].dataContent[key].EndProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].EndProcess,
+                                    responseData[0].dataContent[key].TravelSheetNo,
+                                    responseData[0].dataContent[key].ItemCode + "\n" + responseData[0].dataContent[key].ItemName,
+                                    responseData[0].dataContent[key].Priority,
+                                    responseData[0].dataContent[key].Age + " Days",
+                                    responseData[0].dataContent[key].ShipDate,
+                                ]
+                            )
+                        }else if(filterData === "Pending" && responseData[0].dataContent[key].StartProcess === "1900-01-01 00:00:00" && responseData[0].dataContent[key].EndProcess === "1900-01-01 00:00:00"){
+                            datael.push(
+                                [
+                                    responseData[0].dataContent[key].StartProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].StartProcess,
+                                    responseData[0].dataContent[key].EndProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].EndProcess,
+                                    responseData[0].dataContent[key].TravelSheetNo,
+                                    responseData[0].dataContent[key].ItemCode + "\n" + responseData[0].dataContent[key].ItemName,
+                                    responseData[0].dataContent[key].Priority,
+                                    responseData[0].dataContent[key].Age + " Days",
+                                    responseData[0].dataContent[key].ShipDate,
+                                ]
+                            )
+                        }else if(filterData === "All"){
+                            datael.push(
+                                [
+                                    responseData[0].dataContent[key].StartProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].StartProcess,
+                                    responseData[0].dataContent[key].EndProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].EndProcess,
+                                    responseData[0].dataContent[key].TravelSheetNo,
+                                    responseData[0].dataContent[key].ItemCode + "\n" + responseData[0].dataContent[key].ItemName,
+                                    responseData[0].dataContent[key].Priority,
+                                    responseData[0].dataContent[key].Age + " Days",
+                                    responseData[0].dataContent[key].ShipDate,
+                                ]
+                            )
+                        }
+                    }else{
+                        datael.push(
+                            [
+                                responseData[0].dataContent[key].StartProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].StartProcess,
+                                responseData[0].dataContent[key].EndProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].EndProcess,
+                                responseData[0].dataContent[key].TravelSheetNo,
+                                responseData[0].dataContent[key].ItemCode + "\n" + responseData[0].dataContent[key].ItemName,
+                                responseData[0].dataContent[key].Priority,
+                                responseData[0].dataContent[key].Age + " Days",
+                                responseData[0].dataContent[key].ShipDate,
+                            ]
+                        )
+                    }
+                }
+                setWorkEntry(datael)
             }
-
-            setWorkEntry(datael)
-
             setRefreshing(false);
         } catch (error) {
             alertMessage(error.message);
@@ -114,22 +177,50 @@ const ProductionWorkEntryScreen = ({navigation}) =>{
         );
     }
 
-    const goToWorkResult = (component, travelsheetno) =>{
-        if(travelsheetno != null ){
-            navigation.navigate(component, 
-                {
-                    dataContent: {
-                      number: travelsheetno,
-                    },
+    const goToWorkResult = async(component, travelsheetno) =>{
+
+        const componentTitle = props.route.params.title;
+        var productionWork =  domainSetting + "api/production-work/production-work-entry/search-production-work-table-entry/" + travelsheetno;
+        var outgoing =  domainSetting + "api/quality-inspection/get-travelsheet-details/" + travelsheetno;
+        
+        try {
+            const response = await fetch(componentTitle === "Outgoing Inspection" ? outgoing : productionWork, {
+                method:'GET',
+                headers:{
+                    'Content-type': 'application/json',
+                    'Authorization': 'Bearer ' + token
                 }
-            )
-            setTravelSheetNo(null)
-            setIsEnable(false)
-        }else{
-            AlertNull()
+            })
+
+            const responseData = await response.json();
+
+            if(componentTitle === "Outgoing Inspection" && responseData[0].dataContent.IsProcess === 1){
+                alertMessage("Please scan Pending/On-Going Travel Sheet.")
+            }else if(responseData[0].total === 0 && componentTitle === "Production Work Entry"){
+                alertMessage("Please scan Pending/On-Going Travel Sheet.")
+            }else if(!responseData[0].status && componentTitle === "Outgoing Inspection"){
+                alertMessage("Please scan a valid Travel Sheet")
+            }else{
+                if(travelsheetno != null ){
+                    props.navigation.navigate(componentTitle === "Outgoing Inspection" ? "InscpectionDetails": component, 
+                        {
+                            title: component === "WorkResultInputScreen" ? "Work Result Input" : "Inspection Details",
+                            dataContent: {
+                                number: travelsheetno,
+                            },
+                        }
+                    )
+                    setTravelSheetNo(null)
+                    setIsEnable(false)
+                }else{
+                    AlertNull()
+                }
+            }
+        } catch (error) {
+            alertMessage(error.message);
         }
     }
-
+ 
     const AlertNull = () =>{
         Alert.alert(
             "Note",
@@ -157,30 +248,58 @@ const ProductionWorkEntryScreen = ({navigation}) =>{
     }
     
     useEffect(() =>{
-        getProductionWorkEntryList(token, domainSetting)
-        if(travelSheetNo != null && isEnable == false){
-            goToWorkResult("WorkResultInputScreen", travelSheetNo)
-            setTravelSheetNo(null)
-            setIsEnable(false)
+        if(isFocused){ 
+            getProductionWorkEntryList(token, domainSetting)
+            if(travelSheetNo != null && isEnable == false){
+                props.route.params.title === "Outgoing Inspection"
+                ?
+                    goToWorkResult("InscpectionDetails", travelSheetNo)
+                :
+                    goToWorkResult("WorkResultInputScreen", travelSheetNo)
+
+                setTravelSheetNo(null)
+                setIsEnable(false)
+            }
         }
-    },[travelSheetNo])
+    },[travelSheetNo, isFocused, filterData])
 
     const table = {
-        tableHead: ['Age', 'Priority No.', 'Ship Date', 'Travel Sheet No.', 'Item  Code', 'Item Name', 'Start Date', 'Start Process', 'End Process'],
+        tableHead: ['Start Process', 'End Process', 'Travel Sheet No.', 'Product Name', 'Priority No.', 'Age', 'Ship Date'],
     }
 
     const tableComponent = () =>{
         return(
             <NativeBaseProvider>
-                <ScrollView style={[CustomStyle.tableScroll]}>
+                {
+                    currentComponent === "Outgoing Inspection"
+                    ? <></>
+                    :
+                        <View style={[
+                            styles.justifyCenter,
+                            styles.alignCenter,
+                            styles.mT1
+                        ]}>
+                            <Text style={[
+                                styles.font30,
+                                styles.textBold,
+                                styles.textUppercase
+                            ]}>
+                                {filterData}
+                            </Text>
+                        </View>
+                }
+                <ScrollView horizontal={true} style={[CustomStyle.tableScroll]}>
                     <Table borderStyle={{borderWidth: 2, borderColor: '#c8e1ff'}}>
                         <Row 
                             data={table.tableHead} 
                             textStyle={CustomStyle.tableText}
+                            widthArr={[280, 280, 250, 400, 150, 170, 200]}
                         />
                         <Rows 
                             data={WorkEntry} 
                             textStyle={CustomStyle.tableDataText}
+                            widthArr={[280, 280, 250, 400, 150, 170, 200]}
+
                         />
                     </Table>
                 </ScrollView>
@@ -219,10 +338,12 @@ const ProductionWorkEntryScreen = ({navigation}) =>{
             <View style={[styles.mT1]}>
                 <View style={[
                     styles.flexRow,
-                    styles.justifySpaceAround
+                    styles.justifySpaceAround,
+                    styles.alignFlexEnd
+
                 ]}>
                     <View style={[
-                        styles.w50
+                        styles.w50,
                     ]}>
                         <FormControl>
                             <Text style={[
@@ -230,11 +351,12 @@ const ProductionWorkEntryScreen = ({navigation}) =>{
                             ]}>
                                 Travel Sheet No.
                             </Text>
-                            <Input 
+                            <TextInput  
+                                disableFullscreenUI={true}
                                 style={[
                                     styles.font40,
-                                    styles.bordered,
-                                    styles.textDark
+                                    styles.borderedNoRadius,
+                                    styles.textDark,
                                 ]}
                                 showSoftInputOnFocus={isEnable}
                                 autoFocus={true}
@@ -249,22 +371,6 @@ const ProductionWorkEntryScreen = ({navigation}) =>{
                         styles.alignFlexEnd,
                         styles.justifySpaceAround
                     ]}>
-                        <View>
-                            <TouchableOpacity onPress={() => goToWorkResult("WorkResultInputScreen", travelSheetNo)}>
-                                <View style={[
-                                    styles.backgroundPrimary,
-                                    styles.justifyCenter,
-                                    styles.alignCenter,
-                                    styles.flexRow,
-                                    styles.border10,
-                                    styles.pY1,
-                                    styles.pX2
-                                ]}>
-                                    <Icon name="search" size={30} color={colors.lightColor} />
-                                    <Text style={[styles.font30, styles.textWhite, styles.mL1]}>Search</Text>
-                                </View>
-                            </TouchableOpacity>
-                        </View>
                         <View style={[
                             styles.flexRow
                         ]}>
@@ -276,6 +382,48 @@ const ProductionWorkEntryScreen = ({navigation}) =>{
                                 style={{ transform: [{ scaleX: 2 }, { scaleY: 2 }] }}
                                 value={isEnable}
                             />
+                        </View>
+                        <View>
+                            <TouchableOpacity 
+                                disabled={!isEnable ? true : false}
+                                onPress={() => goToWorkResult("WorkResultInputScreen", travelSheetNo)}
+                            >
+                                <View style={[
+                                    !isEnable ? styles.bgGray200 : styles.backgroundPrimary ,
+                                    styles.justifyCenter,
+                                    styles.alignCenter,
+                                    styles.flexRow,
+                                    styles.border10,
+                                    styles.pY1,
+                                    styles.pX2
+                                ]}>
+                                    <Icon name="search" size={30} color={colors.lightColor} />
+                                    <Text style={[styles.font30, styles.textWhite, styles.mL1]}>Search</Text>
+                                </View>
+                            </TouchableOpacity>
+                            {
+                                currentComponent === "Outgoing Inspection" 
+                                ? <></> 
+                                :
+                                <TouchableOpacity 
+                                    onPress={() => actionsheet()}
+                                >
+                                    <View style={[
+                                        styles.backgroundLightBlue ,
+                                        styles.justifyCenter,
+                                        styles.alignCenter,
+                                        styles.flexRow,
+                                        styles.border10,
+                                        styles.pY1,
+                                        styles.pX2,
+                                        styles.mT1
+                                    ]}>
+                                        <Icon name="filter" size={30} color={colors.lightColor} />
+                                        <Text style={[styles.font30, styles.textWhite, styles.mL1]}>Filter</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            }
+                            
                         </View>
                     </View>
                 </View>
@@ -304,6 +452,49 @@ const ProductionWorkEntryScreen = ({navigation}) =>{
                         />
                     </>
             }
+            <Actionsheet isOpen={activeActionSheet} onClose={onClose}  hideDragIndicator={true}>
+                <Actionsheet.Content style={[styles.alignFlexStart]}>
+                    <Actionsheet.Item>
+                        <View>
+                            <TouchableOpacity onPress={() => setactiveActionSheet(false)}>
+                                <View style={[
+                                    styles.flexRow,
+                                    styles.justifySpaceBetween,
+                                    styles.alignCenter,
+                                    styles.pL5,
+                                ]}>
+                                    <Icon name="times" size={40} color={colors.dangerColor} />
+                                    <Text style={[styles.font40, styles.mL2, styles.textDanger]}>Cancel</Text>
+                                </View>
+                            </TouchableOpacity>
+                        </View>
+                    </Actionsheet.Item>
+                    <ScrollView>
+                        {
+                            dataFilter != null?
+                            dataFilter.map((data, index)=>
+                                <Actionsheet.Item key={index}>
+                                    <View>
+                                        <TouchableOpacity onPress={() => closeActionSheet(data.value)}>
+                                            <View style={[
+                                                styles.flexRow,
+                                                styles.justifySpaceBetween,
+                                                styles.alignCenter,
+                                                styles.pL5,
+                                            ]}>
+                                                <Icon name="circle" size={40} color={filterData == data.value ? colors.primaryColor : colors.gray200} />
+                                                <Text style={[styles.font40, styles.mL2]}>{data.filterType}</Text>
+                                            </View>
+                                        </TouchableOpacity>
+                                    </View>
+                                </Actionsheet.Item>
+                            )
+                            :
+                            <></>
+                        }
+                    </ScrollView>
+                </Actionsheet.Content>
+            </Actionsheet>
         </NativeBaseProvider>
     );
 }

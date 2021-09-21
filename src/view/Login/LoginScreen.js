@@ -52,7 +52,7 @@ const LoginScreen = () => {
     const [loadingstate, setloadingstate] = useState(false);
     const [modalVisible, setModalVisible] = useState(false)
     const [showModal, setShowModal] = useState(false)
-    const [setting, setSetting] = useState("192.168.43.198:8016/")
+    const [setting, setSetting] = useState("http:/192.168.200.100:1993/")
 
     const handleSizeClick = (newSize) => {
         setSize(newSize)
@@ -65,6 +65,7 @@ const LoginScreen = () => {
         setloadingstate(true);
         try {
             await dispatch(LoginAction.login(username, pass, domainSetting));
+            await dispatch(LoginAction.getUserDetails(username, pass, domainSetting));
             setloadingstate(false);
         } catch (error) {
             alertMessage(error.message);
@@ -104,6 +105,7 @@ const LoginScreen = () => {
                         <FormControl>
                             <Text style={[styles.font20]}>Domain / IP Address</Text>
                             <Input 
+                                disableFullscreenUI={true}
                                 style={[
                                     styles.font20,
                                     styles.mB2
@@ -147,85 +149,100 @@ const LoginScreen = () => {
                     <Icon name="gear" size={30} color={colors.darkColor} />
                 </TouchableOpacity>
             </View>
-            <KeyboardAvoidingView 
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
-                style={[styles.justifyCenter, styles.alignCenter, styles.flex1]}
-            > 
-                <View style={[styles.w90]}>
-                    <View style={[
-                        styles.justifyCenter,
-                        styles.alignCenter
-                    ]}
-                    >
-                        <Text 
-                            style={[
-                                styles.font40,
-                                styles.textBold
-                            ]}
+            {
+                domainSetting == null
+                ?
+                    <>
+                        <View style={[
+                            styles.justifyCenter,
+                            styles.alignCenter
+                        ]}>
+                            <Text style={[styles.font20]}>Please set your Domain IP address..</Text>
+                        </View>
+                    </>
+                :
+                <KeyboardAvoidingView 
+                    behavior={Platform.OS === "ios" ? "padding" : "height"}
+                    style={[styles.justifyCenter, styles.alignCenter, styles.flex1]}
+                > 
+                    <View style={[styles.w90]}>
+                        <View style={[
+                            styles.justifyCenter,
+                            styles.alignCenter
+                        ]}
                         >
-                            Process Management System
-                        </Text>
-                    </View>
-                    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
-                        <VStack >
-                            <FormControl>
-                                <Text style={[styles.font30]}>Username</Text>
-                                <Input 
-                                    style={[
-                                        styles.font40,
-                                        styles.bordered
-                                    ]}
-                                    value={username}
-                                    onChangeText={(text) => setUsername(text)}
-                                />
-                            </FormControl>
-                            <FormControl mb={5}>
-                                <Text style={[styles.font30]}>Password</Text>
-                                <Input 
-                                    style={[
-                                        styles.font40,
-                                        styles.bordered
-                                    ]}
-                                    type="password" 
-                                    value={password}
-                                    onChangeText={(text) => setPassword(text)}
-                                />
-                            </FormControl>
-                            
-                            <VStack  space={2}>
-                                <TouchableOpacity
-                                    onPress={() => getLogin(username, password, domainSetting)} 
-                                >
-                                    <View 
-                                        style ={[
-                                            styles.backgroundLightBlue,
-                                            styles.border10,
-                                            styles.pY2
+                            <Text 
+                                style={[
+                                    styles.font40,
+                                    styles.textBold
+                                ]}
+                            >
+                                Process Management System
+                            </Text>
+                        </View>
+                        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
+                            <VStack >
+                                <FormControl>
+                                    <Text style={[styles.font30]}>Username</Text>
+                                    <Input 
+                                        disableFullscreenUI={true}
+                                        style={[
+                                            styles.font40,
+                                            styles.bordered
                                         ]}
+                                        value={username}
+                                        onChangeText={(text) => setUsername(text)}
+                                    />
+                                </FormControl>
+                                <FormControl mb={5}>
+                                    <Text style={[styles.font30]}>Password</Text>
+                                    <Input 
+                                        disableFullscreenUI={true}
+                                        style={[
+                                            styles.font40,
+                                            styles.bordered
+                                        ]}
+                                        type="password" 
+                                        value={password}
+                                        onChangeText={(text) => setPassword(text)}
+                                    />
+                                </FormControl>
+                                
+                                <VStack  space={2}>
+                                    <TouchableOpacity
+                                        onPress={() => getLogin(username, password, domainSetting)} 
                                     >
-                                        
-                                        {
-                                            loadingstate 
-                                            ? 
-                                                <ActivityIndicator style={[{marginLeft:5}]} size="large" color={colors.lightColor}/> 
-                                            : 
-                                                <>
-                                                    <Text style={[
-                                                        styles.font40, 
-                                                        styles.textWhite,
-                                                        styles.textCenter
-                                                    ]}>
-                                                        Login
-                                                    </Text>
-                                                </>
-                                        }
-                                    </View>
-                                </TouchableOpacity>
+                                        <View 
+                                            style ={[
+                                                styles.backgroundLightBlue,
+                                                styles.border10,
+                                                styles.pY2
+                                            ]}
+                                        >
+                                            
+                                            {
+                                                loadingstate 
+                                                ? 
+                                                    <ActivityIndicator style={[{marginLeft:5}]} size="large" color={colors.lightColor}/> 
+                                                : 
+                                                    <>
+                                                        <Text style={[
+                                                            styles.font40, 
+                                                            styles.textWhite,
+                                                            styles.textCenter
+                                                        ]}>
+                                                            Login
+                                                        </Text>
+                                                    </>
+                                            }
+                                        </View>
+                                    </TouchableOpacity>
+                                </VStack>
                             </VStack>
-                        </VStack>
-                    </KeyboardAvoidingView>
-                </View>
-            </KeyboardAvoidingView>
+                        </KeyboardAvoidingView>
+                    </View>
+                </KeyboardAvoidingView>
+            }
             {modal()}
         </NativeBaseProvider>
     );
