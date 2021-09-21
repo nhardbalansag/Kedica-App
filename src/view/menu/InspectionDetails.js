@@ -116,36 +116,40 @@ const InscpectionDetails = (props, {navigation}) =>{
     }
 
      const saveInspectionDetails = async () =>{
-        if((NGQTY > 0 && NGRemarks !== null) || (NGQTY === 0 && NGRemarks === null) || (NGQTY === "" && NGRemarks === null)){
-            setloading(true)
-            try{
-                const response = await fetch(domainSetting + "api/quality-inspection/save", {
-                    method:'POST',
-                    headers:{
-                        'Content-type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify({
-                        ProductionWorkID: OutgoingData[0].ProductionWorkID,
-                        ThicknessFrom: thicknessFrom,
-                        ThicknessTo: thicknessTo,
-                        ActualThickness : ActualThickness,
-                        NGQty : NGQTY,
-                        NGRemarksID : NGRemarks
+        if((NGQTY > 0 && NGRemarks !== null) || (NGQTY === 0 && NGRemarks === null) || (NGQTY === null && NGRemarks === null)){
+            if(FactoryID === 2 && (thicknessFrom == null || thicknessTo == null || ActualThickness == null)){
+                alertMessage("Thickness must not be null")
+            }else{
+                setloading(true)
+                try{
+                    const response = await fetch(domainSetting + "api/quality-inspection/save", {
+                        method:'POST',
+                        headers:{
+                            'Content-type': 'application/json',
+                            'Authorization': 'Bearer ' + token
+                        },
+                        body: JSON.stringify({
+                            ProductionWorkID: OutgoingData[0].ProductionWorkID,
+                            ThicknessFrom: thicknessFrom,
+                            ThicknessTo: thicknessTo,
+                            ActualThickness : ActualThickness,
+                            NGQty : NGQTY,
+                            NGRemarksID : NGRemarks
+                        })
                     })
-                })
-                const responseData = await response.json();
-                setloading(false)
-                if(responseData[0].status === true){
-                    props.navigation.goBack()
-                }else{
-                    alertMessage(responseData[0].message)
+                    const responseData = await response.json();
+                    setloading(false)
+                    if(responseData[0].status === true){
+                        props.navigation.goBack()
+                    }else{
+                        alertMessage(responseData[0].message)
+                    }
+                }catch(error){
+                    alertMessage(error.message)
                 }
-            }catch(error){
-                alertMessage(error.message)
             }
-        }else if(FactoryID === 2 && (thicknessFrom == null || thicknessTo == null || ActualThickness == null)){
-            alertMessage("Thickness must not be null")
+            
+            
         }else{
             alertMessage("NG Remarks and NG Quantity Cannot be empty")
         }
