@@ -2,6 +2,7 @@ import {APP_URL} from "../../config/AppConfig"
 
 export const SET_CREDENTIALS = 'SET_CREDENTIALS';
 export const SET_DOMAIN = 'SET_DOMAIN';
+export const SET_USER_INFORMATION = 'SET_USER_INFORMATION';
 
 export const login = (username, password, domainSetting) =>{
 
@@ -20,7 +21,6 @@ export const login = (username, password, domainSetting) =>{
     }
 
     formBody = formBody.join("&");
-
     return async (dispatch) =>{
         const response = await fetch(domainSetting + "token", {
             method : 'POST',
@@ -38,7 +38,7 @@ export const login = (username, password, domainSetting) =>{
                 type: SET_CREDENTIALS, 
                 TokenData: responseData.access_token
             });
-
+            
         }else if(Object.keys(responseData).length < 3){
 
             throw new Error(false)
@@ -46,6 +46,30 @@ export const login = (username, password, domainSetting) =>{
         }
     }
 }
+
+export const getUserDetails = (username, password, domainSetting) =>{
+    return async (dispatch) =>{
+
+        const response = await fetch(domainSetting + "api/login/user-information/get", {
+            method : 'POST',
+            headers:{
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                Username: username,
+                Password : password
+            })
+        })
+
+        const responseData = await response.json();
+
+        dispatch({
+            type: SET_USER_INFORMATION, 
+            FactoryId: responseData[0].FactoryID
+        });
+    }
+}
+
 
 export const changeDomain = (domain) =>{
     return async (dispatch) =>{

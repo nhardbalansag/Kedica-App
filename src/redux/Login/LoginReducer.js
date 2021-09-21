@@ -1,10 +1,11 @@
 
-import {SET_CREDENTIALS, SET_DOMAIN} from "./LoginAction"
+import {SET_CREDENTIALS, SET_DOMAIN, SET_USER_INFORMATION} from "./LoginAction"
 
 const InitialStates ={
     TokenData:null,
     data:[],
-    domainSetting: null
+    domainSetting: null,
+    FactoryId: null
 }
 
 export default (state = InitialStates, action) =>{
@@ -18,6 +19,11 @@ export default (state = InitialStates, action) =>{
             return{
                 ...state,
                 domainSetting:action.domain
+            }
+        case SET_USER_INFORMATION:
+            return{
+                ...state,
+                FactoryId:action.FactoryId
             }
         default :
             return{
