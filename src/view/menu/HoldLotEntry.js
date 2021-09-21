@@ -94,7 +94,7 @@ const HoldLotEntry = () =>{
                         <Row 
                             data={table.tableHead} 
                             textStyle={CustomStyle.tableText}
-                            widthArr={[280, 200, 200, 200, 200, 200, 200, 200, 280, 200, 200, 200]}
+                            widthArr={[280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280]}
                         />
                         {
                             data.map((rowData, index) => (
@@ -105,17 +105,13 @@ const HoldLotEntry = () =>{
                                             key={cellIndex} 
                                             data={cellIndex === 0 ? dataPress(cellData, index) : cellData} 
                                             textStyle={[CustomStyle.tableDataText]}
+                                            width={280}
                                         />
                                     ))
                                   }
                                 </TableWrapper>
                             ))
                         }
-                        {/* <Rows 
-                            data={data} 
-                            textStyle={CustomStyle.tableDataText}
-                            widthArr={[280, 200, 200, 200, 200, 200, 200, 200, 280, 200, 200, 200]}
-                        /> */}
                     </Table>
                 </ScrollView>
             </NativeBaseProvider>
