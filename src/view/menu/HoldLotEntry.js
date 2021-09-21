@@ -76,19 +76,6 @@ const HoldLotEntry = () =>{
     const holdLotTable = () =>{
         return(
             <NativeBaseProvider>
-                <View style={[
-                    styles.justifyCenter,
-                    styles.alignCenter,
-                    styles.mT1
-                ]}>
-                    <Text style={[
-                        styles.font30,
-                        styles.textBold,
-                        styles.textUppercase
-                    ]}>
-                       test
-                    </Text>
-                </View>
                 <ScrollView horizontal={true} style={[CustomStyle.tableScroll]}>
                     <Table borderStyle={{borderWidth: 2, borderColor: '#c8e1ff'}}>
                         <Row 
