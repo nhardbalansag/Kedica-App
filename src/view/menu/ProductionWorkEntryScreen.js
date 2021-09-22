@@ -250,14 +250,13 @@ const ProductionWorkEntryScreen = (props) =>{
     useEffect(() =>{
         if(isFocused){ 
             getProductionWorkEntryList(token, domainSetting)
-            if(travelSheetNo != null && isEnable == false){
+            if(travelSheetNo !== null && isEnable == false){
                 props.route.params.title === "Outgoing Inspection"
                 ?
                     goToWorkResult("InscpectionDetails", travelSheetNo)
                 :
                     goToWorkResult("WorkResultInputScreen", travelSheetNo)
 
-                setTravelSheetNo(null)
                 setIsEnable(false)
             }
         }

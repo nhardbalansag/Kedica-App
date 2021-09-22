@@ -36,38 +36,19 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 const HoldQtyProcess = (props, {navigation}) =>{
 
-    const [thicknessFrom, setThicknessFrom] = useState(0)
-    const [thicknessTo, setThicknessTo] = useState(0) 
-    const [NGQTY, setNGQTY] = useState(0)
-    const [ActualThickness, setActualThickness] = useState(0)
-    const [NGRemarks, setNGRemarks] = useState(0)
-    const [activeActionSheet, setactiveActionSheet] = useState(false)
-    const [OutgoingData, setOutgoingData] = useState(null)
-    const [dataRemarks, setdataRemarks] = useState(null)
     const [loading, setloading] =  useState(true);
-    const [NGRemarksTitle, setNGRemarksTitle] =  useState(null);
+    const [holdQtyDetails, setholdQtyDetails] =  useState(null);
+    const [returnQty, setreturnQty] =  useState(null);
+    const [proceedQty, setproceedQty] =  useState(null);
 
-    const travelSheetNumber = props.route.params.dataContent.number;
+    const detailsId = props.route.params.dataContent.number;
     const token = useSelector(state => state.loginCredential.TokenData);
     const domainSetting = useSelector(state => state.loginCredential.domainSetting);
-    const FactoryID = useSelector(state => state.loginCredential.FactoryId);
 
-    const { isOpen, onOpen, onClose } = useDisclose()
-
-    const closeActionSheet = (remarks, title) =>{
-        setactiveActionSheet(false)
-        setNGRemarks(remarks)
-        setNGRemarksTitle(title)
-    }
-
-    const actionsheet = () =>{
-        setactiveActionSheet(true)
-    }
-
-    const getOutgoingTravelSheetDetails = async (travelsheet) =>{
+    const getdetails = async () =>{
         setloading(true)
         try{
-            const response = await fetch(domainSetting + "api/quality-inspection/get-travelsheet-details/" + travelsheet, {
+            const response = await fetch(domainSetting + "api/receiving/get-hold-lot-details/" + detailsId, {
                 method:"GET",
                 headers:{
                     'Content-type': 'application/json',
@@ -76,16 +57,18 @@ const HoldQtyProcess = (props, {navigation}) =>{
             })
     
             const responseData = await response.json();
-
-            setOutgoingData([
+            
+            setholdQtyDetails([
                 {
-                    ID: responseData[0].dataContent.ID,
-                    ProductionWorkID: responseData[0].dataContent.ProductionWorkID,
-                    TravelSheetNo: responseData[0].dataContent.TravelSheetNo,
-                    ItemCode: responseData[0].dataContent.ItemCode,
-                    LotNo: responseData[0].dataContent.LotNo,
-                    Qty: responseData[0].dataContent.Qty,
-                    UpdateDate: responseData[0].dataContent.UpdateDate,
+                    OrderEntryID: responseData[0].dataContent[0].OrderEntryID,
+                    ProductionWorkID: responseData[0].dataContent[0].ProductionWorkID,
+                    HoldLotID: responseData[0].dataContent[0].HoldLotID,
+                    SourceName: responseData[0].dataContent[0].SourceName,
+                    ItemNo: responseData[0].dataContent[0].ItemNo,
+                    ItemDesc: responseData[0].dataContent[0].ItemDesc,
+                    LotNo: responseData[0].dataContent[0].LotNo,
+                    ReceivedQty: responseData[0].dataContent[0].ReceivedQty,
+                    NGRemarks: responseData[0].dataContent[0].NGRemarks
                 }
             ])
             setloading(false)
@@ -93,51 +76,34 @@ const HoldQtyProcess = (props, {navigation}) =>{
             alertMessage(error.message)
         }
     }
-
-     const saveInspectionDetails = async () =>{
-        if((NGQTY !== 0 && NGRemarks !== null) || (NGQTY === 0 && NGRemarks === null)){
-            if(FactoryID === 2 && (thicknessFrom == 0 || thicknessTo == 0 || ActualThickness == 0)){
-                alertMessage("Thickness must not be null")
+  
+     const saveholdLot = async (idData) =>{
+        setloading(true)
+        try{
+            const response = await fetch(domainSetting + "api/quality-inspection/save", {
+                method:'POST',
+                headers:{
+                    'Content-type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({
+                    ID: idData
+                })
+            })
+            const responseData = await response.json();
+            setloading(false)
+            if(responseData[0].status === true){
+                props.navigation.goBack()
             }else{
-                if(isNaN(NGQTY) == false && isNaN(thicknessFrom) == false && isNaN(thicknessTo) == false && isNaN(ActualThickness) == false){
-                    setloading(true)
-                    try{
-                        const response = await fetch(domainSetting + "api/quality-inspection/save", {
-                            method:'POST',
-                            headers:{
-                                'Content-type': 'application/json',
-                                'Authorization': 'Bearer ' + token
-                            },
-                            body: JSON.stringify({
-                                ProductionWorkID: OutgoingData[0].ProductionWorkID,
-                                ThicknessFrom: thicknessFrom,
-                                ThicknessTo: thicknessTo,
-                                ActualThickness : ActualThickness,
-                                NGQty : NGQTY,
-                                NGRemarksID : NGRemarks
-                            })
-                        })
-                        const responseData = await response.json();
-                        setloading(false)
-                        if(responseData[0].status === true){
-                            props.navigation.goBack()
-                        }else{
-                            alertMessage(responseData[0].message)
-                        }
-                    }catch(error){
-                        alertMessage(error.message)
-                    }
-                }else{
-                    alertMessage("Please input a valid number")
-                }
+                alertMessage(responseData[0].message)
             }
-        }else{
-            alertMessage("NG Remarks and NG Quantity Cannot be empty")
+        }catch(error){
+            alertMessage(error.message)
         }
     }
 
     useEffect(() =>{
-        getOutgoingTravelSheetDetails(travelSheetNumber)
+        getdetails()
     },[])
 
     const alertMessage = (message) =>{
@@ -150,13 +116,13 @@ const HoldQtyProcess = (props, {navigation}) =>{
         );
     }
 
-    const ActualThicknessComponent = () =>{
+    const ProceedQtyComponent = () =>{
         return(
             <View>
                 <Input
                     disableFullscreenUI={true}
                     size="2xl"
-                    placeholder=" Actual Thickness "
+                    placeholder=" 0 "
                     _light={{
                         placeholderTextColor: "blueGray.400",
                     }}
@@ -165,21 +131,21 @@ const HoldQtyProcess = (props, {navigation}) =>{
                     }}
                     keyboardType={'numeric'}
                     minLength={0}
-                    onChangeText={(text) => setActualThickness(text)}
-                    value={ActualThickness}
+                    onChangeText={(text) => setproceedQty(text)}
+                    value={proceedQty}
                 />
             </View>
         )
     }
-
-    const ThicknessComponent = () =>{
+    
+    const ReturnQtyComponent = () =>{
         return(
             <View style={[styles.flexRow]}>
                 <View style={[styles.flexRow , styles.justifyCenter, styles.alignFlexEnd]}>
                     <Input
                         disableFullscreenUI={true}
                         size="2xl"
-                        placeholder=" From "
+                        placeholder=" 0 "
                         _light={{
                             placeholderTextColor: "blueGray.400",
                         }}
@@ -188,8 +154,8 @@ const HoldQtyProcess = (props, {navigation}) =>{
                         }}
                         keyboardType={'numeric'}
                         minLength={0}
-                        onChangeText={(text) => setThicknessFrom(text)}
-                        value={thicknessFrom}
+                        onChangeText={(text) => setreturnQty(text)}
+                        value={returnQty}
                     />
                 </View>
             </View>
@@ -210,11 +176,10 @@ const HoldQtyProcess = (props, {navigation}) =>{
                     styles.flexRow,
                 ]}>
                     <TouchableOpacity 
-                        onPress={() => saveInspectionDetails()}
-                        disabled ={thicknessFrom !== 0 ? (thicknessTo !== 0 ? (ActualThickness !== 0 ? false : true): true) : true}
+                        // onPress={() => saveInspectionDetails()}
                     >
                         <View style={[
-                            thicknessFrom !== 0 ? (thicknessTo !== 0 ? (ActualThickness !== 0 ? styles.backgroundPrimary : styles.bgGray200): styles.bgGray200) : styles.bgGray200,
+                            styles.backgroundPrimary,
                             styles.justifyCenter,
                             styles.alignCenter,
                             styles.border10,
@@ -222,18 +187,9 @@ const HoldQtyProcess = (props, {navigation}) =>{
                             styles.w100,
                             styles.pX9,
                         ]}>
-                            <View style={[
-                                styles.flexRow
-                            ]}>
-                                <Icon 
-                                    name={"save"}
-                                    size={70} 
-                                    color={colors.lightColor} 
-                                />
-                                
-                                <Text style={[styles.font60, styles.mL2, styles.textWhite]}> 
-                                    Save
-                                </Text>
+                            <View style={[styles.flexRow]}>
+                                <Icon name={"save"} size={70} color={colors.lightColor}/>
+                                <Text style={[styles.font60, styles.mL2, styles.textWhite]}>Save</Text>
                             </View>
                         </View>
                     </TouchableOpacity>
@@ -251,11 +207,8 @@ const HoldQtyProcess = (props, {navigation}) =>{
                             styles.w100,
                             styles.pX8
                         ]}>
-                            <View style={[
-                                styles.flexRow
-                            ]}>
-                                <Icon 
-                                    name={"times"}
+                            <View style={[styles.flexRow]}>
+                                <Icon name={"times"}
                                     size={70} 
                                     color={colors.lightColor} 
                                 />
@@ -288,32 +241,52 @@ const HoldQtyProcess = (props, {navigation}) =>{
                     <ScrollView>
                         <View style={[styles.mX3]}>
                             <View style={[]}>
-                                <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300]}>
-                                    Product Name : 
-                                </Text>
-                                <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300]}>
-                                    Lot No : 
-                                </Text>
-                                <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300]}>
-                                    Received Qty : 
-                                </Text>
-                                <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300]}>
-                                    Remarks : 
-                                </Text>     
+                                <View style={[styles.flexRow]}>
+                                    <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textDark]}>
+                                        Product Name :
+                                    </Text>
+                                    <Text style={[styles.font30, styles.mR1, styles.textDark]}>
+                                        {holdQtyDetails[0].ItemDesc}
+                                    </Text>
+                                </View>
+                                <View style={[styles.flexRow]}>
+                                    <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textDark]}>
+                                        Lot No :
+                                    </Text>
+                                    <Text style={[styles.font30, styles.mR1, styles.textDark]}>
+                                        {holdQtyDetails[0].LotNo}
+                                    </Text>
+                                </View>
+                                <View style={[styles.flexRow]}>
+                                    <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textDark]}>
+                                        Received Qty :
+                                    </Text>
+                                    <Text style={[styles.font30, styles.mR1, styles.textDark]}>
+                                        {holdQtyDetails[0].ReceivedQty}
+                                    </Text>
+                                </View>
+                                <View style={[styles.flexRow]}>
+                                    <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textDark]}>
+                                        Remarks :
+                                    </Text>
+                                    <Text style={[styles.font30, styles.mR1, styles.textDark]}>
+                                        {holdQtyDetails[0].NGRemarks}
+                                    </Text>
+                                </View>
                             </View>
                         
                             <View style={[]}>
                                 <View style={[styles.flexRow, styles.alignFlexEnd, {marginBottom:10}]}>
-                                    <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300]}>
-                                        Return Qty : 
+                                    <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textDark]}>
+                                        Return Qty :
                                     </Text>
-                                    {ThicknessComponent()}
+                                    {ReturnQtyComponent()}
                                 </View>
                                 <View style={[styles.flexRow, styles.alignFlexEnd, {marginBottom:10}]}>
-                                    <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300]}>
+                                    <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textDark]}>
                                         Proceed Qty : 
                                     </Text>
-                                    {ActualThicknessComponent()}
+                                    {ProceedQtyComponent()}
                                 </View>
                             </View>
                             {ButtonSaveCancel()}
