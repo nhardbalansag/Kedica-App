@@ -55,7 +55,7 @@ const MainScreen = ({navigation}) =>{
             iconuse: "pause",
             navigationScreen: "HoldLotEntry",
             api: {
-                url: "api/quality-inspection/outgoing-inspection/get",
+                url: "api/receiving/get-hold-summary-list",
                 method: "GET"
             }
         }
