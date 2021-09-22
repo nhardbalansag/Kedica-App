@@ -204,7 +204,7 @@ const ProductionWorkEntryScreen = (props) =>{
                 if(travelsheetno != null ){
                     props.navigation.navigate(componentTitle === "Outgoing Inspection" ? "InscpectionDetails": component, 
                         {
-                            title: component === "WorkResultInputScreen" ? "Work Result Input" : "Inspection Details",
+                            title: (component === "WorkResultInputScreen" ? "Work Result Input" : (component === "InscpectionDetails" ? "OQC Result Input" : "") ),
                             dataContent: {
                                 number: travelsheetno,
                             },
