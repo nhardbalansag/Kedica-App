@@ -38,6 +38,8 @@ const WorkResultInputScreen = (props) =>{
 
     const travelSheetNumber = props.route.params.dataContent.number;
 
+    const traveldata = useSelector(state => state.loginCredential.travelSheet);
+
     const token = useSelector(state => state.loginCredential.TokenData);
 
     const [boolStartProcess, setBoolStartProcess] =  useState(false);
@@ -161,10 +163,13 @@ const WorkResultInputScreen = (props) =>{
         }
     }
 
-    const search = async (tokendata, param, domainSetting) =>{
+    const search = async (tokendata, domainSetting) =>{
+
+        const travelSheetNumber = props.route.params.dataContent.number;
+        
         setloading(true)
         try{
-            const response = await fetch(domainSetting + "api/production-work/production-work-entry/search-travelsheet-details/" + param, {
+            const response = await fetch(domainSetting + "api/production-work/production-work-entry/search-travelsheet-details/" + traveldata, {
                 method:'GET',
                 headers:{
                     'Content-type': 'application/json',
@@ -199,21 +204,6 @@ const WorkResultInputScreen = (props) =>{
             alertMessage(error.message);
         }
     }
-
-    const ProductionScreen = [
-        {
-            api: {
-                url: "api/production-work/production-work-entry/index",
-                method: "GET"
-            }
-        },
-        {
-            api: {
-                url: "api/quality-inspection/outgoing-inspection/get",
-                method: "GET"
-            }
-        }
-    ];
 
     const alertMessage = (message) =>{
         Alert.alert(
@@ -254,7 +244,7 @@ const WorkResultInputScreen = (props) =>{
 
     useEffect(() =>{
         getProductLine()
-        search(token, travelSheetNumber, domainSetting)
+        search(token, domainSetting)
         realtime();
     },[])
 
@@ -276,7 +266,7 @@ const WorkResultInputScreen = (props) =>{
                     <Text style={[
                         styles.font40
                     ]}>
-                        {travelSheetNumber}
+                        {traveldata}
                     </Text>
                 </View>
                 <View style={[
