@@ -122,13 +122,14 @@ const HoldLotEntry = (props, {navigation}) =>{
     },[isFocused])
 
     const actionViewComponent = (data, index) =>{
+       
         return(
             <TouchableOpacity 
                 onPress={() => props.navigation.navigate("HoldQtyProcess",
                     {
                         title: "Hold Qty Return/Proceed",
                         dataContent: {
-                            number: 1,
+                            number: String(data),
                         },
                     }
                 )}
