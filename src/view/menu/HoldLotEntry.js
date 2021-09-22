@@ -52,7 +52,7 @@ import {
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-const HoldLotEntry = (props) =>{
+const HoldLotEntry = (props, {navigation}) =>{
 
     const isFocused = useIsFocused();
     const token = useSelector(state => state.loginCredential.TokenData);
@@ -124,7 +124,14 @@ const HoldLotEntry = (props) =>{
     const actionViewComponent = (data, index) =>{
         return(
             <TouchableOpacity 
-                onPress={() => console.warn("helo")}
+                onPress={() => props.navigation.navigate("HoldQtyProcess",
+                    {
+                        title: "Hold Qty Return/Proceed",
+                        dataContent: {
+                            number: 1,
+                        },
+                    }
+                )}
             >
                 <View style={[
                     styles.justifyCenter,

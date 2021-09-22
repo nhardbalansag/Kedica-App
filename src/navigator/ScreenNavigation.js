@@ -8,6 +8,7 @@ import ProductionWorkEntryScreen from "../view/menu/ProductionWorkEntryScreen";
 import WorkResultInputScreen from "../view/menu/WorkResultInputScreen";
 import InscpectionDetails from "../view/menu/InspectionDetails";
 import HoldLotEntry from "../view/menu/HoldLotEntry";
+import HoldQtyProcess from "../view/menu/HoldQtyProcess";
 
 import { styles, colors } from "../asset/css/BaseStyle";
 
@@ -95,6 +96,17 @@ const menuScreens = [
         name:"HoldLotEntry", 
         component: HoldLotEntry, 
         title: 'Hold Lot Summary', 
+        header:{
+            headerTintColor: colors.lightColor,
+            backgroundColor: colors.canvaupperBG,
+            height: 100,
+            fontSize: 40
+        }
+    },
+    {
+        name:"HoldQtyProcess", 
+        component: HoldQtyProcess, 
+        title: 'Hold Qty Return/Proceed', 
         header:{
             headerTintColor: colors.lightColor,
             backgroundColor: colors.canvaupperBG,
