@@ -166,7 +166,7 @@ const WorkResultInputScreen = (props) =>{
     const search = async (tokendata, domainSetting) =>{
 
         const travelSheetNumber = props.route.params.dataContent.number;
-        
+        // console.warn(travelSheetNumber + " another screen")
         setloading(true)
         try{
             const response = await fetch(domainSetting + "api/production-work/production-work-entry/search-travelsheet-details/" + travelSheetNumber, {

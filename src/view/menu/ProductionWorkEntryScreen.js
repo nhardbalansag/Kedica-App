@@ -190,7 +190,8 @@ const ProductionWorkEntryScreen = (props) =>{
     }
 
     const goToWorkResult = async(component, travelsheetno) =>{
-
+        // console.warn(travelsheetno + "  before")
+       
         const componentTitle = props.route.params.title;
         var productionWork =  domainSetting + "api/production-work/production-work-entry/search-production-work-table-entry/" + travelsheetno;
         var outgoing =  domainSetting + "api/quality-inspection/get-travelsheet-details/" + travelsheetno;
@@ -206,14 +207,16 @@ const ProductionWorkEntryScreen = (props) =>{
 
             const responseData = await response.json();
 
-            if(componentTitle === "Outgoing Inspection" && responseData[0].dataContent.IsProcess === 1){
+            if(componentTitle === "Outgoing Inspection" && responseData[0].dataContent.IsProcess === 1 && travelsheetno.length === 15){
                 alertMessage("Please scan Pending/On-Going Travel Sheet.")
-            }else if(responseData[0].total === 0 && componentTitle === "Production Work Entry"){
+            }else if(responseData[0].total === 0 && componentTitle === "Production Work Entry" && travelsheetno.length === 15){
                 alertMessage("Please scan Pending/On-Going Travel Sheet.")
-            }else if(!responseData[0].status && componentTitle === "Outgoing Inspection"){
+            }else if(!responseData[0].status && componentTitle === "Outgoing Inspection" && travelsheetno.length === 15){
                 alertMessage("Please scan a valid Travel Sheet")
             }else{
-                if(travelsheetno != null ){
+                if(travelsheetno != null && travelsheetno.length > 14){
+                    // console.warn(travelsheetno + "  after")
+
                     props.navigation.navigate(componentTitle === "Outgoing Inspection" ? "InscpectionDetails": component, 
                         {
                             title: (component === "WorkResultInputScreen" ? "Work Result Input" : (component === "InscpectionDetails" ? "OQC Result Input" : "") ),
@@ -224,9 +227,10 @@ const ProductionWorkEntryScreen = (props) =>{
                     )
                     setTravelSheetNo(null)
                     setIsEnable(false)
-                }else{
-                    AlertNull()
                 }
+                // else{
+                //     AlertNull()
+                // }
             }
             setRefreshing(false);
         } catch (error) {
@@ -264,7 +268,7 @@ const ProductionWorkEntryScreen = (props) =>{
         if(isFocused){ 
             getProductionWorkEntryList(token, domainSetting)
             if(travelSheetNo !== null && isEnable == false){
-                reduxTravelSheet(travelSheetNo)
+                // console.warn(travelSheetNo + " current screen")
 
                 props.route.params.title === "Outgoing Inspection"
                 ?
