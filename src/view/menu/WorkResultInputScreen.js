@@ -169,7 +169,7 @@ const WorkResultInputScreen = (props) =>{
         
         setloading(true)
         try{
-            const response = await fetch(domainSetting + "api/production-work/production-work-entry/search-travelsheet-details/" + traveldata, {
+            const response = await fetch(domainSetting + "api/production-work/production-work-entry/search-travelsheet-details/" + travelSheetNumber, {
                 method:'GET',
                 headers:{
                     'Content-type': 'application/json',
@@ -266,7 +266,7 @@ const WorkResultInputScreen = (props) =>{
                     <Text style={[
                         styles.font40
                     ]}>
-                        {traveldata}
+                        {travelSheetNumber}
                     </Text>
                 </View>
                 <View style={[
