@@ -7,6 +7,7 @@ import MainScreen from "../view/menu/MainScreen";
 import ProductionWorkEntryScreen from "../view/menu/ProductionWorkEntryScreen";
 import WorkResultInputScreen from "../view/menu/WorkResultInputScreen";
 import InscpectionDetails from "../view/menu/InspectionDetails";
+import HoldLotEntry from "../view/menu/HoldLotEntry";
 
 import { styles, colors } from "../asset/css/BaseStyle";
 
@@ -83,6 +84,17 @@ const menuScreens = [
         name:"InscpectionDetails", 
         component: InscpectionDetails, 
         title: 'Inspection Details', 
+        header:{
+            headerTintColor: colors.lightColor,
+            backgroundColor: colors.canvaupperBG,
+            height: 100,
+            fontSize: 40
+        }
+    },
+    {
+        name:"HoldLotEntry", 
+        component: HoldLotEntry, 
+        title: 'Hold Lot Summary', 
         header:{
             headerTintColor: colors.lightColor,
             backgroundColor: colors.canvaupperBG,

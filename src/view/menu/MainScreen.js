@@ -48,12 +48,22 @@ const MainScreen = ({navigation}) =>{
                 url: "api/quality-inspection/outgoing-inspection/get",
                 method: "GET"
             }
+        },
+        {
+            title: "Hold Lot Summary",
+            toptitle: "Receiving",
+            iconuse: "pause",
+            navigationScreen: "HoldLotEntry",
+            api: {
+                url: "api/quality-inspection/outgoing-inspection/get",
+                method: "GET"
+            }
         }
     ];
 
     const ButtonComponent = ({item}) => {
         return(
-            <View>
+            <View style={[styles.w50]}>
                 <TouchableOpacity
                     onPress={() => navigation.navigate(
                         item.navigationScreen,
@@ -73,7 +83,7 @@ const MainScreen = ({navigation}) =>{
                             styles.mY1,
                             styles.justifyCenter,
                             styles.alignCenter,
-                            styles.border10
+                            styles.border10,
                         ]}
                     >
                         <View>
@@ -94,7 +104,7 @@ const MainScreen = ({navigation}) =>{
     return (
         <View
             style={[
-                styles.alignCenter
+                styles.alignCenter,
             ]}
         >
             <FlatList 
