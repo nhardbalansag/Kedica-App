@@ -52,6 +52,9 @@ import {
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 
+import * as LoginAction from "../../redux/Login/LoginAction";
+import { useDispatch } from "react-redux";
+
 const ProductionWorkEntryScreen = (props) =>{
 
     const { isOpen, onOpen, onClose } = useDisclose()
@@ -66,7 +69,8 @@ const ProductionWorkEntryScreen = (props) =>{
     const [checkTravelSheet, setcheckTravelSheet] =  useState(false);
 
     const [WorkEntry, setWorkEntry] = useState();
-   
+    const dispatch = useDispatch()
+    
     const token = useSelector(state => state.loginCredential.TokenData);
 
     const domainSetting = useSelector(state => state.loginCredential.domainSetting);
@@ -177,12 +181,20 @@ const ProductionWorkEntryScreen = (props) =>{
         );
     }
 
+    const reduxTravelSheet = async (travelSheetNo) => {
+        try {
+            await dispatch(LoginAction.travelSheetRedux(travelSheetNo));
+        } catch (error) {
+            alertMessage(error.message);
+        }
+    }
+
     const goToWorkResult = async(component, travelsheetno) =>{
 
         const componentTitle = props.route.params.title;
         var productionWork =  domainSetting + "api/production-work/production-work-entry/search-production-work-table-entry/" + travelsheetno;
         var outgoing =  domainSetting + "api/quality-inspection/get-travelsheet-details/" + travelsheetno;
-        
+        setRefreshing(true);
         try {
             const response = await fetch(componentTitle === "Outgoing Inspection" ? outgoing : productionWork, {
                 method:'GET',
@@ -216,6 +228,7 @@ const ProductionWorkEntryScreen = (props) =>{
                     AlertNull()
                 }
             }
+            setRefreshing(false);
         } catch (error) {
             alertMessage(error.message);
         }
@@ -251,6 +264,8 @@ const ProductionWorkEntryScreen = (props) =>{
         if(isFocused){ 
             getProductionWorkEntryList(token, domainSetting)
             if(travelSheetNo !== null && isEnable == false){
+                reduxTravelSheet(travelSheetNo)
+
                 props.route.params.title === "Outgoing Inspection"
                 ?
                     goToWorkResult("InscpectionDetails", travelSheetNo)

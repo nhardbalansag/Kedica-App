@@ -3,6 +3,7 @@ import {APP_URL} from "../../config/AppConfig"
 export const SET_CREDENTIALS = 'SET_CREDENTIALS';
 export const SET_DOMAIN = 'SET_DOMAIN';
 export const SET_USER_INFORMATION = 'SET_USER_INFORMATION';
+export const SET_TRAVELSHEET = 'SET_TRAVELSHEET';
 
 export const login = (username, password, domainSetting) =>{
 
@@ -76,6 +77,15 @@ export const changeDomain = (domain) =>{
         dispatch({
             type: SET_DOMAIN, 
             domain: domain
+        });
+    }
+}
+
+export const travelSheetRedux = (travelSheetdata) =>{
+    return async (dispatch) =>{
+        dispatch({
+            type: SET_TRAVELSHEET, 
+            travelSheet: travelSheetdata
         });
     }
 }
