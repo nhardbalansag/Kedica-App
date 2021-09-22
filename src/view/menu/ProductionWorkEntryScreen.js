@@ -257,7 +257,6 @@ const ProductionWorkEntryScreen = (props) =>{
                 :
                     goToWorkResult("WorkResultInputScreen", travelSheetNo)
 
-                setTravelSheetNo(null)
                 setIsEnable(false)
             }
         }
