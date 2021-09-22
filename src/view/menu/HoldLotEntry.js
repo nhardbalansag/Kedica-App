@@ -52,13 +52,74 @@ import {
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-const HoldLotEntry = () =>{
+const HoldLotEntry = (props) =>{
+
+    const isFocused = useIsFocused();
+    const token = useSelector(state => state.loginCredential.TokenData);
+    const domainSetting = useSelector(state => state.loginCredential.domainSetting);
 
     const [refreshing, setRefreshing] = useState(false);
+    const [WorkEntry, setWorkEntry] = useState(null);
 
-     const table = {
-        tableHead: ['Action', 'Source Location/Process', 'Production No', 'Lot No.', 'Order No', 'Customer Name', 'Product Name', 'Qty', 'Unit', 'Entry (Order/Product)', 'Delivery Date', 'Ship Date', 'Actual Qty'],
+    const table = {
+        tableHead: ['Action', 'Production No', 'Lot No.', 'Order No', 'Customer Name', 'Product Name', 'Qty', 'Unit', 'Entry (Order/Product)', 'Delivery Date', 'Ship Date', 'Actual Qty'],
     }
+
+    const refreshPage = () =>{
+        holdlotEntryList()
+    }
+
+    const holdlotEntryList = async () =>{
+        const apiUrl = props.route.params.url;
+        setRefreshing(true);
+        try {
+            const response = await fetch(domainSetting + apiUrl, {
+                method:"GET",
+                headers:{
+                    'Content-type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                }
+            })
+    
+            const responseData = await response.json();
+            var datael = [];
+            
+            if(!responseData[0].status){
+                alertMessage("An Error Occured: No data fetched");
+            }else{
+                for (const key in responseData[0].dataContent){
+                    if(responseData[0].dataContent[key].SourceName.toLowerCase() === "outgoing inspection"){
+                        datael.push(
+                            [
+                                responseData[0].dataContent[key].ID,
+                                responseData[0].dataContent[key].ProductionNo,
+                                responseData[0].dataContent[key].LotNo,
+                                responseData[0].dataContent[key].OrderNo,
+                                responseData[0].dataContent[key].CustomerName,
+                                responseData[0].dataContent[key].ItemDesc,
+                                responseData[0].dataContent[key].Qty,
+                                responseData[0].dataContent[key].Unit,
+                                responseData[0].dataContent[key].Entry,
+                                responseData[0].dataContent[key].DeliveryDate,
+                                responseData[0].dataContent[key].ShipDate,
+                                responseData[0].dataContent[key].ActualQty
+                            ]
+                        )
+                    }
+                }
+                setWorkEntry(datael)
+            }
+            setRefreshing(false);
+        } catch (error) {
+            alertMessage(error.message);
+        }
+    }
+
+    useEffect(() =>{
+        if(isFocused){ 
+            holdlotEntryList()
+        }
+    },[isFocused])
 
     const actionViewComponent = (data, index) =>{
         return(
@@ -66,24 +127,18 @@ const HoldLotEntry = () =>{
                 onPress={() => console.warn("helo")}
             >
                 <View style={[
-                    styles.backgroundPrimary,
                     styles.justifyCenter,
                     styles.alignCenter,
                     styles.flexRow,
                     styles.pY1,
                     styles.pX2
                 ]}>
-                    <Icon name="eye" size={25} color={colors.lightColor} />
-                    <Text style={[styles.font25, styles.textWhite, styles.mL1]}>View</Text>
+                    <Icon name="eye" size={25} color={colors.primaryColor} />
+                    <Text style={[styles.font25, styles.textPrimary, styles.mL1]}>View</Text>
                 </View>
             </TouchableOpacity>
         )
     }
-    const data =  [
-        ["test", "test", 'test', 'test', 'test', 'test', 'tes', 'test', 'test', 'test', 'test', 'test', 'test'],
-        ["test", "test", 'test', 'test', 'test', 'test', 'tes', 'test', 'test', 'test', 'test', 'test', 'test'],
-        ["test", "test", 'test', 'test', 'test', 'test', 'tes', 'test', 'test', 'test', 'test', 'test', 'test'],
-    ]
 
     const holdLotTable = () =>{
         return(
@@ -93,10 +148,11 @@ const HoldLotEntry = () =>{
                         <Row 
                             data={table.tableHead} 
                             textStyle={CustomStyle.tableText}
-                            widthArr={[280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280]}
+                            widthArr={[280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280]}
                         />
                         {
-                            data.map((rowData, index) => (
+                            WorkEntry !== null ?
+                            WorkEntry.map((rowData, index) => (
                                 <TableWrapper key={index} style={[styles.flexRow]}>
                                   {
                                     rowData.map((cellData, cellIndex) => (
@@ -110,6 +166,7 @@ const HoldLotEntry = () =>{
                                   }
                                 </TableWrapper>
                             ))
+                            :<></>
                         }
                     </Table>
                 </ScrollView>
@@ -163,9 +220,9 @@ const HoldLotEntry = () =>{
                         ListHeaderComponent={holdLotTable}
                         ListFooterComponent={loadbutton}
                         numColumns={1}
-                        // refreshControl={
-                        //     <RefreshControl refreshing={refreshing} size="large" onRefresh={refreshPage} />
-                        // }
+                        refreshControl={
+                            <RefreshControl refreshing={refreshing} size="large" onRefresh={refreshPage} />
+                        }
                     />
                 </>
         }
