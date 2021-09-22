@@ -116,7 +116,7 @@ const InscpectionDetails = (props, {navigation}) =>{
     }
 
      const saveInspectionDetails = async () =>{
-        if((NGQTY > 0 && NGRemarks !== null) || (NGQTY === 0 && NGRemarks === null)){
+        if((NGQTY !== 0 && NGRemarks !== null) || (NGQTY === 0 && NGRemarks === null)){
             if(FactoryID === 2 && (thicknessFrom == 0 || thicknessTo == 0 || ActualThickness == 0)){
                 alertMessage("Thickness must not be null")
             }else{

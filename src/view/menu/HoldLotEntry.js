@@ -57,20 +57,32 @@ const HoldLotEntry = () =>{
     const [refreshing, setRefreshing] = useState(false);
 
      const table = {
-        tableHead: ['Source Location/Process', 'Production No', 'Lot No.', 'Order No', 'Customer Name', 'Product Name', 'Qty', 'Unit', 'Entry (Order/Product)', 'Delivery Date', 'Ship Date', 'Actual Qty'],
+        tableHead: ['Action', 'Source Location/Process', 'Production No', 'Lot No.', 'Order No', 'Customer Name', 'Product Name', 'Qty', 'Unit', 'Entry (Order/Product)', 'Delivery Date', 'Ship Date', 'Actual Qty'],
     }
 
-    const dataPress = (data, index) =>{
+    const actionViewComponent = (data, index) =>{
         return(
-            <TouchableOpacity>
-                <Text style={[CustomStyle.tableDataText]}>{data}</Text>
+            <TouchableOpacity 
+                onPress={() => console.warn("helo")}
+            >
+                <View style={[
+                    styles.backgroundPrimary,
+                    styles.justifyCenter,
+                    styles.alignCenter,
+                    styles.flexRow,
+                    styles.pY1,
+                    styles.pX2
+                ]}>
+                    <Icon name="eye" size={25} color={colors.lightColor} />
+                    <Text style={[styles.font25, styles.textWhite, styles.mL1]}>View</Text>
+                </View>
             </TouchableOpacity>
         )
     }
     const data =  [
-        ["test", 'test', 'test', 'test', 'test', 'tes', 'test', 'test', 'test', 'test', 'test', 'test'],
-        ['test', 'test', 'test', 'test', 'test', 'tes', 'test', 'test', 'test', 'test', 'test', 'test'],
-        ['test', 'test', 'test', 'test', 'test', 'tes', 'test', 'test', 'test', 'test', 'test', 'test'],
+        ["test", "test", 'test', 'test', 'test', 'test', 'tes', 'test', 'test', 'test', 'test', 'test', 'test'],
+        ["test", "test", 'test', 'test', 'test', 'test', 'tes', 'test', 'test', 'test', 'test', 'test', 'test'],
+        ["test", "test", 'test', 'test', 'test', 'test', 'tes', 'test', 'test', 'test', 'test', 'test', 'test'],
     ]
 
     const holdLotTable = () =>{
@@ -81,7 +93,7 @@ const HoldLotEntry = () =>{
                         <Row 
                             data={table.tableHead} 
                             textStyle={CustomStyle.tableText}
-                            widthArr={[280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280]}
+                            widthArr={[280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280]}
                         />
                         {
                             data.map((rowData, index) => (
@@ -90,7 +102,7 @@ const HoldLotEntry = () =>{
                                     rowData.map((cellData, cellIndex) => (
                                         <Cell 
                                             key={cellIndex} 
-                                            data={cellIndex === 0 ? dataPress(cellData, index) : cellData} 
+                                            data={cellIndex === 0 ? actionViewComponent(cellData, index) : cellData} 
                                             textStyle={[CustomStyle.tableDataText]}
                                             width={280}
                                         />
