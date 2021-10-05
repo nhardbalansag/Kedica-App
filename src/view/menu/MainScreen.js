@@ -51,17 +51,29 @@ const MainScreen = ({navigation}) =>{
     const veryIntensiveTask = async (taskDataArguments) => {
         // Example of an infinite loop task
         await new Promise( async (resolve) => {
-            console.log(BackgroundService.isRunning())
+            while(BackgroundService.isRunning()){
+                let locationStat
+                testupdate(locationStat)
+            }
         });
     };
 
     const test = async () =>{
         try {
-          await BackgroundService.start(veryIntensiveTask, options);
+            await BackgroundService.start(veryIntensiveTask, options);
         } catch (error) {
           console.log(error.message)
         }
-      }
+    }
+    
+    const testupdate = async (data) =>{
+        try {
+            await BackgroundService.updateNotification({taskDesc: data});
+            await BackgroundService.stop();
+        } catch (error) {
+          console.log(error.message)
+        }
+    }
 
     const [loading, setisLoading] = useState(false)
 
