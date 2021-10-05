@@ -24,6 +24,8 @@ import {
     usePropsResolution,
 } from 'native-base';
 
+import DeviceInfo from 'react-native-device-info';
+
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 import {ProductionScreen} from "../../navigator/appData"
@@ -33,7 +35,7 @@ const MainScreen = ({navigation}) =>{
     const [loading, setisLoading] = useState(false)
 
     const getDeviceInformation = () =>{
-
+        let uniqueId = DeviceInfo.getUniqueId();
     }
 
     const checkDeviceInServer = () =>{
@@ -44,6 +46,37 @@ const MainScreen = ({navigation}) =>{
 
     }
 
+    const getDeviceActivity = () =>{
+        DeviceInfo.isLocationEnabled().then((enabled) => {
+            // true or false
+            console.log("isLocationEnabled =>" + enabled)
+        });
+        DeviceInfo.getAvailableLocationProviders().then((providers) => {
+            // {
+            //   gps: true
+            //   network: true
+            //   passive: true
+            // }
+            console.log(providers)
+        });
+        DeviceInfo.isBatteryCharging().then((isCharging) => {
+            // true or false
+            console.log("isBatteryCharging =>" + isCharging)
+        });
+        DeviceInfo.isAirplaneMode().then((airplaneModeOn) => {
+            // false
+            console.log("isAirplaneMode =>" + airplaneModeOn)
+        });
+        DeviceInfo.getPowerState().then((state) => {
+            // {
+            //   batteryLevel: 0.759999,
+            //   batteryState: 'unplugged',
+            //   lowPowerMode: false,
+            // }
+            console.log(state)
+        });
+    }
+ 
     const alertMessage = (message) =>{
         Alert.alert(
             "Note",
@@ -58,6 +91,7 @@ const MainScreen = ({navigation}) =>{
 
     useEffect(() =>{
         checkDeviceInServer()
+        getDeviceActivity()
     }, [])
 
     const ButtonComponent = ({item}) => {
