@@ -29,8 +29,39 @@ import DeviceInfo from 'react-native-device-info';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 import {ProductionScreen} from "../../navigator/appData"
+import BackgroundService from 'react-native-background-actions';
 
 const MainScreen = ({navigation}) =>{
+
+    const options = {
+        taskName: 'Example',
+        taskTitle: 'ExampleTask title',
+        taskDesc: 'ExampleTask description',
+        taskIcon: {
+            name: 'ic_launcher',
+            type: 'mipmap',
+        },
+        color: '#ff00ff',
+        linkingURI: 'yourSchemeHere://chat/jane', // See Deep Linking for more info
+        parameters: {
+            delay: 1000,
+        },
+    };
+    
+    const veryIntensiveTask = async (taskDataArguments) => {
+        // Example of an infinite loop task
+        await new Promise( async (resolve) => {
+            console.log(BackgroundService.isRunning())
+        });
+    };
+
+    const test = async () =>{
+        try {
+          await BackgroundService.start(veryIntensiveTask, options);
+        } catch (error) {
+          console.log(error.message)
+        }
+      }
 
     const [loading, setisLoading] = useState(false)
 
@@ -90,8 +121,7 @@ const MainScreen = ({navigation}) =>{
     }
 
     useEffect(() =>{
-        checkDeviceInServer()
-        getDeviceActivity()
+        test()
     }, [])
 
     const ButtonComponent = ({item}) => {
