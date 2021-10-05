@@ -48,18 +48,17 @@ const MainScreen = ({navigation}) =>{
                 url: "api/quality-inspection/outgoing-inspection/get",
                 method: "GET"
             }
+        },
+        {
+            title: "Hold Lot Summary",
+            toptitle: "Receiving",
+            iconuse: "pause",
+            navigationScreen: "HoldLotEntry",
+            api: {
+                url: "api/receiving/get-hold-summary-list",
+                method: "GET"
+            }
         }
-        // ,
-        // {
-        //     title: "Hold Lot Summary",
-        //     toptitle: "Receiving",
-        //     iconuse: "pause",
-        //     navigationScreen: "HoldLotEntry",
-        //     api: {
-        //         url: "api/receiving/get-hold-summary-list",
-        //         method: "GET"
-        //     }
-        // }
     ];
 
     const ButtonComponent = ({item}) => {
