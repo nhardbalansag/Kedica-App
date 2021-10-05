@@ -26,40 +26,39 @@ import {
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 
+import {ProductionScreen} from "../../navigator/appData"
+
 const MainScreen = ({navigation}) =>{
 
-    const ProductionScreen = [
-        {
-            title: "Production Work Entry",
-            toptitle: "Production Work",
-            iconuse: "cube",
-            navigationScreen: "ProductionWorkEntryScreen",
-            api: {
-                url: "api/production-work/production-work-entry/index",
-                method: "GET"
-            }
-        },
-        {
-            title: "Outgoing Inspection",
-            toptitle: "Outgoing Quality Inspection",
-            iconuse: "search",
-            navigationScreen: "ProductionWorkEntryScreen",
-            api: {
-                url: "api/quality-inspection/outgoing-inspection/get",
-                method: "GET"
-            }
-        },
-        {
-            title: "Hold Lot Summary",
-            toptitle: "Receiving",
-            iconuse: "pause",
-            navigationScreen: "HoldLotEntry",
-            api: {
-                url: "api/receiving/get-hold-summary-list",
-                method: "GET"
-            }
-        }
-    ];
+    const [loading, setisLoading] = useState(false)
+
+    const getDeviceInformation = () =>{
+
+    }
+
+    const checkDeviceInServer = () =>{
+        
+    }
+
+    const submitDeviceInformation = () =>{
+
+    }
+
+    const alertMessage = (message) =>{
+        Alert.alert(
+            "Note",
+            message,
+            [
+                { 
+                  text: "OK",
+                }
+            ]
+        );
+    }
+
+    useEffect(() =>{
+        checkDeviceInServer()
+    }, [])
 
     const ButtonComponent = ({item}) => {
         return(
@@ -107,12 +106,26 @@ const MainScreen = ({navigation}) =>{
                 styles.alignCenter,
             ]}
         >
-            <FlatList 
-                // keyExtractor={item => console.log(item)} 
-                data={ProductionScreen} 
-                renderItem={ButtonComponent} 
-                numColumns={2}
-            />
+            {
+                loading ?
+                    <>
+                        <View style={[
+                                styles.alignCenter,
+                                styles.justifyCenter,
+                            ]}>
+                            <ActivityIndicator  size="large" color={colors.primaryColor}/>
+                            <Text style={[styles.font20]}>Checking Device Information, please wait..</Text>
+                        </View>
+                    </> 
+                    :
+                    <FlatList 
+                        // keyExtractor={item => console.log(item)} 
+                        data={ProductionScreen} 
+                        renderItem={ButtonComponent} 
+                        numColumns={2}
+                    />
+            }
+            
         </View>
     )
 }
