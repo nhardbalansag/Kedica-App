@@ -2,13 +2,9 @@ import React from "react";
 
 import {View, Text} from "react-native"
 
+import {menuScreens, loginScreenData} from './appData'
+
 import LoginScreen from "../view/Login/LoginScreen";
-import MainScreen from "../view/menu/MainScreen";
-import ProductionWorkEntryScreen from "../view/menu/ProductionWorkEntryScreen";
-import WorkResultInputScreen from "../view/menu/WorkResultInputScreen";
-import InscpectionDetails from "../view/menu/InspectionDetails";
-import HoldLotEntry from "../view/menu/HoldLotEntry";
-import HoldQtyProcess from "../view/menu/HoldQtyProcess";
 
 import { styles, colors } from "../asset/css/BaseStyle";
 
@@ -28,93 +24,29 @@ const Tab = createBottomTabNavigator();
 const Login = () =>{
     return(
         <Stack.Navigator>
-            <Stack.Screen 
-                name="LoginScreen" 
-                component={LoginScreen} 
-                options={{ 
-                    title: 'Kedica Login',
-                    headerTintColor: colors.lightColor,
-                    headerStyle: {
-                        backgroundColor: colors.canvaupperBG,
-                        height: 100,
-                    },
-                    headerTitleStyle: {
-                        fontSize: 40,
-                    },
-                }}
-            />
+            {
+                loginScreenData.map((screenData, index) =>
+                    <Stack.Screen 
+                        key={index}
+                        name={screenData.name}
+                        component={screenData.component}
+                        options={{ 
+                            title: screenData.title,
+                            headerTintColor: screenData.header.headerTintColor,
+                            headerStyle: {
+                                backgroundColor: screenData.header.backgroundColor,
+                                height:screenData.header.height
+                            },
+                            headerTitleStyle: {
+                                fontSize: screenData.header.fontSize,
+                            },
+                        }}
+                    />
+                )
+            }
         </Stack.Navigator>
     )
 }
-
-const menuScreens = [
-    {
-        name:"MainScreen", 
-        component: MainScreen, 
-        title: 'Main Menu', 
-        header:{
-            headerTintColor: colors.lightColor,
-            backgroundColor: colors.canvaupperBG,
-            height: 100,
-            fontSize: 40
-        }
-    },
-    {
-        name:"ProductionWorkEntryScreen", 
-        component: ProductionWorkEntryScreen, 
-        title: 'Production Work Entry', 
-        header:{
-            headerTintColor: colors.lightColor,
-            backgroundColor: colors.canvaupperBG,
-            height: 100,
-            fontSize: 40
-        }
-    },
-    {
-        name:"WorkResultInputScreen", 
-        component: WorkResultInputScreen, 
-        title: 'Work Result Input', 
-        header:{
-            headerTintColor: colors.lightColor,
-            backgroundColor: colors.canvaupperBG,
-            height: 100,
-            fontSize: 40
-        }
-    },
-    {
-        name:"InscpectionDetails", 
-        component: InscpectionDetails, 
-        title: 'Inspection Details', 
-        header:{
-            headerTintColor: colors.lightColor,
-            backgroundColor: colors.canvaupperBG,
-            height: 100,
-            fontSize: 40
-        }
-    },
-    {
-        name:"HoldLotEntry", 
-        component: HoldLotEntry, 
-        title: 'Hold Lot Summary', 
-        header:{
-            headerTintColor: colors.lightColor,
-            backgroundColor: colors.canvaupperBG,
-            height: 100,
-            fontSize: 40
-        }
-    },
-    {
-        name:"HoldQtyProcess", 
-        component: HoldQtyProcess, 
-        title: 'Hold Qty Return/Proceed', 
-        header:{
-            headerTintColor: colors.lightColor,
-            backgroundColor: colors.canvaupperBG,
-            height: 100,
-            fontSize: 40
-        }
-    }
-]
 
 const Menu = () =>{
 
@@ -162,7 +94,6 @@ const Menu = () =>{
                                             {route.params.title}
                                     </Text>
                                 </View>
-                                    
                                 :
                                     <></>
                             ),
