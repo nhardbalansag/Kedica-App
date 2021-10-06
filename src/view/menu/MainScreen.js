@@ -28,6 +28,7 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 import {ProductionScreen} from "../../navigator/appData"
+import { io } from "socket.io-client";
 import { backgroundTaskInit, updateTaskfunct } from "../../background/task";
 import { AppState } from 'react-native';
 
