@@ -32,6 +32,8 @@ import {ProductionScreen} from "../../navigator/appData"
 
 const MainScreen = ({navigation}) =>{
 
+    const [loading, setisLoading] = useState(false)
+
     useEffect(() =>{
         
     }, [])
