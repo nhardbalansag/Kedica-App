@@ -1,7 +1,8 @@
 import React,
 {
     useState,
-    useEffect
+    useEffect,
+    useRef
 } from "react";
 
 import { 
@@ -24,62 +25,18 @@ import {
     usePropsResolution,
 } from 'native-base';
 
-import DeviceInfo from 'react-native-device-info';
-
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 import {ProductionScreen} from "../../navigator/appData"
-import BackgroundService from 'react-native-background-actions';
+import { backgroundTaskInit, updateTaskfunct } from "../../background/task";
+import { AppState } from 'react-native';
 
 const MainScreen = ({navigation}) =>{
 
-    const options = {
-        taskName: 'Example',
-        taskTitle: 'ExampleTask title',
-        taskDesc: 'ExampleTask description',
-        taskIcon: {
-            name: 'ic_launcher',
-            type: 'mipmap',
-        },
-        color: '#ff00ff',
-        linkingURI: 'yourSchemeHere://chat/jane', // See Deep Linking for more info
-        parameters: {
-            delay: 1000,
-        },
-    };
-    
-    const veryIntensiveTask = async (taskDataArguments) => {
-        // Example of an infinite loop task
-        await new Promise( async (resolve) => {
-            while(BackgroundService.isRunning()){
-                let locationStat
-                testupdate(locationStat)
-            }
-        });
-    };
-
-    const test = async () =>{
-        try {
-            await BackgroundService.start(veryIntensiveTask, options);
-        } catch (error) {
-          console.log(error.message)
-        }
-    }
-    
-    const testupdate = async (data) =>{
-        try {
-            await BackgroundService.updateNotification({taskDesc: data});
-            await BackgroundService.stop();
-        } catch (error) {
-          console.log(error.message)
-        }
-    }
+    const appState = useRef(AppState.currentState);
+    const [appStateVisible, setAppStateVisible] = useState(appState.current);
 
     const [loading, setisLoading] = useState(false)
-
-    const getDeviceInformation = () =>{
-        let uniqueId = DeviceInfo.getUniqueId();
-    }
 
     const checkDeviceInServer = () =>{
         
@@ -89,37 +46,6 @@ const MainScreen = ({navigation}) =>{
 
     }
 
-    const getDeviceActivity = () =>{
-        DeviceInfo.isLocationEnabled().then((enabled) => {
-            // true or false
-            console.log("isLocationEnabled =>" + enabled)
-        });
-        DeviceInfo.getAvailableLocationProviders().then((providers) => {
-            // {
-            //   gps: true
-            //   network: true
-            //   passive: true
-            // }
-            console.log(providers)
-        });
-        DeviceInfo.isBatteryCharging().then((isCharging) => {
-            // true or false
-            console.log("isBatteryCharging =>" + isCharging)
-        });
-        DeviceInfo.isAirplaneMode().then((airplaneModeOn) => {
-            // false
-            console.log("isAirplaneMode =>" + airplaneModeOn)
-        });
-        DeviceInfo.getPowerState().then((state) => {
-            // {
-            //   batteryLevel: 0.759999,
-            //   batteryState: 'unplugged',
-            //   lowPowerMode: false,
-            // }
-            console.log(state)
-        });
-    }
- 
     const alertMessage = (message) =>{
         Alert.alert(
             "Note",
@@ -133,7 +59,22 @@ const MainScreen = ({navigation}) =>{
     }
 
     useEffect(() =>{
-        test()
+        backgroundTaskInit()
+        const subscription = AppState.addEventListener("change", nextAppState => {
+            if (appState.current.match(/inactive|background/) && nextAppState === "active") {
+              console.log("App has come to the foreground!");
+              updateTaskfunct("App is in active foreground")
+            }else{
+                updateTaskfunct("App is close and running in background")
+                appState.current = nextAppState;
+                setAppStateVisible(appState.current);
+                console.log("AppState", appState.current);
+            }
+        });
+      
+        return () => {
+            subscription.remove();
+        };
     }, [])
 
     const ButtonComponent = ({item}) => {
