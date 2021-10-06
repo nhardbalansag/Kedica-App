@@ -2,6 +2,7 @@ import BackgroundService from 'react-native-background-actions';
 
 import DeviceInfo from 'react-native-device-info';
 import React, { useRef } from 'react';
+import BackgroundTimer from 'react-native-background-timer';
 
 const options = {
     taskName: 'Status',
@@ -22,9 +23,7 @@ const options = {
 const veryIntensiveTask = async (taskDataArguments) => {
     // Example of an infinite loop task
     await new Promise( async (resolve) => {
-        if(BackgroundService.isRunning()){
-            getDeviceActivity()
-        }
+        starttime()
     });
 };
 
@@ -43,6 +42,12 @@ const updateTask = async (data) =>{
     } catch (error) {
       console.log(error.message)
     }
+}
+
+const starttime = () =>{
+    BackgroundTimer.runBackgroundTimer(() => { 
+        getDeviceActivity()
+    }, 3000);
 }
 
 const getDeviceActivity = () =>{
