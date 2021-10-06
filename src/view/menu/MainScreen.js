@@ -29,8 +29,13 @@ import DeviceInfo from 'react-native-device-info';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 import {ProductionScreen} from "../../navigator/appData"
+import { io } from "socket.io-client";
 
 const MainScreen = ({navigation}) =>{
+
+    const socket = io("http:/192.168.200.100:1993/");
+
+    console.log(socket)
 
     const [loading, setisLoading] = useState(false)
 
