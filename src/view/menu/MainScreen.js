@@ -1,7 +1,8 @@
 import React,
 {
     useState,
-    useEffect
+    useEffect,
+    useRef
 } from "react";
 
 import { 
@@ -24,18 +25,57 @@ import {
     usePropsResolution,
 } from 'native-base';
 
-import DeviceInfo from 'react-native-device-info';
-
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 import {ProductionScreen} from "../../navigator/appData"
+import { io } from "socket.io-client";
+import { backgroundTaskInit, updateTaskfunct } from "../../background/task";
+import { AppState } from 'react-native';
 
 const MainScreen = ({navigation}) =>{
 
+    const appState = useRef(AppState.currentState);
+    const [appStateVisible, setAppStateVisible] = useState(appState.current);
+
     const [loading, setisLoading] = useState(false)
 
-    useEffect(() =>{
+    const checkDeviceInServer = () =>{
         
+    }
+
+    const submitDeviceInformation = () =>{
+
+    }
+
+    const alertMessage = (message) =>{
+        Alert.alert(
+            "Note",
+            message,
+            [
+                { 
+                  text: "OK",
+                }
+            ]
+        );
+    }
+
+    useEffect(() =>{
+        backgroundTaskInit()
+        const subscription = AppState.addEventListener("change", nextAppState => {
+            if (appState.current.match(/inactive|background/) && nextAppState === "active") {
+              console.log("App has come to the foreground!");
+              updateTaskfunct("App is in active foreground")
+            }else{
+                updateTaskfunct("App is close and running in background")
+                appState.current = nextAppState;
+                setAppStateVisible(appState.current);
+                console.log("AppState", appState.current);
+            }
+        });
+      
+        return () => {
+            subscription.remove();
+        };
     }, [])
 
     const ButtonComponent = ({item}) => {
