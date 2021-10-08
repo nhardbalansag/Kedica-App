@@ -48,7 +48,7 @@ const Login = () =>{
     )
 }
 
-const Menu = () =>{
+const Menu = (FirstName) =>{
 
     return(
         <Stack.Navigator>
@@ -97,6 +97,13 @@ const Menu = () =>{
                                 :
                                     <></>
                             ),
+                            headerRight: () => (
+                                <View>
+                                    <Text style={[styles.font25,styles.textBold,styles.textWhite, styles.mX2]}>
+                                           {FirstName}
+                                    </Text>
+                                </View>
+                              ),
                         })}
                     />
                 )
@@ -108,9 +115,10 @@ const Menu = () =>{
 const ScreenNavigation = () => {
 
     const tokenresponse = useSelector(state => state.loginCredential.TokenData);
+    const FirstName = useSelector(state => state.loginCredential.FirstName);
 
     if(tokenresponse !== null && tokenresponse !== undefined){
-        return Menu();
+        return Menu(FirstName);
     }else{
         return Login();
     }

@@ -6,7 +6,11 @@ const InitialStates ={
     data:[],
     domainSetting: null,
     travelSheet: null,
-    FactoryId: null
+    FactoryId: null,
+    UserName: null,
+    FirstName: null,
+    MiddleName: null,
+    LastName: null
 }
 
 export default (state = InitialStates, action) =>{
@@ -24,7 +28,11 @@ export default (state = InitialStates, action) =>{
         case SET_USER_INFORMATION:
             return{
                 ...state,
-                FactoryId:action.FactoryId
+                FactoryId: action.FactoryId,
+                UserName: action.UserName,
+                FirstName: action.FirstName,
+                MiddleName: action.MiddleName,
+                LastName: action.LastName
             }
         case SET_TRAVELSHEET:
             return{
