@@ -25,9 +25,7 @@ import {
 
 import {
     NativeBaseProvider,
-    Actionsheet,
-    useDisclose,
-    Modal,
+    Checkbox,
     Input,
     ScrollView
 } from 'native-base';
@@ -40,6 +38,8 @@ const HoldQtyProcess = (props, {navigation}) =>{
     const [holdQtyDetails, setholdQtyDetails] =  useState(null);
     const [returnQty, setreturnQty] =  useState(null);
     const [proceedQty, setproceedQty] =  useState(null);
+    const [IsStrip, setIsStrip] =  useState(false);
+    const [IsReplate, setIsReplate] =  useState(false);
 
     const detailsId = props.route.params.dataContent.number;
     const token = useSelector(state => state.loginCredential.TokenData);
@@ -68,7 +68,10 @@ const HoldQtyProcess = (props, {navigation}) =>{
                     ItemDesc: responseData[0].dataContent[0].ItemDesc,
                     LotNo: responseData[0].dataContent[0].LotNo,
                     ReceivedQty: responseData[0].dataContent[0].ReceivedQty,
-                    NGRemarks: responseData[0].dataContent[0].NGRemarks
+                    NGRemarks: responseData[0].dataContent[0].NGRemarks,
+
+                    IsStrip: IsStrip,
+                    IsReplate: IsReplate,
                 }
             ])
             setloading(false)
@@ -76,18 +79,33 @@ const HoldQtyProcess = (props, {navigation}) =>{
             alertMessage(error.message)
         }
     }
+
+    const validateSave = () =>{
+        var qtytotal = returnQty + proceedQty
+        if(qtytotal !== holdQtyDetails[0].ReceivedQty){
+            alertMessage("Return QTY and Proceed Qty must be equal to Received QTY")
+        }else{
+            saveholdLot()
+        }
+    }
   
-     const saveholdLot = async (idData) =>{
+    const saveholdLot = async () =>{
         setloading(true)
         try{
-            const response = await fetch(domainSetting + "api/quality-inspection/save", {
+            const response = await fetch(domainSetting + "api/receiving/save-scrap-rework", {
                 method:'POST',
                 headers:{
                     'Content-type': 'application/json',
                     'Authorization': 'Bearer ' + token
                 },
                 body: JSON.stringify({
-                    ID: idData
+                    HoldLotID: holdQtyDetails[0].HoldLotID,
+                    ProductionWorkID: holdQtyDetails[0].ProductionWorkID,
+                    LotNo: holdQtyDetails[0].LotNo,
+                    ReturnQty: returnQty,
+                    ProceedQty: proceedQty,
+                    IsStrip: IsStrip,
+                    IsReplate: IsReplate
                 })
             })
             const responseData = await response.json();
@@ -114,6 +132,14 @@ const HoldQtyProcess = (props, {navigation}) =>{
               { text: "OK"}
             ]
         );
+    }
+
+    const stripFun = () =>{
+        IsStrip ? setIsStrip(false) : setIsStrip(true)
+    }
+
+    const replateFun = () =>{
+        IsReplate ? setIsReplate(false) : setIsReplate(true)
     }
 
     const ProceedQtyComponent = () =>{
@@ -176,7 +202,7 @@ const HoldQtyProcess = (props, {navigation}) =>{
                     styles.flexRow,
                 ]}>
                     <TouchableOpacity 
-                        // onPress={() => saveInspectionDetails()}
+                        onPress={() => validateSave()}
                     >
                         <View style={[
                             styles.backgroundPrimary,
@@ -240,53 +266,73 @@ const HoldQtyProcess = (props, {navigation}) =>{
                 :
                     <ScrollView>
                         <View style={[styles.mX3]}>
-                            <View style={[]}>
-                                <View style={[styles.flexRow]}>
-                                    <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textDark]}>
-                                        Product Name :
-                                    </Text>
-                                    <Text style={[styles.font30, styles.mR1, styles.textDark]}>
-                                        {holdQtyDetails[0].ItemDesc}
-                                    </Text>
+                            <View style={[styles.flexRow, styles.alignCenter, styles.justifySpaceAround]}>
+                                <View>
+                                    <View style={[]}>
+                                        <View style={[styles.flexRow]}>
+                                            <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textDark]}>
+                                                Product Name :
+                                            </Text>
+                                            <Text style={[styles.font30, styles.mR1, styles.textDark]}>
+                                                {holdQtyDetails[0].ItemDesc}
+                                            </Text>
+                                        </View>
+                                        <View style={[styles.flexRow]}>
+                                            <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textDark]}>
+                                                Lot No :
+                                            </Text>
+                                            <Text style={[styles.font30, styles.mR1, styles.textDark]}>
+                                                {holdQtyDetails[0].LotNo}
+                                            </Text>
+                                        </View>
+                                        <View style={[styles.flexRow]}>
+                                            <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textDark]}>
+                                                Received Qty :
+                                            </Text>
+                                            <Text style={[styles.font30, styles.mR1, styles.textDark]}>
+                                                {holdQtyDetails[0].ReceivedQty}
+                                            </Text>
+                                        </View>
+                                        <View style={[styles.flexRow]}>
+                                            <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textDark]}>
+                                                Remarks :
+                                            </Text>
+                                            <Text style={[styles.font30, styles.mR1, styles.textDark]}>
+                                                {holdQtyDetails[0].NGRemarks}
+                                            </Text>
+                                        </View>
+                                    </View>
+                            
+                                    <View style={[]}>
+                                        <View style={[styles.flexRow, styles.alignFlexEnd, {marginBottom:10}]}>
+                                            <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textDark]}>
+                                                Return Qty :
+                                            </Text>
+                                            {ReturnQtyComponent()}
+                                        </View>
+                                        <View style={[styles.flexRow, styles.alignFlexEnd, {marginBottom:10}]}>
+                                            <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textDark]}>
+                                                Proceed Qty : 
+                                            </Text>
+                                            {ProceedQtyComponent()}
+                                        </View>
+                                    </View>
                                 </View>
-                                <View style={[styles.flexRow]}>
-                                    <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textDark]}>
-                                        Lot No :
-                                    </Text>
-                                    <Text style={[styles.font30, styles.mR1, styles.textDark]}>
-                                        {holdQtyDetails[0].LotNo}
-                                    </Text>
-                                </View>
-                                <View style={[styles.flexRow]}>
-                                    <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textDark]}>
-                                        Received Qty :
-                                    </Text>
-                                    <Text style={[styles.font30, styles.mR1, styles.textDark]}>
-                                        {holdQtyDetails[0].ReceivedQty}
-                                    </Text>
-                                </View>
-                                <View style={[styles.flexRow]}>
-                                    <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textDark]}>
-                                        Remarks :
-                                    </Text>
-                                    <Text style={[styles.font30, styles.mR1, styles.textDark]}>
-                                        {holdQtyDetails[0].NGRemarks}
-                                    </Text>
-                                </View>
-                            </View>
-                        
-                            <View style={[]}>
-                                <View style={[styles.flexRow, styles.alignFlexEnd, {marginBottom:10}]}>
-                                    <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textDark]}>
-                                        Return Qty :
-                                    </Text>
-                                    {ReturnQtyComponent()}
-                                </View>
-                                <View style={[styles.flexRow, styles.alignFlexEnd, {marginBottom:10}]}>
-                                    <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textDark]}>
-                                        Proceed Qty : 
-                                    </Text>
-                                    {ProceedQtyComponent()}
+                                <View>
+                                    <View style={[]}>
+                                        <View style={[styles.flexRow, styles.alignCenter, {marginBottom:10}]}>
+                                            <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textDark]}>
+                                                Strip? :
+                                            </Text>
+                                            <Checkbox onChange={() => stripFun()}  value={IsStrip} size="lg" accessibilityLabel="strip" />
+                                        </View>
+                                        <View style={[styles.flexRow, styles.alignCenter, {marginBottom:10}]}>
+                                            <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textDark]}>
+                                                Replate? : 
+                                            </Text>
+                                            <Checkbox onChange={() => replateFun()} value={IsReplate} size="lg" accessibilityLabel="replate" />
+                                        </View>
+                                    </View>
                                 </View>
                             </View>
                             {ButtonSaveCancel()}
