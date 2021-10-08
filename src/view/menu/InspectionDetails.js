@@ -46,6 +46,7 @@ const InscpectionDetails = (props, {navigation}) =>{
     const [dataRemarks, setdataRemarks] = useState(null)
     const [loading, setloading] =  useState(true);
     const [NGRemarksTitle, setNGRemarksTitle] =  useState(null);
+    const [NGGoodQty, setNGGoodQty] =  useState(0);
 
     const travelSheetNumber = props.route.params.dataContent.number;
     const token = useSelector(state => state.loginCredential.TokenData);
@@ -115,6 +116,15 @@ const InscpectionDetails = (props, {navigation}) =>{
         }
     }
 
+    const validateSave = () =>{
+        var qtytotal = NGGoodQty + NGQTY
+        if(qtytotal > OutgoingData[0].Qty){
+            alertMessage("Invalid Input, Please try again.")
+        }else{
+            saveholdLot()
+        }
+    }
+
      const saveInspectionDetails = async () =>{
         if((NGQTY !== 0 && NGRemarks !== null) || (NGQTY === 0 && NGRemarks === null)){
             if(FactoryID === 2 && (thicknessFrom == 0 || thicknessTo == 0 || ActualThickness == 0)){
@@ -135,6 +145,7 @@ const InscpectionDetails = (props, {navigation}) =>{
                                 ThicknessTo: thicknessTo,
                                 ActualThickness : ActualThickness,
                                 NGQty : NGQTY,
+                                NGGoodQty : NGGoodQty,
                                 NGRemarksID : NGRemarks
                             })
                         })
@@ -295,6 +306,28 @@ const InscpectionDetails = (props, {navigation}) =>{
         )
     }
 
+    const NGGoodQtyfun = () =>{
+        return(
+            <View>
+                <Input
+                    disableFullscreenUI={true}
+                    size="2xl"
+                    placeholder=" Material Reject QTY "
+                    _light={{
+                        placeholderTextColor: "blueGray.400",
+                    }}
+                    _dark={{
+                        placeholderTextColor: "blueGray.50",
+                    }}
+                    keyboardType='numeric'
+                    minLength={0}
+                    onChangeText={(text) => setNGGoodQty(text)}
+                    value={NGGoodQty}
+                />
+            </View>
+        )
+    }
+
     const ThicknessComponent = () =>{
         return(
             <View style={[styles.flexRow]}>
@@ -364,7 +397,7 @@ const InscpectionDetails = (props, {navigation}) =>{
                     styles.flexRow,
                 ]}>
                     <TouchableOpacity 
-                        onPress={() => saveInspectionDetails()}
+                        onPress={() => validateSave()}
                         disabled ={thicknessFrom !== 0 ? (thicknessTo !== 0 ? (ActualThickness !== 0 ? false : true): true) : true}
                     >
                         <View style={[
@@ -426,6 +459,7 @@ const InscpectionDetails = (props, {navigation}) =>{
 
     return(
         <NativeBaseProvider>
+            
             {
                 loading 
                 ? 
@@ -439,6 +473,7 @@ const InscpectionDetails = (props, {navigation}) =>{
                         </View>
                     </>
                 :
+                <ScrollView>
                     <View style={[styles.mX3]}>
                         <View style={[styles.flexRow, styles.alignFlexEnd, styles.justifySpaceBetween, styles.mX1]}>
                             <View style={[styles.flexRow, styles.alignFlexEnd, {marginBottom:10}]}>
@@ -510,9 +545,19 @@ const InscpectionDetails = (props, {navigation}) =>{
                                 {RemarksComponent()}
                             </View>
                         </View>
+                        <View style={[styles.flexRow, styles.alignFlexEnd, styles.justifySpaceBetween, styles.mX1]}>
+                            <View style={[styles.flexRow, styles.alignFlexEnd]}>
+                                <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300]}>
+                                    Material Reject QTY : 
+                                </Text>
+                                {NGGoodQtyfun()}
+                            </View>
+                        </View>
                         {ButtonSaveCancel()}
-                    </View>    
+                    </View>   
+                </ScrollView> 
             }  
+            
         </NativeBaseProvider>
     )
 }

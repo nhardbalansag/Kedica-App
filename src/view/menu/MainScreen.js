@@ -60,22 +60,22 @@ const MainScreen = ({navigation}) =>{
     }
 
     useEffect(() =>{
-        backgroundTaskInit()
-        const subscription = AppState.addEventListener("change", nextAppState => {
-            if (appState.current.match(/inactive|background/) && nextAppState === "active") {
-              console.log("App has come to the foreground!");
-              updateTaskfunct("App is in active foreground")
-            }else{
-                updateTaskfunct("App is close and running in background")
-                appState.current = nextAppState;
-                setAppStateVisible(appState.current);
-                console.log("AppState", appState.current);
-            }
-        });
+        // backgroundTaskInit()
+        // const subscription = AppState.addEventListener("change", nextAppState => {
+        //     if (appState.current.match(/inactive|background/) && nextAppState === "active") {
+        //       console.log("App has come to the foreground!");
+        //       updateTaskfunct("App is in active foreground")
+        //     }else{
+        //         updateTaskfunct("App is close and running in background")
+        //         appState.current = nextAppState;
+        //         setAppStateVisible(appState.current);
+        //         console.log("AppState", appState.current);
+        //     }
+        // });
       
-        return () => {
-            subscription.remove();
-        };
+        // return () => {
+        //     subscription.remove();
+        // };
     }, [])
 
     const ButtonComponent = ({item}) => {

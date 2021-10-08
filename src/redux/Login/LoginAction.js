@@ -66,7 +66,11 @@ export const getUserDetails = (username, password, domainSetting) =>{
 
         dispatch({
             type: SET_USER_INFORMATION, 
-            FactoryId: responseData[0].FactoryID
+            FactoryId: responseData[0].FactoryID,
+            UserName: responseData[0].UserName,
+            FirstName: responseData[0].FirstName,
+            MiddleName: responseData[0].MiddleName,
+            LastName: responseData[0].LastName
         });
     }
 }
