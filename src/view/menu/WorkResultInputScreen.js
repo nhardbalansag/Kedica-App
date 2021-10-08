@@ -58,6 +58,8 @@ const WorkResultInputScreen = (props) =>{
     const [activeActionSheet, setactiveActionSheet] =  useState(false);
     const [activeActionSheetlabel, setactiveActionSheetlabel] =  useState(null);
 
+    const FactoryID = useSelector(state => state.loginCredential.FactoryId);
+
     const getcurrentdate = () =>{
 
         const formatYmd = date => date.toISOString().slice(0, 10);
@@ -105,12 +107,18 @@ const WorkResultInputScreen = (props) =>{
                         TravelSheetID: TravelSheetID,
                         LineID: lineId,
                         DateFrom: getcurrentdate(),
+                        FactoryID: FactoryID,
                         DateTo : "1900-01-01 00:00:00"
                     })
                 })
 
                 const responseData = await response.json();
-
+                props.navigation.navigate('ProductionWorkEntryScreen',
+                {
+                    title: "Work Result Input",
+                    url: "api/production-work/production-work-entry/index",
+                }
+            )
             }catch(error){
                 alertMessage(error.message);
             }

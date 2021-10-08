@@ -19,12 +19,8 @@ import {
 
 import { 
     Table, 
-    TableWrapper, 
     Row, 
     Rows, 
-    Col, 
-    Cols, 
-    Cell 
 } from 'react-native-table-component';
 
 import {
@@ -34,14 +30,11 @@ import {
 
 import CustomStyle from "../../asset/css/CustomStyle";
 
-import { APP_URL } from "../../config/AppConfig";
-
 import { useIsFocused } from "@react-navigation/native";
 
 import {
     NativeBaseProvider,
     FormControl,
-    Input,
     useDisclose,
     Actionsheet
 } from 'native-base';
@@ -216,7 +209,7 @@ const ProductionWorkEntryScreen = (props) =>{
             }else{
                 if(travelsheetno != null && travelsheetno.length > 14){
                     // console.warn(travelsheetno + "  after")
-
+                    
                     props.navigation.navigate(componentTitle === "Outgoing Inspection" ? "InscpectionDetails": component, 
                         {
                             title: (component === "WorkResultInputScreen" ? "Work Result Input" : (component === "InscpectionDetails" ? "OQC Result Input" : "") ),
@@ -275,8 +268,6 @@ const ProductionWorkEntryScreen = (props) =>{
                     goToWorkResult("InscpectionDetails", travelSheetNo)
                 :
                     goToWorkResult("WorkResultInputScreen", travelSheetNo)
-
-                setIsEnable(false)
             }
         }
     },[travelSheetNo, isFocused, filterData])
