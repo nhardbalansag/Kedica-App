@@ -36,7 +36,9 @@ import {
     NativeBaseProvider,
     FormControl,
     useDisclose,
-    Actionsheet
+    Actionsheet,
+    TableWrapper,
+    Cell
 } from 'native-base';
 
 import { 
@@ -59,7 +61,8 @@ const ProductionWorkEntryScreen = (props) =>{
     const [activeActionSheet, setactiveActionSheet] =  useState(false);
     const [filterData, setfilterData] =  useState("All");
     const [currentComponent, setcurrentComponent] =  useState("");
-    const [checkTravelSheet, setcheckTravelSheet] =  useState(false);
+    const [checkTravelSheet, setcheckTravelSheet] =  useState(null);
+    const limiters = [15, 19]
 
     const [WorkEntry, setWorkEntry] = useState();
     const dispatch = useDispatch()
@@ -169,17 +172,9 @@ const ProductionWorkEntryScreen = (props) =>{
             "Note",
             message,
             [
-              { text: "OK"}
+              { text: "OK", onPress: () => setTravelSheetNo(null) }
             ]
         );
-    }
-
-    const reduxTravelSheet = async (travelSheetNo) => {
-        try {
-            await dispatch(LoginAction.travelSheetRedux(travelSheetNo));
-        } catch (error) {
-            alertMessage(error.message);
-        }
     }
 
     const goToWorkResult = async(component, travelsheetno) =>{
@@ -199,46 +194,35 @@ const ProductionWorkEntryScreen = (props) =>{
             })
 
             const responseData = await response.json();
-
-            if(componentTitle === "Outgoing Inspection" && responseData[0].dataContent.IsProcess === 1 && travelsheetno.length === 15){
-                alertMessage("Please scan Pending/On-Going Travel Sheet.")
-            }else if(responseData[0].total === 0 && componentTitle === "Production Work Entry" && travelsheetno.length === 15){
-                alertMessage("Please scan Pending/On-Going Travel Sheet.")
-            }else if(!responseData[0].status && componentTitle === "Outgoing Inspection" && travelsheetno.length === 15){
-                alertMessage("Please scan a valid Travel Sheet")
-            }else{
-                if(travelsheetno != null && travelsheetno.length > 14){
-                    // console.warn(travelsheetno + "  after")
-                    
-                    props.navigation.navigate(componentTitle === "Outgoing Inspection" ? "InscpectionDetails": component, 
-                        {
-                            title: (component === "WorkResultInputScreen" ? "Work Result Input" : (component === "InscpectionDetails" ? "OQC Result Input" : "") ),
-                            dataContent: {
-                                number: travelsheetno,
-                            },
-                        }
-                    )
-                    setTravelSheetNo(null)
-                    setIsEnable(false)
+            setTravelSheetNo(null)
+            if(travelsheetno.includes("-") && travelsheetno.split("-").length === 3){
+                if(travelsheetno.split("-")[0] === "TS"){
+                    if(componentTitle === "Outgoing Inspection" && responseData[0].dataContent.IsProcess === 1){
+                        alertMessage("Please scan Pending/On-Going Travel Sheet.")
+                    }else if(responseData[0].total === 0 && componentTitle === "Production Work Entry"){
+                        alertMessage("Please scan Pending/On-Going Travel Sheet.")
+                    }else{
+                        // console.warn(travelsheetno + "  after")
+                        props.navigation.navigate(componentTitle === "Outgoing Inspection" ? "InscpectionDetails": component, 
+                            {
+                                title: (component === "WorkResultInputScreen" ? "Work Result Input" : (component === "InscpectionDetails" ? "OQC Result Input" : "") ),
+                                dataContent: {
+                                    number: travelsheetno,
+                                }
+                            }
+                        )
+                        setIsEnable(false)
+                    }
+                }else{
+                    alertMessage("Please scan a valid Travel Sheet")
                 }
-                // else{
-                //     AlertNull()
-                // }
+            }else{
+                alertMessage("Please scan a valid Travel Sheet")
             }
             setRefreshing(false);
         } catch (error) {
             alertMessage(error.message);
         }
-    }
- 
-    const AlertNull = () =>{
-        Alert.alert(
-            "Note",
-            "Travel Sheet number is Empty",
-            [
-              { text: "OK"}
-            ]
-        );
     }
 
     var pressCount = 0;
@@ -260,9 +244,8 @@ const ProductionWorkEntryScreen = (props) =>{
     useEffect(() =>{
         if(isFocused){ 
             getProductionWorkEntryList(token, domainSetting)
+           
             if(travelSheetNo !== null && isEnable == false){
-                // console.warn(travelSheetNo + " current screen")
-
                 props.route.params.title === "Outgoing Inspection"
                 ?
                     goToWorkResult("InscpectionDetails", travelSheetNo)
@@ -274,6 +257,33 @@ const ProductionWorkEntryScreen = (props) =>{
 
     const table = {
         tableHead: ['Start Process', 'End Process', 'Travel Sheet No.', 'Product Name', 'Priority No.', 'Age', 'Ship Date'],
+    }
+
+    const actionViewComponent = (data, index) =>{
+       
+        return(
+            <TouchableOpacity 
+                onPress={() => props.navigation.navigate("HoldQtyProcess",
+                    {
+                        title: "Hold Qty Return/Proceed",
+                        dataContent: {
+                            number: String(data),
+                        },
+                    }
+                )}
+            >
+                <View style={[
+                    styles.justifyCenter,
+                    styles.alignCenter,
+                    styles.flexRow,
+                    styles.pY1,
+                    styles.pX2
+                ]}>
+                    <Icon name="eye" size={25} color={colors.primaryColor} />
+                    <Text style={[styles.font25, styles.textPrimary, styles.mL1]}>View</Text>
+                </View>
+            </TouchableOpacity>
+        )
     }
 
     const tableComponent = () =>{
@@ -304,12 +314,30 @@ const ProductionWorkEntryScreen = (props) =>{
                             textStyle={CustomStyle.tableText}
                             widthArr={[280, 280, 250, 400, 150, 170, 200]}
                         />
-                        <Rows 
+                        {/* <Rows 
                             data={WorkEntry} 
                             textStyle={CustomStyle.tableDataText}
                             widthArr={[280, 280, 250, 400, 150, 170, 200]}
-
-                        />
+                        /> */}
+                        {
+                            WorkEntry !== null ?
+                            WorkEntry.map((rowData, index) => (
+                                // <TableWrapper key={index} style={[styles.flexRow]}>
+                                //   {
+                                //     rowData.map((cellData, cellIndex) => (
+                                //         <Cell 
+                                //             key={cellIndex} 
+                                //             data={cellIndex === 0 ? actionViewComponent(cellData, index) : cellData} 
+                                //             textStyle={[CustomStyle.tableDataText]}
+                                //             width={280}
+                                //         />
+                                //     ))
+                                //   }
+                                // </TableWrapper>
+                                console.log(index)
+                            ))
+                            :<></>
+                        }
                     </Table>
                 </ScrollView>
             </NativeBaseProvider>
@@ -369,7 +397,7 @@ const ProductionWorkEntryScreen = (props) =>{
                                 ]}
                                 showSoftInputOnFocus={isEnable}
                                 autoFocus={true}
-                                onChangeText={(text) => setTravelSheetNo(text)}
+                                onChangeText={(text) => !isEnable ? limiters.includes(text.length) ? setTravelSheetNo(text) : "" : setTravelSheetNo(text)}
                                 value={travelSheetNo}
                             />
                         </FormControl>
