@@ -460,7 +460,7 @@ const ProductionWorkEntryScreen = (props) =>{
                     <>
                         <FlatList 
                             ListHeaderComponent={tableComponent}
-                            ListFooterComponent={loadbutton}
+                            // ListFooterComponent={loadbutton}
                             numColumns={1}
                             refreshControl={
                                 <RefreshControl refreshing={refreshing} size="large" onRefresh={refreshPage} />
