@@ -20,8 +20,6 @@ import {
     colors,
 } from "../../asset/css/BaseStyle";
 
-import DeviceInfo from 'react-native-device-info';
-
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 import {ProductionScreen} from "../../navigator/appData"
@@ -29,12 +27,7 @@ import { io } from "socket.io-client";
 import { backgroundTaskInit, updateTaskfunct } from "../../background/task";
 import { AppState } from 'react-native';
 
-import * as ProductionWorkEntryAction from '../../redux/ProductionWork/ProductionWorkEntryAction'
-import { useDispatch } from "react-redux";
-
 const MainScreen = ({navigation}) =>{
-
-    const dispatch = useDispatch()
 
     const appState = useRef(AppState.currentState);
     const [appStateVisible, setAppStateVisible] = useState(appState.current);
@@ -61,16 +54,6 @@ const MainScreen = ({navigation}) =>{
         );
     }
 
-    const getDeviceInformation = async () =>{
-        try {
-            DeviceInfo.getDeviceName().then((deviceName) => {
-                dispatch(ProductionWorkEntryAction.getDeviceInformation(deviceName));
-            })
-        } catch (error) {
-            alertMessage(error.message);
-        }
-    }
-
     useEffect(() =>{
         // backgroundTaskInit()
         // const subscription = AppState.addEventListener("change", nextAppState => {
@@ -88,7 +71,6 @@ const MainScreen = ({navigation}) =>{
         // return () => {
         //     subscription.remove();
         // };
-        getDeviceInformation()
     }, [])
 
     const ButtonComponent = ({item}) => {
