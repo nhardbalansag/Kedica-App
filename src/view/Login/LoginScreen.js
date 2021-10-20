@@ -35,7 +35,7 @@ import {
     Center,
     Button
   } from 'native-base';
-
+  
 import { 
     useSelector
 } from 'react-redux';
@@ -44,7 +44,7 @@ import * as LoginAction from "../../redux/Login/LoginAction";
 import { useDispatch } from "react-redux";
 
 const LoginScreen = () => {
-
+   
     const domainSetting = useSelector(state => state.loginCredential.domainSetting);
 
     const [username, setUsername] = useState("admin")
