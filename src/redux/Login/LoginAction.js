@@ -4,6 +4,7 @@ export const SET_CREDENTIALS = 'SET_CREDENTIALS';
 export const SET_DOMAIN = 'SET_DOMAIN';
 export const SET_USER_INFORMATION = 'SET_USER_INFORMATION';
 export const SET_TRAVELSHEET = 'SET_TRAVELSHEET';
+export const SET_LOGOUT = 'SET_LOGOUT';
 
 export const login = (username, password, domainSetting) =>{
 
@@ -81,6 +82,14 @@ export const changeDomain = (domain) =>{
         dispatch({
             type: SET_DOMAIN, 
             domain: domain
+        });
+    }
+}
+
+export const logoutUser = () =>{
+    return async (dispatch) =>{
+        dispatch({
+            type: SET_LOGOUT
         });
     }
 }

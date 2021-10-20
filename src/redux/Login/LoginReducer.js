@@ -1,5 +1,5 @@
 
-import {SET_CREDENTIALS, SET_DOMAIN, SET_USER_INFORMATION, SET_TRAVELSHEET} from "./LoginAction"
+import {SET_CREDENTIALS, SET_DOMAIN, SET_USER_INFORMATION, SET_TRAVELSHEET, SET_LOGOUT} from "./LoginAction"
 
 const InitialStates ={
     TokenData:null,
@@ -38,6 +38,11 @@ export default (state = InitialStates, action) =>{
             return{
                 ...state,
                 travelSheet:action.travelSheet
+            }
+        case SET_LOGOUT:
+            return{
+                ...state,
+                TokenData: null
             }
         default :
             return{
