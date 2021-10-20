@@ -29,13 +29,13 @@ import {
     ScrollView
 } from 'native-base';
 
+import DeviceInfo from 'react-native-device-info';
+
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 const WorkResultInputScreen = (props) =>{
 
     const domainSetting = useSelector(state => state.loginCredential.domainSetting);
-    const deviceName = useSelector(state => state.ProductionWork.DeviceName);
-
     const { isOpen, onOpen, onClose } = useDisclose()
 
     const travelSheetNumber = props.route.params.dataContent.number;
@@ -59,6 +59,8 @@ const WorkResultInputScreen = (props) =>{
     const [loading, setloading] =  useState(true);
     const [activeActionSheet, setactiveActionSheet] =  useState(false);
     const [activeActionSheetlabel, setactiveActionSheetlabel] =  useState(null);
+    const [prodlineButton, setprodlineButton] =  useState(false);
+    const [plating, setPlating] =  useState(null);
 
     const FactoryID = useSelector(state => state.loginCredential.FactoryId);
 
@@ -166,8 +168,6 @@ const WorkResultInputScreen = (props) =>{
             })
 
             const responseData = await response.json();
-            
-            setProductionLine(responseData[0].dataContent)
             checkLineID(responseData[0].dataContent)
         }catch(error){
             alertMessage(error.message);
@@ -177,7 +177,7 @@ const WorkResultInputScreen = (props) =>{
     const search = async (tokendata, domainSetting) =>{
 
         const travelSheetNumber = props.route.params.dataContent.number;
-        // console.warn(travelSheetNumber + " another screen")
+ 
         setloading(true)
         try{
             const response = await fetch(domainSetting + "api/production-work/production-work-entry/search-travelsheet-details/" + travelSheetNumber, {
@@ -197,6 +197,8 @@ const WorkResultInputScreen = (props) =>{
                     ItemCode:       responseData[0].dataContent[0].ItemCode,
                     ItemName:       responseData[0].dataContent[0].ItemName,
                     Qty:            responseData[0].dataContent[0].Qty,
+                    Line:           responseData[0].dataContent[0].Line,
+                    PlatingLotNo:   responseData[0].dataContent[0].PlatingLotNo,
                     DateFrom:       responseData[0].dataContent[0].DateFrom,
                     DateTo:         responseData[0].dataContent[0].DateTo
                }
@@ -207,6 +209,15 @@ const WorkResultInputScreen = (props) =>{
                setendDatetime(tempvar.DateTo == "1900-01-01 00:00:00" ? null : tempvar.DateTo)
                setQty(tempvar.Qty)
                setTravelSheetID(tempvar.TravelSheetID)
+
+               if(tempvar.Line !== ""){
+                    setactiveActionSheetlabel(tempvar.Line)
+                    setPlating(tempvar.PlatingLotNo)
+                    setprodlineButton(true)
+               }else{
+                    getProductLine()
+               }
+
                setloading(false)
             }else{
                 alertMessage("No Data Available");
@@ -247,15 +258,17 @@ const WorkResultInputScreen = (props) =>{
         setactiveActionSheet(true)
     }
 
-    const checkLineID = (data) =>{
+    const checkLineID = async (data) =>{
+        var name = await DeviceInfo.getDeviceName()
         if(data != null){
             for(let i = 0; i < data.length; i++){
-                if(data[i].Line === deviceName){
+                if(data[i].Line === name){
                     setLineID(data[i].LineID)
                     setactiveActionSheetlabel(data[i].Line)
+                    setProductionLine(data)
                     break;
                 }else{
-                    alertMessageNote("No Production line Connected to this device Please Setup your device or select production line")
+                    alertMessageNote("No Production line Connected to this device Please Setup your device in tablet settings.")
                     break;
                 }
             }
@@ -269,7 +282,6 @@ const WorkResultInputScreen = (props) =>{
     }
 
     useEffect(() =>{
-        getProductLine()
         search(token, domainSetting)
         realtime();
     },[])
@@ -277,24 +289,44 @@ const WorkResultInputScreen = (props) =>{
     const mainContent = () =>{
         return(
             <NativeBaseProvider>
-                <View style={[
-                    styles.flexRow,
-                    styles.alignCenter,
-                    styles.mL2
-                ]}>
-                    <Text style={[
-                        styles.font30,
-                        styles.textBold,
-                        styles.mR1
-                    ]}>
-                        Travel Sheet No. :
-                    </Text>
-                    <Text style={[
-                        styles.font40
-                    ]}>
-                        {travelSheetNumber}
-                    </Text>
-                </View>
+<View style={[styles.flexRow]}>
+    <View style={[
+        styles.flexRow,
+        styles.alignCenter,
+        styles.mL2
+    ]}>
+        <Text style={[
+            styles.font30,
+            styles.textBold,
+            styles.mR1
+        ]}>
+            Travel Sheet No. :
+        </Text>
+        <Text style={[
+            styles.font40
+        ]}>
+            {travelSheetNumber}
+        </Text>
+    </View>
+    <View style={[
+        styles.flexRow,
+        styles.alignCenter,
+        styles.mL2
+    ]}>
+        <Text style={[
+            styles.font30,
+            styles.textBold,
+            styles.mR1
+        ]}>
+            Plating Lot No. :
+        </Text>
+        <Text style={[
+            styles.font40
+        ]}>
+            {plating == null ? "--" : plating}
+        </Text>
+    </View>
+</View>
                 <View style={[
                     styles.flexRow,
                     styles.alignCenter,
@@ -355,9 +387,9 @@ const WorkResultInputScreen = (props) =>{
                         Prod. Line :
                     </Text>
                     <View>
-                        <TouchableOpacity onPress={ () => actionsheet()}>
+                        <TouchableOpacity disabled={prodlineButton} onPress={ () => actionsheet()}>
                             <View style={[
-                                styles.backgroundPrimary,
+                                !prodlineButton ? styles.backgroundPrimary : styles.bgGray200,
                                 styles.justifyCenter,
                                 styles.alignCenter,
                                 styles.flexRow,
@@ -402,7 +434,7 @@ const WorkResultInputScreen = (props) =>{
                                         styles.pL5,
                                     ]}>
                                         <Icon name="times" size={40} color={colors.dangerColor} />
-                                        <Text style={[styles.font40, styles.mL2, styles.textDanger]}>Cancel</Text>
+                                        <Text style={[styles.font40, styles.mL2, styles.textDanger]}>{productionLine == null ? "No production line connected to this device Please Setup your device name in tablet settings." : "Cancel"}</Text>
                                     </View>
                                 </TouchableOpacity>
                             </View>
