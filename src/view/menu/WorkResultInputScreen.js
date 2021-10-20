@@ -168,6 +168,7 @@ const WorkResultInputScreen = (props) =>{
             const responseData = await response.json();
             
             setProductionLine(responseData[0].dataContent)
+            checkLineID(responseData[0].dataContent)
         }catch(error){
             alertMessage(error.message);
         }
@@ -246,6 +247,21 @@ const WorkResultInputScreen = (props) =>{
         setactiveActionSheet(true)
     }
 
+    const checkLineID = (data) =>{
+        if(data != null){
+            for(let i = 0; i < data.length; i++){
+                if(data[i].Line === deviceName){
+                    setLineID(data[i].LineID)
+                    setactiveActionSheetlabel(data[i].Line)
+                    break;
+                }else{
+                    alertMessageNote("No Production line Connected to this device Please Setup your device or select production line")
+                    break;
+                }
+            }
+        }
+    }
+
     const closeActionSheet = (prodline, labelTitle) =>{
         setactiveActionSheet(false)
         setLineID(prodline)
@@ -254,8 +270,6 @@ const WorkResultInputScreen = (props) =>{
 
     useEffect(() =>{
         getProductLine()
-        setLineID(deviceName)
-        setactiveActionSheetlabel(deviceName)
         search(token, domainSetting)
         realtime();
     },[])
