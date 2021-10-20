@@ -25,7 +25,8 @@ import {
     NativeBaseProvider,
     Actionsheet,
     useDisclose,
-    Modal
+    Modal,
+    ScrollView
 } from 'native-base';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -33,6 +34,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 const WorkResultInputScreen = (props) =>{
 
     const domainSetting = useSelector(state => state.loginCredential.domainSetting);
+    const deviceName = useSelector(state => state.ProductionWork.DeviceName);
 
     const { isOpen, onOpen, onClose } = useDisclose()
 
@@ -252,6 +254,8 @@ const WorkResultInputScreen = (props) =>{
 
     useEffect(() =>{
         getProductLine()
+        setLineID(deviceName)
+        setactiveActionSheetlabel(deviceName)
         search(token, domainSetting)
         realtime();
     },[])
@@ -373,7 +377,7 @@ const WorkResultInputScreen = (props) =>{
                 </View>
                 
                 <Actionsheet isOpen={activeActionSheet} onClose={onClose}  hideDragIndicator={true}>
-                    <Actionsheet.Content>
+                    <Actionsheet.Content style={[styles.alignFlexStart]}>
                         <Actionsheet.Item>
                             <View>
                                 <TouchableOpacity onPress={() => setactiveActionSheet(false)}>
@@ -389,6 +393,7 @@ const WorkResultInputScreen = (props) =>{
                                 </TouchableOpacity>
                             </View>
                         </Actionsheet.Item>
+                        <ScrollView>
                         {
                             productionLine != null?
                             productionLine.map((data, index)=>
@@ -411,6 +416,7 @@ const WorkResultInputScreen = (props) =>{
                             :
                             <></>
                         }
+                        </ScrollView>
                     </Actionsheet.Content>
                 </Actionsheet>
 

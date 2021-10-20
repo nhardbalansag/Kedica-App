@@ -1,6 +1,7 @@
 import {APP_URL} from "../../config/AppConfig"
 
 export const GET_PRODUCTIONWORKENTRYLIST = 'GET_PRODUCTIONWORKENTRYLIST';
+export const SET_DEVICE_INFORMATION = 'SET_DEVICE_INFORMATION';
 
 import ProductionWorkEntry from "../../model/ProductionWork/ProductionWorkEntry";
 
@@ -17,7 +18,6 @@ export const getProductionWorkEntryList = (token) =>{
 
         const responseData = await response.json();
         const productionWorkEntryData = [];
-        console.warn(responseData[0])
 
         dispatch({
             type:       GET_PRODUCTIONWORKENTRYLIST,
@@ -25,5 +25,14 @@ export const getProductionWorkEntryList = (token) =>{
             Message:    responseData.message,
             Total:      responseData.total
         })
+    }
+}
+
+export const getDeviceInformation = (devicename) =>{
+    return async (dispatch) =>{
+        dispatch({
+            type: SET_DEVICE_INFORMATION, 
+            DeviceName: devicename
+        });
     }
 }

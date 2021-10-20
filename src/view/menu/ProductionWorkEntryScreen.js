@@ -17,11 +17,7 @@ import {
     TextInput 
 } from "react-native";
 
-import { 
-    Table, 
-    Row, 
-    Rows, 
-} from 'react-native-table-component';
+import { Table, TableWrapper, Row, Cell } from 'react-native-table-component';
 
 import {
     styles,
@@ -37,8 +33,6 @@ import {
     FormControl,
     useDisclose,
     Actionsheet,
-    TableWrapper,
-    Cell
 } from 'native-base';
 
 import { 
@@ -61,10 +55,9 @@ const ProductionWorkEntryScreen = (props) =>{
     const [activeActionSheet, setactiveActionSheet] =  useState(false);
     const [filterData, setfilterData] =  useState("All");
     const [currentComponent, setcurrentComponent] =  useState("");
-    const [checkTravelSheet, setcheckTravelSheet] =  useState(null);
     const limiters = [15, 19]
 
-    const [WorkEntry, setWorkEntry] = useState();
+    const [WorkEntry, setWorkEntry] = useState(null);
     const dispatch = useDispatch()
     
     const token = useSelector(state => state.loginCredential.TokenData);
@@ -260,17 +253,9 @@ const ProductionWorkEntryScreen = (props) =>{
     }
 
     const actionViewComponent = (data, index) =>{
-       
         return(
             <TouchableOpacity 
-                onPress={() => props.navigation.navigate("HoldQtyProcess",
-                    {
-                        title: "Hold Qty Return/Proceed",
-                        dataContent: {
-                            number: String(data),
-                        },
-                    }
-                )}
+                onPress={() => setTravelSheetNo(data)}
             >
                 <View style={[
                     styles.justifyCenter,
@@ -279,8 +264,8 @@ const ProductionWorkEntryScreen = (props) =>{
                     styles.pY1,
                     styles.pX2
                 ]}>
-                    <Icon name="eye" size={25} color={colors.primaryColor} />
-                    <Text style={[styles.font25, styles.textPrimary, styles.mL1]}>View</Text>
+                    <Icon name="mouse-pointer" size={25} color={colors.primaryColor} />
+                    <Text style={[styles.font25, styles.textPrimary, styles.mL1]}>{data}</Text>
                 </View>
             </TouchableOpacity>
         )
@@ -312,29 +297,23 @@ const ProductionWorkEntryScreen = (props) =>{
                         <Row 
                             data={table.tableHead} 
                             textStyle={CustomStyle.tableText}
-                            widthArr={[280, 280, 250, 400, 150, 170, 200]}
+                            widthArr={[280, 280, 320, 280, 280, 280, 280]}
                         />
-                        {/* <Rows 
-                            data={WorkEntry} 
-                            textStyle={CustomStyle.tableDataText}
-                            widthArr={[280, 280, 250, 400, 150, 170, 200]}
-                        /> */}
                         {
                             WorkEntry !== null ?
                             WorkEntry.map((rowData, index) => (
-                                // <TableWrapper key={index} style={[styles.flexRow]}>
-                                //   {
-                                //     rowData.map((cellData, cellIndex) => (
-                                //         <Cell 
-                                //             key={cellIndex} 
-                                //             data={cellIndex === 0 ? actionViewComponent(cellData, index) : cellData} 
-                                //             textStyle={[CustomStyle.tableDataText]}
-                                //             width={280}
-                                //         />
-                                //     ))
-                                //   }
-                                // </TableWrapper>
-                                console.log(index)
+                                <TableWrapper key={index} style={[styles.flexRow]}>
+                                  {
+                                    rowData.map((cellData, cellIndex) => (
+                                        <Cell 
+                                            key={cellIndex} 
+                                            data={cellIndex === 2 ? actionViewComponent(cellData, index) : cellData} 
+                                            textStyle={[CustomStyle.tableDataText]}
+                                            width={cellIndex === 2 ? 320 : 280}
+                                        />
+                                    ))
+                                  }
+                                </TableWrapper>
                             ))
                             :<></>
                         }
