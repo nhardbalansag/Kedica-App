@@ -226,7 +226,7 @@ const HoldLotEntry = (props, {navigation}) =>{
                 <>
                     <FlatList 
                         ListHeaderComponent={holdLotTable}
-                        ListFooterComponent={loadbutton}
+                        // ListFooterComponent={loadbutton}
                         numColumns={1}
                         refreshControl={
                             <RefreshControl refreshing={refreshing} size="large" onRefresh={refreshPage} />
