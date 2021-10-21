@@ -1,7 +1,8 @@
 import React,
 {
     useState,
-    useEffect
+    useEffect,
+    useRef
 } from "react";
 
 import { 
@@ -19,41 +20,62 @@ import {
     colors,
 } from "../../asset/css/BaseStyle";
 
-import {
-    NativeBaseProvider, 
-    usePropsResolution,
-} from 'native-base';
-
 import Icon from 'react-native-vector-icons/FontAwesome';
+
+import {ProductionScreen} from "../../navigator/appData"
+import { io } from "socket.io-client";
+import { backgroundTaskInit, updateTaskfunct } from "../../background/task";
+import { AppState } from 'react-native';
 
 const MainScreen = ({navigation}) =>{
 
-    const ProductionScreen = [
-        {
-            title: "Production Work Entry",
-            toptitle: "Production Work",
-            iconuse: "cube",
-            navigationScreen: "ProductionWorkEntryScreen",
-            api: {
-                url: "api/production-work/production-work-entry/index",
-                method: "GET"
-            }
-        },
-        {
-            title: "Outgoing Inspection",
-            toptitle: "Outgoing Quality Inspection",
-            iconuse: "search",
-            navigationScreen: "ProductionWorkEntryScreen",
-            api: {
-                url: "api/quality-inspection/outgoing-inspection/get",
-                method: "GET"
-            }
-        }
-    ];
+    const appState = useRef(AppState.currentState);
+    const [appStateVisible, setAppStateVisible] = useState(appState.current);
+
+    const [loading, setisLoading] = useState(false)
+
+    const checkDeviceInServer = () =>{
+        
+    }
+
+    const submitDeviceInformation = () =>{
+
+    }
+
+    const alertMessage = (message) =>{
+        Alert.alert(
+            "Note",
+            message,
+            [
+                { 
+                  text: "OK",
+                }
+            ]
+        );
+    }
+
+    useEffect(() =>{
+        // backgroundTaskInit()
+        // const subscription = AppState.addEventListener("change", nextAppState => {
+        //     if (appState.current.match(/inactive|background/) && nextAppState === "active") {
+        //       console.log("App has come to the foreground!");
+        //       updateTaskfunct("App is in active foreground")
+        //     }else{
+        //         updateTaskfunct("App is close and running in background")
+        //         appState.current = nextAppState;
+        //         setAppStateVisible(appState.current);
+        //         console.log("AppState", appState.current);
+        //     }
+        // });
+      
+        // return () => {
+        //     subscription.remove();
+        // };
+    }, [])
 
     const ButtonComponent = ({item}) => {
         return(
-            <View>
+            <View style={[styles.w50]}>
                 <TouchableOpacity
                     onPress={() => navigation.navigate(
                         item.navigationScreen,
@@ -73,7 +95,7 @@ const MainScreen = ({navigation}) =>{
                             styles.mY1,
                             styles.justifyCenter,
                             styles.alignCenter,
-                            styles.border10
+                            styles.border10,
                         ]}
                     >
                         <View>
@@ -94,15 +116,29 @@ const MainScreen = ({navigation}) =>{
     return (
         <View
             style={[
-                styles.alignCenter
+                styles.alignCenter,
             ]}
         >
-            <FlatList 
-                // keyExtractor={item => console.log(item)} 
-                data={ProductionScreen} 
-                renderItem={ButtonComponent} 
-                numColumns={2}
-            />
+            {
+                loading ?
+                    <>
+                        <View style={[
+                                styles.alignCenter,
+                                styles.justifyCenter,
+                            ]}>
+                            <ActivityIndicator  size="large" color={colors.primaryColor}/>
+                            <Text style={[styles.font20]}>Checking Device Information, please wait..</Text>
+                        </View>
+                    </> 
+                    :
+                    <FlatList 
+                        // keyExtractor={item => console.log(item)} 
+                        data={ProductionScreen} 
+                        renderItem={ButtonComponent} 
+                        numColumns={2}
+                    />
+            }
+            
         </View>
     )
 }

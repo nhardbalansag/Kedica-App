@@ -25,18 +25,22 @@ import {
     NativeBaseProvider,
     Actionsheet,
     useDisclose,
-    Modal
+    Modal,
+    ScrollView
 } from 'native-base';
+
+import DeviceInfo from 'react-native-device-info';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 const WorkResultInputScreen = (props) =>{
 
     const domainSetting = useSelector(state => state.loginCredential.domainSetting);
-
     const { isOpen, onOpen, onClose } = useDisclose()
 
     const travelSheetNumber = props.route.params.dataContent.number;
+
+    const traveldata = useSelector(state => state.loginCredential.travelSheet);
 
     const token = useSelector(state => state.loginCredential.TokenData);
 
@@ -55,6 +59,10 @@ const WorkResultInputScreen = (props) =>{
     const [loading, setloading] =  useState(true);
     const [activeActionSheet, setactiveActionSheet] =  useState(false);
     const [activeActionSheetlabel, setactiveActionSheetlabel] =  useState(null);
+    const [prodlineButton, setprodlineButton] =  useState(false);
+    const [plating, setPlating] =  useState(null);
+
+    const FactoryID = useSelector(state => state.loginCredential.FactoryId);
 
     const getcurrentdate = () =>{
 
@@ -103,12 +111,18 @@ const WorkResultInputScreen = (props) =>{
                         TravelSheetID: TravelSheetID,
                         LineID: lineId,
                         DateFrom: getcurrentdate(),
+                        FactoryID: FactoryID,
                         DateTo : "1900-01-01 00:00:00"
                     })
                 })
 
                 const responseData = await response.json();
-
+                props.navigation.navigate('ProductionWorkEntryScreen',
+                {
+                    title: "Work Result Input",
+                    url: "api/production-work/production-work-entry/index",
+                }
+            )
             }catch(error){
                 alertMessage(error.message);
             }
@@ -154,17 +168,19 @@ const WorkResultInputScreen = (props) =>{
             })
 
             const responseData = await response.json();
-            
-            setProductionLine(responseData[0].dataContent)
+            checkLineID(responseData[0].dataContent)
         }catch(error){
             alertMessage(error.message);
         }
     }
 
-    const search = async (tokendata, param, domainSetting) =>{
+    const search = async (tokendata, domainSetting) =>{
+
+        const travelSheetNumber = props.route.params.dataContent.number;
+ 
         setloading(true)
         try{
-            const response = await fetch(domainSetting + "api/production-work/production-work-entry/search-travelsheet-details/" + param, {
+            const response = await fetch(domainSetting + "api/production-work/production-work-entry/search-travelsheet-details/" + travelSheetNumber, {
                 method:'GET',
                 headers:{
                     'Content-type': 'application/json',
@@ -181,6 +197,8 @@ const WorkResultInputScreen = (props) =>{
                     ItemCode:       responseData[0].dataContent[0].ItemCode,
                     ItemName:       responseData[0].dataContent[0].ItemName,
                     Qty:            responseData[0].dataContent[0].Qty,
+                    Line:           responseData[0].dataContent[0].Line,
+                    PlatingLotNo:   responseData[0].dataContent[0].PlatingLotNo,
                     DateFrom:       responseData[0].dataContent[0].DateFrom,
                     DateTo:         responseData[0].dataContent[0].DateTo
                }
@@ -191,6 +209,15 @@ const WorkResultInputScreen = (props) =>{
                setendDatetime(tempvar.DateTo == "1900-01-01 00:00:00" ? null : tempvar.DateTo)
                setQty(tempvar.Qty)
                setTravelSheetID(tempvar.TravelSheetID)
+
+               if(tempvar.Line !== ""){
+                    setactiveActionSheetlabel(tempvar.Line)
+                    setPlating(tempvar.PlatingLotNo)
+                    setprodlineButton(true)
+               }else{
+                    getProductLine()
+               }
+
                setloading(false)
             }else{
                 alertMessage("No Data Available");
@@ -199,21 +226,6 @@ const WorkResultInputScreen = (props) =>{
             alertMessage(error.message);
         }
     }
-
-    const ProductionScreen = [
-        {
-            api: {
-                url: "api/production-work/production-work-entry/index",
-                method: "GET"
-            }
-        },
-        {
-            api: {
-                url: "api/quality-inspection/outgoing-inspection/get",
-                method: "GET"
-            }
-        }
-    ];
 
     const alertMessage = (message) =>{
         Alert.alert(
@@ -246,6 +258,23 @@ const WorkResultInputScreen = (props) =>{
         setactiveActionSheet(true)
     }
 
+    const checkLineID = async (data) =>{
+        var name = await DeviceInfo.getDeviceName()
+        if(data != null){
+            for(let i = 0; i < data.length; i++){
+                if(data[i].Line === name){
+                    setLineID(data[i].LineID)
+                    setactiveActionSheetlabel(data[i].Line)
+                    setProductionLine(data)
+                    break;
+                }else{
+                    alertMessageNote("No Production line Connected to this device Please Setup your device in tablet settings.")
+                    break;
+                }
+            }
+        }
+    }
+
     const closeActionSheet = (prodline, labelTitle) =>{
         setactiveActionSheet(false)
         setLineID(prodline)
@@ -253,32 +282,51 @@ const WorkResultInputScreen = (props) =>{
     }
 
     useEffect(() =>{
-        getProductLine()
-        search(token, travelSheetNumber, domainSetting)
+        search(token, domainSetting)
         realtime();
     },[])
 
     const mainContent = () =>{
         return(
             <NativeBaseProvider>
-                <View style={[
-                    styles.flexRow,
-                    styles.alignCenter,
-                    styles.mL2
-                ]}>
-                    <Text style={[
-                        styles.font30,
-                        styles.textBold,
-                        styles.mR1
-                    ]}>
-                        Travel Sheet No. :
-                    </Text>
-                    <Text style={[
-                        styles.font40
-                    ]}>
-                        {travelSheetNumber}
-                    </Text>
-                </View>
+<View style={[styles.flexRow]}>
+    <View style={[
+        styles.flexRow,
+        styles.alignCenter,
+        styles.mL2
+    ]}>
+        <Text style={[
+            styles.font30,
+            styles.textBold,
+            styles.mR1
+        ]}>
+            Travel Sheet No. :
+        </Text>
+        <Text style={[
+            styles.font40
+        ]}>
+            {travelSheetNumber}
+        </Text>
+    </View>
+    <View style={[
+        styles.flexRow,
+        styles.alignCenter,
+        styles.mL2
+    ]}>
+        <Text style={[
+            styles.font30,
+            styles.textBold,
+            styles.mR1
+        ]}>
+            Plating Lot No. :
+        </Text>
+        <Text style={[
+            styles.font40
+        ]}>
+            {plating == null ? "--" : plating}
+        </Text>
+    </View>
+</View>
                 <View style={[
                     styles.flexRow,
                     styles.alignCenter,
@@ -339,9 +387,9 @@ const WorkResultInputScreen = (props) =>{
                         Prod. Line :
                     </Text>
                     <View>
-                        <TouchableOpacity onPress={ () => actionsheet()}>
+                        <TouchableOpacity disabled={prodlineButton} onPress={ () => actionsheet()}>
                             <View style={[
-                                styles.backgroundPrimary,
+                                !prodlineButton ? styles.backgroundPrimary : styles.bgGray200,
                                 styles.justifyCenter,
                                 styles.alignCenter,
                                 styles.flexRow,
@@ -375,7 +423,7 @@ const WorkResultInputScreen = (props) =>{
                 </View>
                 
                 <Actionsheet isOpen={activeActionSheet} onClose={onClose}  hideDragIndicator={true}>
-                    <Actionsheet.Content>
+                    <Actionsheet.Content style={[styles.alignFlexStart]}>
                         <Actionsheet.Item>
                             <View>
                                 <TouchableOpacity onPress={() => setactiveActionSheet(false)}>
@@ -386,11 +434,12 @@ const WorkResultInputScreen = (props) =>{
                                         styles.pL5,
                                     ]}>
                                         <Icon name="times" size={40} color={colors.dangerColor} />
-                                        <Text style={[styles.font40, styles.mL2, styles.textDanger]}>Cancel</Text>
+                                        <Text style={[styles.font40, styles.mL2, styles.textDanger]}>{productionLine == null ? "No production line connected to this device Please Setup your device name in tablet settings." : "Cancel"}</Text>
                                     </View>
                                 </TouchableOpacity>
                             </View>
                         </Actionsheet.Item>
+                        <ScrollView>
                         {
                             productionLine != null?
                             productionLine.map((data, index)=>
@@ -413,6 +462,7 @@ const WorkResultInputScreen = (props) =>{
                             :
                             <></>
                         }
+                        </ScrollView>
                     </Actionsheet.Content>
                 </Actionsheet>
 

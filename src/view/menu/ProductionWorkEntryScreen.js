@@ -17,15 +17,7 @@ import {
     TextInput 
 } from "react-native";
 
-import { 
-    Table, 
-    TableWrapper, 
-    Row, 
-    Rows, 
-    Col, 
-    Cols, 
-    Cell 
-} from 'react-native-table-component';
+import { Table, TableWrapper, Row, Cell } from 'react-native-table-component';
 
 import {
     styles,
@@ -34,16 +26,13 @@ import {
 
 import CustomStyle from "../../asset/css/CustomStyle";
 
-import { APP_URL } from "../../config/AppConfig";
-
 import { useIsFocused } from "@react-navigation/native";
 
 import {
     NativeBaseProvider,
     FormControl,
-    Input,
     useDisclose,
-    Actionsheet
+    Actionsheet,
 } from 'native-base';
 
 import { 
@@ -51,6 +40,9 @@ import {
 } from "react-redux";
 
 import Icon from 'react-native-vector-icons/FontAwesome';
+
+import * as LoginAction from "../../redux/Login/LoginAction";
+import { useDispatch } from "react-redux";
 
 const ProductionWorkEntryScreen = (props) =>{
 
@@ -63,10 +55,11 @@ const ProductionWorkEntryScreen = (props) =>{
     const [activeActionSheet, setactiveActionSheet] =  useState(false);
     const [filterData, setfilterData] =  useState("All");
     const [currentComponent, setcurrentComponent] =  useState("");
-    const [checkTravelSheet, setcheckTravelSheet] =  useState(false);
+    const limiters = [15, 19]
 
-    const [WorkEntry, setWorkEntry] = useState();
-   
+    const [WorkEntry, setWorkEntry] = useState(null);
+    const dispatch = useDispatch()
+    
     const token = useSelector(state => state.loginCredential.TokenData);
 
     const domainSetting = useSelector(state => state.loginCredential.domainSetting);
@@ -172,17 +165,18 @@ const ProductionWorkEntryScreen = (props) =>{
             "Note",
             message,
             [
-              { text: "OK"}
+              { text: "OK", onPress: () => setTravelSheetNo(null) }
             ]
         );
     }
 
     const goToWorkResult = async(component, travelsheetno) =>{
-
+        // console.warn(travelsheetno + "  before")
+       
         const componentTitle = props.route.params.title;
         var productionWork =  domainSetting + "api/production-work/production-work-entry/search-production-work-table-entry/" + travelsheetno;
         var outgoing =  domainSetting + "api/quality-inspection/get-travelsheet-details/" + travelsheetno;
-        
+        setRefreshing(true);
         try {
             const response = await fetch(componentTitle === "Outgoing Inspection" ? outgoing : productionWork, {
                 method:'GET',
@@ -193,42 +187,35 @@ const ProductionWorkEntryScreen = (props) =>{
             })
 
             const responseData = await response.json();
-
-            if(componentTitle === "Outgoing Inspection" && responseData[0].dataContent.IsProcess === 1){
-                alertMessage("Please scan Pending/On-Going Travel Sheet.")
-            }else if(responseData[0].total === 0 && componentTitle === "Production Work Entry"){
-                alertMessage("Please scan Pending/On-Going Travel Sheet.")
-            }else if(!responseData[0].status && componentTitle === "Outgoing Inspection"){
-                alertMessage("Please scan a valid Travel Sheet")
-            }else{
-                if(travelsheetno != null ){
-                    props.navigation.navigate(componentTitle === "Outgoing Inspection" ? "InscpectionDetails": component, 
-                        {
-                            title: component === "WorkResultInputScreen" ? "Work Result Input" : "Inspection Details",
-                            dataContent: {
-                                number: travelsheetno,
-                            },
-                        }
-                    )
-                    setTravelSheetNo(null)
-                    setIsEnable(false)
+            setTravelSheetNo(null)
+            if(travelsheetno.includes("-") && travelsheetno.split("-").length === 3){
+                if(travelsheetno.split("-")[0] === "TS"){
+                    if(componentTitle === "Outgoing Inspection" && responseData[0].dataContent.IsProcess === 1){
+                        alertMessage("Please scan Pending/On-Going Travel Sheet.")
+                    }else if(responseData[0].total === 0 && componentTitle === "Production Work Entry"){
+                        alertMessage("Please scan Pending/On-Going Travel Sheet.")
+                    }else{
+                        // console.warn(travelsheetno + "  after")
+                        props.navigation.navigate(componentTitle === "Outgoing Inspection" ? "InscpectionDetails": component, 
+                            {
+                                title: (component === "WorkResultInputScreen" ? "Work Result Input" : (component === "InscpectionDetails" ? "OQC Result Input" : "") ),
+                                dataContent: {
+                                    number: travelsheetno,
+                                }
+                            }
+                        )
+                        setIsEnable(false)
+                    }
                 }else{
-                    AlertNull()
+                    alertMessage("Please scan a valid Travel Sheet")
                 }
+            }else{
+                alertMessage("Please scan a valid Travel Sheet")
             }
+            setRefreshing(false);
         } catch (error) {
             alertMessage(error.message);
         }
-    }
- 
-    const AlertNull = () =>{
-        Alert.alert(
-            "Note",
-            "Travel Sheet number is Empty",
-            [
-              { text: "OK"}
-            ]
-        );
     }
 
     var pressCount = 0;
@@ -250,21 +237,38 @@ const ProductionWorkEntryScreen = (props) =>{
     useEffect(() =>{
         if(isFocused){ 
             getProductionWorkEntryList(token, domainSetting)
-            if(travelSheetNo != null && isEnable == false){
+           
+            if(travelSheetNo !== null && isEnable == false){
                 props.route.params.title === "Outgoing Inspection"
                 ?
                     goToWorkResult("InscpectionDetails", travelSheetNo)
                 :
                     goToWorkResult("WorkResultInputScreen", travelSheetNo)
-
-                setTravelSheetNo(null)
-                setIsEnable(false)
             }
         }
     },[travelSheetNo, isFocused, filterData])
 
     const table = {
         tableHead: ['Start Process', 'End Process', 'Travel Sheet No.', 'Product Name', 'Priority No.', 'Age', 'Ship Date'],
+    }
+
+    const actionViewComponent = (data, index) =>{
+        return(
+            <TouchableOpacity 
+                onPress={() => setTravelSheetNo(data)}
+            >
+                <View style={[
+                    styles.justifyCenter,
+                    styles.alignCenter,
+                    styles.flexRow,
+                    styles.pY1,
+                    styles.pX2
+                ]}>
+                    <Icon name="mouse-pointer" size={25} color={colors.primaryColor} />
+                    <Text style={[styles.font25, styles.textPrimary, styles.mL1]}>{data}</Text>
+                </View>
+            </TouchableOpacity>
+        )
     }
 
     const tableComponent = () =>{
@@ -293,14 +297,26 @@ const ProductionWorkEntryScreen = (props) =>{
                         <Row 
                             data={table.tableHead} 
                             textStyle={CustomStyle.tableText}
-                            widthArr={[280, 280, 250, 400, 150, 170, 200]}
+                            widthArr={[280, 280, 320, 280, 280, 280, 280]}
                         />
-                        <Rows 
-                            data={WorkEntry} 
-                            textStyle={CustomStyle.tableDataText}
-                            widthArr={[280, 280, 250, 400, 150, 170, 200]}
-
-                        />
+                        {
+                            WorkEntry !== null ?
+                            WorkEntry.map((rowData, index) => (
+                                <TableWrapper key={index} style={[styles.flexRow]}>
+                                  {
+                                    rowData.map((cellData, cellIndex) => (
+                                        <Cell 
+                                            key={cellIndex} 
+                                            data={cellIndex === 2 ? actionViewComponent(cellData, index) : cellData} 
+                                            textStyle={[CustomStyle.tableDataText]}
+                                            width={cellIndex === 2 ? 320 : 280}
+                                        />
+                                    ))
+                                  }
+                                </TableWrapper>
+                            ))
+                            :<></>
+                        }
                     </Table>
                 </ScrollView>
             </NativeBaseProvider>
@@ -360,7 +376,7 @@ const ProductionWorkEntryScreen = (props) =>{
                                 ]}
                                 showSoftInputOnFocus={isEnable}
                                 autoFocus={true}
-                                onChangeText={(text) => setTravelSheetNo(text)}
+                                onChangeText={(text) => !isEnable ? limiters.includes(text.length) ? setTravelSheetNo(text) : "" : setTravelSheetNo(text)}
                                 value={travelSheetNo}
                             />
                         </FormControl>
@@ -444,7 +460,7 @@ const ProductionWorkEntryScreen = (props) =>{
                     <>
                         <FlatList 
                             ListHeaderComponent={tableComponent}
-                            ListFooterComponent={loadbutton}
+                            // ListFooterComponent={loadbutton}
                             numColumns={1}
                             refreshControl={
                                 <RefreshControl refreshing={refreshing} size="large" onRefresh={refreshPage} />
