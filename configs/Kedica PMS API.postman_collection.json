@@ -1,0 +1,1020 @@
+{
+	"info": {
+		"_postman_id": "ad9f91e1-b2b0-4c57-b425-a0d5c4f84006",
+		"name": "Kedica PMS API",
+		"description": "Kedica PMS API Request  for production and outgoing",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "kedica API",
+			"item": [
+				{
+					"name": "login",
+					"item": [
+						{
+							"name": "login api request",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "username",
+											"value": "admin",
+											"type": "text"
+										},
+										{
+											"key": "password",
+											"value": "12345678",
+											"type": "text"
+										},
+										{
+											"key": "grant_type",
+											"value": "password",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "https://localhost:44312/token",
+									"protocol": "https",
+									"host": [
+										"localhost"
+									],
+									"port": "44312",
+									"path": [
+										"token"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get user access",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "E-G15AUwIaYyAqeDYpwaONgdoieMC-QpsmSMqwPWlXUmEI2NtISFiqVyUAtEiPjYpQguZkIjVWm9G6zVNnCrxs0YpE20349V34PyoMBFEuGZQRVjG4S0q11OA8VIy3L586PFlNnJcSieLGRcDB0_nQfmGKal6BZASpjTGuShoyW2uh7Pn6sBXmJCHN3ckG1yI3AiMbAuuIFl97Hh4yGsEeqQqU5hLF7hJfZ0K0HciOBcGnsh45_s23w_Zffp4LJ4VuD9PDGq1O9uppm7E-49HhVZQ3jDkRTld9zf-gAxBxakeO4cz0TpQqMWZZozG-LpGL65k3f6fYEOtqVe_8dccd3KO6ymZak8umcSc62VxxY",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"Username\":\"admin\",\r\n    \"Password\":\"12345678\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://localhost:44312/api/login/user-information/get",
+									"protocol": "https",
+									"host": [
+										"localhost"
+									],
+									"port": "44312",
+									"path": [
+										"api",
+										"login",
+										"user-information",
+										"get"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get user information",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "cVrhQHRlpPw6rPOaEHFdNFx3eJrN_Oos2IOXi7lYPmgBnCKA4pDJSeGbVOqfYBMVaconQTiMXS2sZQL2tjfquc56hQwfYoXpAcbsMr0-AOmI1eS5S_mcgHSGmu4yCiq5e8wFResNP7Vni7hAx-DsFV7WNkRNsocL1ENgTl4P938zLeW95nwTS8AZYffTgDhxvKX-Aw2VaxPq-VoRbb0no195jMzHrilgXtmV7zlqhh8jKKTf1xpcmaC5IcVcC7N6uiEPyU-ztnuKnzWzx2mgARJyFqDWPfSKoB4vY5PgjsCJuDf53t6YwInk9xfLW8jR8URPpWnrlFvb2Fy1sgw1QjrFBqw2-rp6ANKix6YQug8",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://localhost:44312/api/login/user-information/get",
+									"protocol": "https",
+									"host": [
+										"localhost"
+									],
+									"port": "44312",
+									"path": [
+										"api",
+										"login",
+										"user-information",
+										"get"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "production work",
+					"item": [
+						{
+							"name": "production work entry list api",
+							"protocolProfileBehavior": {
+								"strictSSL": false
+							},
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "bY974FncNTkLYlk2lmF0-EEP6vNgxVvadGGqV39q3bJrWaRlWTJ71ZAlmmqYgALbvHOxEwc2Y1gN6NN4bdRMF9_p6nuAFNPm6y2OFos8M5OVxB2qzv7YWVL5UpGSbJ5C5ev4ITGXz32nzpKnQfGD4k9LPI3xPVWLBJxmk28-rdT-iRJIqiYfSfoa9wWJ1A-zudIcIcMZUgBt31Q-kC_3CAp3pdcTMIFv0XoaObv98CfJk-ZmOyQDjJ8eGroJArODAfvUff91O4fdPJEMgWjeDcNDKlx2ln72CY8xsosjvxybhRurKDxqn-RisXkVYMUPUVtf6quI9fbbHg2z0ntU7X2Jdol1XW2g2V08g7YHOy7R8O5NUd_afwzaMfvTuffaGWHD3WpnCCqjO5W02syv3w",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://localhost:44312/api/production-work/production-work-entry/index",
+									"protocol": "https",
+									"host": [
+										"localhost"
+									],
+									"port": "44312",
+									"path": [
+										"api",
+										"production-work",
+										"production-work-entry",
+										"index"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "search travel sheet",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "Vl-u_rZoyIWx3FzMWYLDowrMgMDjBa2nI4WdigM0DHaNc99QGmphlXxVC2yEw0N1QYtd1cVwddNW5oIWS6jKS5MzaOBLjE0VufqC_iO_63Yt6VG0ClWg09M5yZW2qcrvmKvox4XDBF4_ft7tyKhwfSa7BlPyqXyjiKQdJ_Ma86oNHQBvZIK8hu8lHIe_W0fDomv3_hyU3bdVkeqlt9-bIcDpD72nrrQDDV5hNJCdUNGkgoJ7sAlUjeKRs6qownYGSys9uk00TFMMGM48fqtDufyRnrfWulS54pCT-G3Q6kmagz59DM7UvA8CfFTX6WZG2Zb3pFga76cqQ5gWr4pcam1_CS_ZBeOHvT36CTIQMbsfGELi7hFbfDKdU3dY99HZ7dac24djtOfXKaF5FozFjQ",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[\r\n    {\r\n        \"Age\": 44457,\r\n        \"EndProcess\": \"1900-01-01 00:00:00\",\r\n        \"ID\": 7,\r\n        \"ItemCode\": \"QFCS0002ZZ\",\r\n        \"ItemName\": \"STATOR CORE\",\r\n        \"PriorityNo\": \"\",\r\n        \"SessionFirstName\": null,\r\n        \"SessionLastName\": null,\r\n        \"ShipDate\": \"2021-09-15\",\r\n        \"StartDate\": \"2021-09-15\",\r\n        \"StartProcess\": \"2021-09-17 01:48:15\",\r\n        \"TravelSheetNo\": \"TS-20210915-002\"\r\n    }\r\n]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://localhost:44312/api/production-work/production-work-entry/search-travelsheet-details/TS-20210909-01ssdsd",
+									"protocol": "https",
+									"host": [
+										"localhost"
+									],
+									"port": "44312",
+									"path": [
+										"api",
+										"production-work",
+										"production-work-entry",
+										"search-travelsheet-details",
+										"TS-20210909-01ssdsd"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "search travel entry",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "Iz3juvGH1JAAz1sK_H6LQ3lDDRM9QVi5Me0PtpjaGLg74buhgTOUT_--bKiM6Ydzd0AG64qjN0ldhBfnCbRj2dsOWlVKVxaswK-I6GyD2_3mL3agzFzbsTMnAzDN3FyFkTb9UZ_c88Wu4zz28kS2yqAtyHrfgJi6zJjD6mv75xBXP7LmwYLS31mCYt7ciye_jAZQGk35OA6k6vk9_JiEEb7nEsj5Dr88kqLE5SpSsoWGwjXpwfr751t84rU6HQ31GLPnScbUDDKc6uMfzGSn8rrB_gG5B3Nys1cZF8Mox9RWgLi5VwtvvVOYDnhtmhhXIpDciop2DhF96Lgu4pKRpFYtuHJ8I5o9XJ2lG-tsT5M",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://localhost:44312/api/production-work/production-work-entry/search-production-work-table-entry/TS-20210914-003",
+									"protocol": "https",
+									"host": [
+										"localhost"
+									],
+									"port": "44312",
+									"path": [
+										"api",
+										"production-work",
+										"production-work-entry",
+										"search-production-work-table-entry",
+										"TS-20210914-003"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "save to production",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "14UYXy9853_Mmkw0m3pfNERk6Llk4nJlZYUz3OZYE1qotJn7jFBwicDpJpvIsU-IXVsYe-QGvTpARMWorRsyiIdBDRXCo2FSu8U8h8F6utPVB95bgAxUrmhD7dZL4tTMDbmTLMXFW1bapZi2JYoQrlauZeybFi3eiqEwHqOdaAgcnm6wEP9CkTHjCtUqj9Gr_paScGlP2gsOe3zAjnqAjzk6prOoqBHGGL24-wZLE6BRVEEn9_Ty6Y2vAD3jsX17it1F-fK7auvmMyVIhlfzn02hgQusYP8EieKfdm5jCVk12sZa1gf1YBPd3qx2piFi",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"ID\": 1,\r\n    \"TravelSheetID\": \"wewwewewewewew\",\r\n    \"LineID\": 122313,\r\n    \"DateFrom\": \"dfasfdfwfd\",\r\n    \"DateTo\" : \"asdfsfdf\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://localhost:44312/api/production-work/production-work-entry/save-production",
+									"protocol": "https",
+									"host": [
+										"localhost"
+									],
+									"port": "44312",
+									"path": [
+										"api",
+										"production-work",
+										"production-work-entry",
+										"save-production"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update production",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "14UYXy9853_Mmkw0m3pfNERk6Llk4nJlZYUz3OZYE1qotJn7jFBwicDpJpvIsU-IXVsYe-QGvTpARMWorRsyiIdBDRXCo2FSu8U8h8F6utPVB95bgAxUrmhD7dZL4tTMDbmTLMXFW1bapZi2JYoQrlauZeybFi3eiqEwHqOdaAgcnm6wEP9CkTHjCtUqj9Gr_paScGlP2gsOe3zAjnqAjzk6prOoqBHGGL24-wZLE6BRVEEn9_Ty6Y2vAD3jsX17it1F-fK7auvmMyVIhlfzn02hgQusYP8EieKfdm5jCVk12sZa1gf1YBPd3qx2piFi",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"ID\": 1,\r\n    \"TravelSheetID\": \"wewwewewewewew\",\r\n    \"LineID\": 122313,\r\n    \"DateFrom\": \"dfasfdfwfd\",\r\n    \"DateTo\" : \"asdfsfdf\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://localhost:44312/api/production-work/production-work-entry/update-production-work-date-to",
+									"protocol": "https",
+									"host": [
+										"localhost"
+									],
+									"port": "44312",
+									"path": [
+										"api",
+										"production-work",
+										"production-work-entry",
+										"update-production-work-date-to"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get factory line list",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "Vl-u_rZoyIWx3FzMWYLDowrMgMDjBa2nI4WdigM0DHaNc99QGmphlXxVC2yEw0N1QYtd1cVwddNW5oIWS6jKS5MzaOBLjE0VufqC_iO_63Yt6VG0ClWg09M5yZW2qcrvmKvox4XDBF4_ft7tyKhwfSa7BlPyqXyjiKQdJ_Ma86oNHQBvZIK8hu8lHIe_W0fDomv3_hyU3bdVkeqlt9-bIcDpD72nrrQDDV5hNJCdUNGkgoJ7sAlUjeKRs6qownYGSys9uk00TFMMGM48fqtDufyRnrfWulS54pCT-G3Q6kmagz59DM7UvA8CfFTX6WZG2Zb3pFga76cqQ5gWr4pcam1_CS_ZBeOHvT36CTIQMbsfGELi7hFbfDKdU3dY99HZ7dac24djtOfXKaF5FozFjQ",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"LineFactoryID\": null\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://localhost:44312/api/production-work/production-work-entry/linel-list/get/0",
+									"protocol": "https",
+									"host": [
+										"localhost"
+									],
+									"port": "44312",
+									"path": [
+										"api",
+										"production-work",
+										"production-work-entry",
+										"linel-list",
+										"get",
+										"0"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Outgoing Inspection",
+					"item": [
+						{
+							"name": "get outgoing list",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "Iz3juvGH1JAAz1sK_H6LQ3lDDRM9QVi5Me0PtpjaGLg74buhgTOUT_--bKiM6Ydzd0AG64qjN0ldhBfnCbRj2dsOWlVKVxaswK-I6GyD2_3mL3agzFzbsTMnAzDN3FyFkTb9UZ_c88Wu4zz28kS2yqAtyHrfgJi6zJjD6mv75xBXP7LmwYLS31mCYt7ciye_jAZQGk35OA6k6vk9_JiEEb7nEsj5Dr88kqLE5SpSsoWGwjXpwfr751t84rU6HQ31GLPnScbUDDKc6uMfzGSn8rrB_gG5B3Nys1cZF8Mox9RWgLi5VwtvvVOYDnhtmhhXIpDciop2DhF96Lgu4pKRpFYtuHJ8I5o9XJ2lG-tsT5M",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://localhost:44312/api/quality-inspection/outgoing-inspection/get",
+									"protocol": "https",
+									"host": [
+										"localhost"
+									],
+									"port": "44312",
+									"path": [
+										"api",
+										"quality-inspection",
+										"outgoing-inspection",
+										"get"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Search travel sheet",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "Iz3juvGH1JAAz1sK_H6LQ3lDDRM9QVi5Me0PtpjaGLg74buhgTOUT_--bKiM6Ydzd0AG64qjN0ldhBfnCbRj2dsOWlVKVxaswK-I6GyD2_3mL3agzFzbsTMnAzDN3FyFkTb9UZ_c88Wu4zz28kS2yqAtyHrfgJi6zJjD6mv75xBXP7LmwYLS31mCYt7ciye_jAZQGk35OA6k6vk9_JiEEb7nEsj5Dr88kqLE5SpSsoWGwjXpwfr751t84rU6HQ31GLPnScbUDDKc6uMfzGSn8rrB_gG5B3Nys1cZF8Mox9RWgLi5VwtvvVOYDnhtmhhXIpDciop2DhF96Lgu4pKRpFYtuHJ8I5o9XJ2lG-tsT5M",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://localhost:44312/api/quality-inspection/get-travelsheet-details/TS-20210913-001",
+									"protocol": "https",
+									"host": [
+										"localhost"
+									],
+									"port": "44312",
+									"path": [
+										"api",
+										"quality-inspection",
+										"get-travelsheet-details",
+										"TS-20210913-001"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "New Request",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"TravelSheetID\" : \"212121\",\r\n    \"LineID\" : ,\r\n    \"DateFrom\" :,\r\n    \"DateTo\" : ,\r\n    \"CreateID\":\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "https://localhost:44312/api/quality-inspection/save",
+									"protocol": "https",
+									"host": [
+										"localhost"
+									],
+									"port": "44312",
+									"path": [
+										"api",
+										"quality-inspection",
+										"save"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "maintainance",
+					"item": [
+						{
+							"name": "get remarks list",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "70AQPhnOrb31_VQUTU_zDyXf1JaDv8I1FUdGmsjZser9NTuLPaE06SdtDHo0AXHOuPnq-Oj9_VznsZsQz-bxwzPpAq3WBQdycCxQCcUmzMCuQZBACOiVmUGbeYEyRf7Ubfh5IPBkjlaMhl9Px2NDoKvgMGUH_pQ0uko8XD2pTNZWICTtVhsJMZzPOf3tV-_MMGtaBkg_jOSzTX7Ldu-rxhdnnRP7zUtvEvCn80qkXObXuJuNMUDFQeUo9rQaB-hrd0s7qVUSe_BHfCwLh5Xc9yVvIUTlUwENxa1muuL42AnSmNtApfGzCYzA5x5gvN5DfKdX4Jrcug_vubCO-WkRBkNb0YTGvtdIblsk9xFT11o",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://localhost:44312/api/remarks/get-remarks",
+									"protocol": "https",
+									"host": [
+										"localhost"
+									],
+									"port": "44312",
+									"path": [
+										"api",
+										"remarks",
+										"get-remarks"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Kedica server API",
+			"item": [
+				{
+					"name": "login",
+					"item": [
+						{
+							"name": "New Request",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "username",
+											"value": "admin",
+											"type": "text"
+										},
+										{
+											"key": "password",
+											"value": "12345678",
+											"type": "text"
+										},
+										{
+											"key": "grant_type",
+											"value": "password",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "http://192.168.200.100:1993/token",
+									"protocol": "http",
+									"host": [
+										"192",
+										"168",
+										"200",
+										"100"
+									],
+									"port": "1993",
+									"path": [
+										"token"
+									],
+									"query": [
+										{
+											"key": "username",
+											"value": "admin",
+											"disabled": true
+										},
+										{
+											"key": "password",
+											"value": "12345678",
+											"disabled": true
+										},
+										{
+											"key": "grant_type",
+											"value": "password",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get user access",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "aaKJ4GDL_AwQh0whW6VjnOoO0nZJrd7-JNPhUz0J5UC29BZkwJ-56mmUtjaRbDCrbmMZOWcfLAKU6N2O5nvTctmWJJQP1_zKpqKknKFiDrSvxrxiPjollcatKMtpQIjSOvz6p5rx0wq4EYB7t0gfl4cjveGbxuHphjHSbhW4Es2anuqdattvpD1n06w3LVVtUBX__6l4lyI8f_UhxGKq9njQTdh3eIeFgb-Xg7MuBiqAxcS9RzaO4jcua10U2v5nDJ_7HlT4fBDfgQquKcz_bzy-mt8E-WZCn46Wcvw5BndqwDJgsj4aA_Um0-ZtaKxf8E85S9-EZ3KPBd9jous84YLoiTBqwSz8YA6DwRWIruY",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://192.168.200.100:1993/api/login/user-access/get",
+									"protocol": "http",
+									"host": [
+										"192",
+										"168",
+										"200",
+										"100"
+									],
+									"port": "1993",
+									"path": [
+										"api",
+										"login",
+										"user-access",
+										"get"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get user information",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"Username\": \"admin\",\r\n    \"Password\": \"12345678\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://192.168.200.100:1993/api/login/user-information/get",
+									"protocol": "http",
+									"host": [
+										"192",
+										"168",
+										"200",
+										"100"
+									],
+									"port": "1993",
+									"path": [
+										"api",
+										"login",
+										"user-information",
+										"get"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Production Work",
+					"item": [
+						{
+							"name": "production work entry list",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "OsRKN7WH7LsN3ByN7yLxEtQ88uUMgqTOWNFq-gagAdpcvEyAFDYtf3MJTUx2EaLEhf7KKck5rVqjo2O89QCEhaucv_Tb1VoFIIwaNtGWQt3SWuQmRK9LSy3xO4QF1WpVHsa2NJzTJmsQY9HGCQTFXHLLx_zhvqzCn3gr_NyWKqQoVS6caQ5xgi4097WnjOzXfoxsQC83gKo4PlU7EEM6s5LsH36yd6sEZRYxKYg70JtbQbH_LUO-x2eLuzNpiH3rkANMl51R3d3UM-KBtXag5qRGFsMlVwjmaocPo5qZRbktlHGKhLNxvrhNyyxSI3uqQ4Nr8qdlC3F8EY7opu48SUOiItKWrSZXZC62AwNJDAE",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://192.168.200.100:1993/api/production-work/production-work-entry/index",
+									"protocol": "http",
+									"host": [
+										"192",
+										"168",
+										"200",
+										"100"
+									],
+									"port": "1993",
+									"path": [
+										"api",
+										"production-work",
+										"production-work-entry",
+										"index"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "search travel sheet",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "cVrhQHRlpPw6rPOaEHFdNFx3eJrN_Oos2IOXi7lYPmgBnCKA4pDJSeGbVOqfYBMVaconQTiMXS2sZQL2tjfquc56hQwfYoXpAcbsMr0-AOmI1eS5S_mcgHSGmu4yCiq5e8wFResNP7Vni7hAx-DsFV7WNkRNsocL1ENgTl4P938zLeW95nwTS8AZYffTgDhxvKX-Aw2VaxPq-VoRbb0no195jMzHrilgXtmV7zlqhh8jKKTf1xpcmaC5IcVcC7N6uiEPyU-ztnuKnzWzx2mgARJyFqDWPfSKoB4vY5PgjsCJuDf53t6YwInk9xfLW8jR8URPpWnrlFvb2Fy1sgw1QjrFBqw2-rp6ANKix6YQug8",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://192.168.200.100:1993/api/production-work/production-work-entry/search-travelsheet-details/TS-20210913-001",
+									"protocol": "http",
+									"host": [
+										"192",
+										"168",
+										"200",
+										"100"
+									],
+									"port": "1993",
+									"path": [
+										"api",
+										"production-work",
+										"production-work-entry",
+										"search-travelsheet-details",
+										"TS-20210913-001"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "search travel entry",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "cVrhQHRlpPw6rPOaEHFdNFx3eJrN_Oos2IOXi7lYPmgBnCKA4pDJSeGbVOqfYBMVaconQTiMXS2sZQL2tjfquc56hQwfYoXpAcbsMr0-AOmI1eS5S_mcgHSGmu4yCiq5e8wFResNP7Vni7hAx-DsFV7WNkRNsocL1ENgTl4P938zLeW95nwTS8AZYffTgDhxvKX-Aw2VaxPq-VoRbb0no195jMzHrilgXtmV7zlqhh8jKKTf1xpcmaC5IcVcC7N6uiEPyU-ztnuKnzWzx2mgARJyFqDWPfSKoB4vY5PgjsCJuDf53t6YwInk9xfLW8jR8URPpWnrlFvb2Fy1sgw1QjrFBqw2-rp6ANKix6YQug8",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://192.168.200.100:1993/api/production-work/production-work-entry/search-production-work-table-entry/TS-20210914-002",
+									"protocol": "http",
+									"host": [
+										"192",
+										"168",
+										"200",
+										"100"
+									],
+									"port": "1993",
+									"path": [
+										"api",
+										"production-work",
+										"production-work-entry",
+										"search-production-work-table-entry",
+										"TS-20210914-002"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "save to production",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "Y7l5_xyQX-vZCpO8GmuiCXkI1xCcEs7TCmNgL8Bc8PTWRr2CUYF2deLFN3ASgsNOv57HxOhtqlB4Dp5kL4-zkPYRpAWBlS7cD-BbVfI45NPaLyqA7S9GE5exsFRFIh_Mx22QvrJdmvGqm9JwaS-c4n7LjggfLioLwib0LEWe0BgeOuirIEtDMsr7Yf7raTTtQIUQaLqNPXlr1UAIFwnRFjTjRinLxr1NGombAUJVJtS16asw66_Fd5Qm7iB_z9HjYJUrBY8Fs3iy_-0X-8dIdNMu3bRLKBR5WmTYdJHMFCMFwf8R2Gk-vjTJ7rH_J0UY8XvjpPCuFid8nZxnRz_hdwzoWqgqNRrmJFbZ8TuDYLAQQ5ydAUrKii9Rkxyt0Hq_6WufOvec72B67vxc-xK3gw",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"CreateID\": 1,\r\n    \"TravelSheetID\": 1,\r\n    \"LineID\": 1,\r\n    \"DateFrom\": \"2021-09-10 06:00\",\r\n    \"DateTo\" : \"\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://192.168.200.100:1993/api/production-work/production-work-entry/save-production",
+									"protocol": "http",
+									"host": [
+										"192",
+										"168",
+										"200",
+										"100"
+									],
+									"port": "1993",
+									"path": [
+										"api",
+										"production-work",
+										"production-work-entry",
+										"save-production"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update production",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "2Z3iS2hr2d-mDp5De8cXZhYq8dDRfMLny427BCUWmJ8hxXdLRZIUYh8Qtm7pEq7HCCfsd7iI3h-6tQzKwxEvUANMGea2A3r1r_HYv-5d8L_qWVopBxcudS0BkagpKkxEa1XW8aQDW4kwrlKx1RdpzZkXnM3VbDey-K4ufD3qRQ5q51PuzfBvWZWFKh3K60wMOJLxcSQnK5yLobOrK-ZHKNy-KAexNwIqwFliuBopE2k92knjI74xuX3SvArn_ioMAsVt2R5p_QfJXYnuBZnY8f8L4t-GzdCoTcmDuSLgq-eX8cDR4LbarrscSzP8bOOt6V1wv-QbuHeg9mA51X6ZhoVZxrRpu2hLFDyjOs25HqiE_WcV7NoDCFDUTRqnFIVXbZWXazR1N8qun1rzo30IYg",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"TravelSheetID\": 1,\r\n    \"DateTo\" : \"2021-14-01 01:00:00\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://192.168.200.100:1993/api/production-work/production-work-entry/update-production-work-date-to",
+									"protocol": "http",
+									"host": [
+										"192",
+										"168",
+										"200",
+										"100"
+									],
+									"port": "1993",
+									"path": [
+										"api",
+										"production-work",
+										"production-work-entry",
+										"update-production-work-date-to"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get factory line list",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "d3Y77ZRpd6RJTToUyjAA8XTt76MrE2C6ZKr9lCz5V4jMrUivzRTxcEK261nHdnsXVpBLnNSwuWCXORtfsIdBGZyHYsJxniB7j3JuAUXSOV2_7_y813dkSh3-FkZTf3C0tu4pjUGv3t3wrRlFdgrmuBIpwhE9LcXleD8mf93Q2VDf38Fa0teT6np1oa3EwWYj02Loveb4chotUOM5EonVfnoa3ZejmvTTvg7bsO97n2wQfAYCRwLOT39EekWrmfLNl22K6cIVDcFT89RmHSWL4eGl-J9cdbHp2J8MWbdORZSMoVxhFhM6_8jR9Y1a4uFezO2ZD9J6WAYa0a1TGmFfiRzPBX6kps0fr7nMS8MR6mZtXoO8Za8dB1aizz9dt9C9F0uHqLRfaJv_ryUQw7zG3Q",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://192.168.200.100:1993/api/production-work/production-work-entry/linel-list/get/0",
+									"protocol": "http",
+									"host": [
+										"192",
+										"168",
+										"200",
+										"100"
+									],
+									"port": "1993",
+									"path": [
+										"api",
+										"production-work",
+										"production-work-entry",
+										"linel-list",
+										"get",
+										"0"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Outgoing Inspection",
+					"item": [
+						{
+							"name": "get outgoing list",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "OsRKN7WH7LsN3ByN7yLxEtQ88uUMgqTOWNFq-gagAdpcvEyAFDYtf3MJTUx2EaLEhf7KKck5rVqjo2O89QCEhaucv_Tb1VoFIIwaNtGWQt3SWuQmRK9LSy3xO4QF1WpVHsa2NJzTJmsQY9HGCQTFXHLLx_zhvqzCn3gr_NyWKqQoVS6caQ5xgi4097WnjOzXfoxsQC83gKo4PlU7EEM6s5LsH36yd6sEZRYxKYg70JtbQbH_LUO-x2eLuzNpiH3rkANMl51R3d3UM-KBtXag5qRGFsMlVwjmaocPo5qZRbktlHGKhLNxvrhNyyxSI3uqQ4Nr8qdlC3F8EY7opu48SUOiItKWrSZXZC62AwNJDAE",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://192.168.200.100:1993/api/quality-inspection/outgoing-inspection/get",
+									"protocol": "http",
+									"host": [
+										"192",
+										"168",
+										"200",
+										"100"
+									],
+									"port": "1993",
+									"path": [
+										"api",
+										"quality-inspection",
+										"outgoing-inspection",
+										"get"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "search outgoing travel sheet",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "OsRKN7WH7LsN3ByN7yLxEtQ88uUMgqTOWNFq-gagAdpcvEyAFDYtf3MJTUx2EaLEhf7KKck5rVqjo2O89QCEhaucv_Tb1VoFIIwaNtGWQt3SWuQmRK9LSy3xO4QF1WpVHsa2NJzTJmsQY9HGCQTFXHLLx_zhvqzCn3gr_NyWKqQoVS6caQ5xgi4097WnjOzXfoxsQC83gKo4PlU7EEM6s5LsH36yd6sEZRYxKYg70JtbQbH_LUO-x2eLuzNpiH3rkANMl51R3d3UM-KBtXag5qRGFsMlVwjmaocPo5qZRbktlHGKhLNxvrhNyyxSI3uqQ4Nr8qdlC3F8EY7opu48SUOiItKWrSZXZC62AwNJDAE",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://192.168.200.100:1993/api/quality-inspection/get-travelsheet-details/TS-20210914-003",
+									"protocol": "http",
+									"host": [
+										"192",
+										"168",
+										"200",
+										"100"
+									],
+									"port": "1993",
+									"path": [
+										"api",
+										"quality-inspection",
+										"get-travelsheet-details",
+										"TS-20210914-003"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "maintainance",
+					"item": [
+						{
+							"name": "get remarks",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "KCdpG70330QSydpnrlCgJQEOIjRluq5eM_NZtiLqyVkyVQvzVoHN5ttRCV6cGsKTT_onDaMFNB0_racofEno0mNogOIfn1-DffFbacOvM42-eytOXLkcAf2BaIF40Qth8Y123rUjwOqqlK-8SVwD4go3KijWBabXtu9WBzsTsHX0sKi9LR1PXNKIxYPeHSZoD73J3DI7B03w5XBqhq5dLgpCUSO3lz_5mktZ41ql828ywRSOpY8_CFWCUnrQKeh6fn7RraHv0QOtPu6Ztmb115PFOdPXL2qMMyacUxWQNQBlgtwmfbKb8SxsAdpaA5X2USN2exK4azRVyb0YhwjBF_xuSi-MXf2b28VYL4Gc3r4",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://192.168.200.100:1993/api/remarks/get-remarks",
+									"protocol": "http",
+									"host": [
+										"192",
+										"168",
+										"200",
+										"100"
+									],
+									"port": "1993",
+									"path": [
+										"api",
+										"remarks",
+										"get-remarks"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		}
+	]
+}

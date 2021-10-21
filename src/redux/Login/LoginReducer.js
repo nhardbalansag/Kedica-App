@@ -1,11 +1,16 @@
 
-import {SET_CREDENTIALS, SET_DOMAIN, SET_USER_INFORMATION} from "./LoginAction"
+import {SET_CREDENTIALS, SET_DOMAIN, SET_USER_INFORMATION, SET_TRAVELSHEET, SET_LOGOUT} from "./LoginAction"
 
 const InitialStates ={
     TokenData:null,
     data:[],
     domainSetting: null,
-    FactoryId: null
+    travelSheet: null,
+    FactoryId: null,
+    UserName: null,
+    FirstName: null,
+    MiddleName: null,
+    LastName: null
 }
 
 export default (state = InitialStates, action) =>{
@@ -23,7 +28,21 @@ export default (state = InitialStates, action) =>{
         case SET_USER_INFORMATION:
             return{
                 ...state,
-                FactoryId:action.FactoryId
+                FactoryId: action.FactoryId,
+                UserName: action.UserName,
+                FirstName: action.FirstName,
+                MiddleName: action.MiddleName,
+                LastName: action.LastName
+            }
+        case SET_TRAVELSHEET:
+            return{
+                ...state,
+                travelSheet:action.travelSheet
+            }
+        case SET_LOGOUT:
+            return{
+                ...state,
+                TokenData: null
             }
         default :
             return{

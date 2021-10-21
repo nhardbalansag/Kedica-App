@@ -35,7 +35,7 @@ import {
     Center,
     Button
   } from 'native-base';
-
+  
 import { 
     useSelector
 } from 'react-redux';
@@ -44,7 +44,7 @@ import * as LoginAction from "../../redux/Login/LoginAction";
 import { useDispatch } from "react-redux";
 
 const LoginScreen = () => {
-
+   
     const domainSetting = useSelector(state => state.loginCredential.domainSetting);
 
     const [username, setUsername] = useState("admin")
@@ -53,6 +53,7 @@ const LoginScreen = () => {
     const [modalVisible, setModalVisible] = useState(false)
     const [showModal, setShowModal] = useState(false)
     const [setting, setSetting] = useState("http:/192.168.200.100:1993/")
+    // const [setting, setSetting] = useState("http:/172.18.5.9:8002/")
 
     const handleSizeClick = (newSize) => {
         setSize(newSize)

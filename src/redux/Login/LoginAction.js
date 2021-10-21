@@ -3,6 +3,8 @@ import {APP_URL} from "../../config/AppConfig"
 export const SET_CREDENTIALS = 'SET_CREDENTIALS';
 export const SET_DOMAIN = 'SET_DOMAIN';
 export const SET_USER_INFORMATION = 'SET_USER_INFORMATION';
+export const SET_TRAVELSHEET = 'SET_TRAVELSHEET';
+export const SET_LOGOUT = 'SET_LOGOUT';
 
 export const login = (username, password, domainSetting) =>{
 
@@ -65,7 +67,11 @@ export const getUserDetails = (username, password, domainSetting) =>{
 
         dispatch({
             type: SET_USER_INFORMATION, 
-            FactoryId: responseData[0].FactoryID
+            FactoryId: responseData[0].FactoryID,
+            UserName: responseData[0].UserName,
+            FirstName: responseData[0].FirstName,
+            MiddleName: responseData[0].MiddleName,
+            LastName: responseData[0].LastName
         });
     }
 }
@@ -76,6 +82,23 @@ export const changeDomain = (domain) =>{
         dispatch({
             type: SET_DOMAIN, 
             domain: domain
+        });
+    }
+}
+
+export const logoutUser = () =>{
+    return async (dispatch) =>{
+        dispatch({
+            type: SET_LOGOUT
+        });
+    }
+}
+
+export const travelSheetRedux = (travelSheetdata) =>{
+    return async (dispatch) =>{
+        dispatch({
+            type: SET_TRAVELSHEET, 
+            travelSheet: travelSheetdata
         });
     }
 }
