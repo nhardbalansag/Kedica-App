@@ -261,16 +261,17 @@ const WorkResultInputScreen = (props) =>{
     const checkLineID = async (data) =>{
         var name = await DeviceInfo.getDeviceName()
         if(data != null){
+            let catchPair = false
             for(let i = 0; i < data.length; i++){
                 if(data[i].Line === name){
                     setLineID(data[i].LineID)
                     setactiveActionSheetlabel(data[i].Line)
                     setProductionLine(data)
-                    break;
-                }else{
-                    alertMessageNote("No Production line Connected to this device Please Setup your device in tablet settings.")
-                    break;
+                    catchPair = true
                 }
+            }
+            if(!catchPair){
+                alertMessageNote("No Production line Connected to this device Please Setup your device in tablet settings.")
             }
         }
     }
