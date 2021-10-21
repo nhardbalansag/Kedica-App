@@ -47,6 +47,7 @@ const InscpectionDetails = (props, {navigation}) =>{
     const [loading, setloading] =  useState(true);
     const [NGRemarksTitle, setNGRemarksTitle] =  useState(null);
     const [NGGoodQty, setNGGoodQty] =  useState(0);
+    const [kitsampleqty, setkitsampleqty] =  useState(0);
 
     const travelSheetNumber = props.route.params.dataContent.number;
     const token = useSelector(state => state.loginCredential.TokenData);
@@ -146,7 +147,8 @@ const InscpectionDetails = (props, {navigation}) =>{
                                 ActualThickness : ActualThickness,
                                 NGQty : NGQTY,
                                 NGGoodQty : NGGoodQty,
-                                NGRemarksID : NGRemarks
+                                NGRemarksID : NGRemarks,
+                                KitSampleQTY : kitsampleqty
                             })
                         })
                         const responseData = await response.json();
@@ -328,6 +330,28 @@ const InscpectionDetails = (props, {navigation}) =>{
         )
     }
 
+    const kitSample = () =>{
+        return(
+            <View>
+                <Input
+                    disableFullscreenUI={true}
+                    size="2xl"
+                    placeholder=" Kit Sample QTY "
+                    _light={{
+                        placeholderTextColor: "blueGray.400",
+                    }}
+                    _dark={{
+                        placeholderTextColor: "blueGray.50",
+                    }}
+                    keyboardType='numeric'
+                    minLength={0}
+                    onChangeText={(text) => setkitsampleqty(text)}
+                    value={kitsampleqty}
+                />
+            </View>
+        )
+    }
+ 
     const ThicknessComponent = () =>{
         return(
             <View style={[styles.flexRow]}>
@@ -474,7 +498,7 @@ const InscpectionDetails = (props, {navigation}) =>{
                     </>
                 :
                 <ScrollView>
-                    <View style={[styles.mX3]}>
+                    <View style={[styles.mX3, styles.mY2]}>
                         <View style={[styles.flexRow, styles.alignFlexEnd, styles.justifySpaceBetween, styles.mX1]}>
                             <View style={[styles.flexRow, styles.alignFlexEnd, {marginBottom:10}]}>
                                 <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300]}>
@@ -551,6 +575,14 @@ const InscpectionDetails = (props, {navigation}) =>{
                                     Material Reject QTY : 
                                 </Text>
                                 {NGGoodQtyfun()}
+                            </View>
+                        </View>
+                        <View style={[styles.flexRow, styles.alignFlexEnd, styles.justifySpaceBetween, styles.mX1, styles.mY1]}>
+                            <View style={[styles.flexRow, styles.alignFlexEnd]}>
+                                <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300]}>
+                                    Kit Sample QTY : 
+                                </Text>
+                                {kitSample()}
                             </View>
                         </View>
                         {ButtonSaveCancel()}
