@@ -36,18 +36,25 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 const InscpectionDetails = (props, {navigation}) =>{
 
+    // reject remarks is required if material reject has data vise versa
+    //ng QTY is required when ng remarks has data
+
     const [thicknessFrom, setThicknessFrom] = useState(0)
     const [thicknessTo, setThicknessTo] = useState(0) 
     const [NGQTY, setNGQTY] = useState(0)
     const [ActualThickness, setActualThickness] = useState(0)
-    const [NGRemarks, setNGRemarks] = useState(0)
+    const [NGRemarks, setNGRemarks] = useState(null)
     const [activeActionSheet, setactiveActionSheet] = useState(false)
+    const [activeRejectActionSheet, setactiveRejectActionSheet] = useState(false)
     const [OutgoingData, setOutgoingData] = useState(null)
     const [dataRemarks, setdataRemarks] = useState(null)
     const [loading, setloading] =  useState(true);
     const [NGRemarksTitle, setNGRemarksTitle] =  useState(null);
+    const [RejectRemarksTitle, setRejectRemarksTitle] =  useState(null);
     const [NGGoodQty, setNGGoodQty] =  useState(0);
     const [kitsampleqty, setkitsampleqty] =  useState(0);
+    const [RejectRemarksID, setRejectRemarksID] =  useState(null);
+    const [KeepSampleQty, setKeepSampleQty] =  useState(null);
 
     const travelSheetNumber = props.route.params.dataContent.number;
     const token = useSelector(state => state.loginCredential.TokenData);
@@ -62,8 +69,18 @@ const InscpectionDetails = (props, {navigation}) =>{
         setNGRemarksTitle(title)
     }
 
+    const RejectcloseActionSheet = (remarks, title) =>{
+        setactiveRejectActionSheet(false)
+        setRejectRemarksID(remarks)
+        setRejectRemarksTitle(title)
+    }
+
     const actionsheet = () =>{
         setactiveActionSheet(true)
+    }
+
+    const Rejectactionsheet = () =>{
+        setactiveRejectActionSheet(true)
     }
 
     const getOutgoingTravelSheetDetails = async (travelsheet) =>{
@@ -132,15 +149,10 @@ const InscpectionDetails = (props, {navigation}) =>{
                 alertMessage("Thickness must not be null")
             }else{
                 if(isNaN(NGQTY) == false && isNaN(thicknessFrom) == false && isNaN(thicknessTo) == false && isNaN(ActualThickness) == false){
-                    setloading(true)
+                    // setloading(true)
                     try{
-                        const response = await fetch(domainSetting + "api/quality-inspection/save", {
-                            method:'POST',
-                            headers:{
-                                'Content-type': 'application/json',
-                                'Authorization': 'Bearer ' + token
-                            },
-                            body: JSON.stringify({
+                        console.warn(
+                            JSON.stringify({
                                 ProductionWorkID: OutgoingData[0].ProductionWorkID,
                                 ThicknessFrom: thicknessFrom,
                                 ThicknessTo: thicknessTo,
@@ -148,16 +160,35 @@ const InscpectionDetails = (props, {navigation}) =>{
                                 NGQty : NGQTY,
                                 NGGoodQty : NGGoodQty,
                                 NGRemarksID : NGRemarks,
-                                KitSampleQTY : kitsampleqty
-                            })
-                        })
-                        const responseData = await response.json();
-                        setloading(false)
-                        if(responseData[0].status === true){
-                            props.navigation.goBack()
-                        }else{
-                            alertMessage(responseData[0].message)
-                        }
+                                KeepSampleQty : KeepSampleQty,
+                                RejectRemarksID : RejectRemarksID
+                            }) 
+                        )
+                        // const response = await fetch(domainSetting + "api/quality-inspection/save", {
+                        //     method:'POST',
+                        //     headers:{
+                        //         'Content-type': 'application/json',
+                        //         'Authorization': 'Bearer ' + token
+                        //     },
+                        //     body: JSON.stringify({
+                        //         ProductionWorkID: OutgoingData[0].ProductionWorkID,
+                        //         ThicknessFrom: thicknessFrom,
+                        //         ThicknessTo: thicknessTo,
+                        //         ActualThickness : ActualThickness,
+                        //         NGQty : NGQTY,
+                        //         NGGoodQty : NGGoodQty,
+                        //         NGRemarksID : NGRemarks,
+                        //         KeepSampleQty : KeepSampleQty,
+                        //         RejectRemarksID : RejectRemarksID
+                        //     })
+                        // })
+                        // const responseData = await response.json();
+                        // setloading(false)
+                        // if(responseData[0].status === true){
+                        //     props.navigation.goBack()
+                        // }else{
+                        //     alertMessage(responseData[0].message)
+                        // }
                     }catch(error){
                         alertMessage(error.message)
                     }
@@ -264,6 +295,85 @@ const InscpectionDetails = (props, {navigation}) =>{
         )
     }
 
+    const RejectRemarksComponent = () =>{
+        return(
+            <View>
+                <TouchableOpacity onPress={ () => Rejectactionsheet()}>
+                    <View style={[
+                        styles.backgroundPrimary,
+                        styles.justifyCenter,
+                        styles.alignCenter,
+                        styles.flexRow,
+                        styles.border10,
+                        styles.pY1,
+                        styles.pX2
+                    ]}>
+                        <Text style={[styles.font30, styles.textWhite, styles.mR1]}>{RejectRemarksTitle !== null ? RejectRemarksTitle : "Select Remarks"}</Text>
+                        <Icon name="mouse-pointer" size={30} color={colors.lightColor} />
+                    </View>
+                </TouchableOpacity>
+                <Actionsheet isOpen={activeRejectActionSheet} onClose={onClose} hideDragIndicator={true} >
+                    <Actionsheet.Content  style={[styles.alignFlexStart]}>
+                        <Actionsheet.Item>
+                            <View>
+                                <TouchableOpacity onPress={() => setactiveRejectActionSheet(false)}>
+                                    <View style={[
+                                        styles.flexRow,
+                                        styles.justifySpaceBetween,
+                                        styles.alignCenter,
+                                        styles.pL5,
+                                    ]}>
+                                        <Icon name="times" size={40} color={colors.dangerColor} />
+                                        <Text style={[styles.font40, styles.mL2, styles.textDanger]}>Cancel</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            </View>
+                        </Actionsheet.Item>
+                        <ScrollView>
+                            <Actionsheet.Item>
+                                <View>
+                                    <TouchableOpacity onPress={() => RejectcloseActionSheet(null, "Select Remarks")}>
+                                        <View style={[
+                                            styles.flexRow,
+                                            styles.justifySpaceBetween,
+                                            styles.alignCenter,
+                                            styles.pL5,
+                                        ]}>
+                                            <Icon name="circle" size={40} color={NGRemarks == null ? colors.primaryColor : colors.gray200} />
+                                            <Text style={[styles.font40, styles.mL2, styles.warningColor]}>None</Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                </View>
+                            </Actionsheet.Item>
+                            {
+                                dataRemarks != null?
+                                dataRemarks.map((data, index)=>
+                                    <Actionsheet.Item key={index}>
+                                        <View>
+                                            <TouchableOpacity onPress={() => RejectcloseActionSheet(data.ID, data.NGRemarks)}>
+                                                <View style={[
+                                                    styles.flexRow,
+                                                    styles.justifySpaceBetween,
+                                                    styles.alignCenter,
+                                                    styles.pL5,
+                                                ]}>
+                                                    <Icon name="circle" size={40} color={NGRemarks == data.ID ? colors.primaryColor : colors.gray200} />
+                                                    <Text style={[styles.font40, styles.mL2]}>{data.NGRemarks}</Text>
+                                                </View>
+                                            </TouchableOpacity>
+                                        </View>
+                                    </Actionsheet.Item>
+                                )
+                                :
+                                <></>
+                            }
+                        </ScrollView>
+                    </Actionsheet.Content>
+                </Actionsheet>
+            </View>
+        )
+    }
+
     const ActualThicknessComponent = () =>{
         return(
             <View>
@@ -330,13 +440,35 @@ const InscpectionDetails = (props, {navigation}) =>{
         )
     }
 
-    const kitSample = () =>{
+    const keepSample = () =>{
         return(
             <View>
                 <Input
                     disableFullscreenUI={true}
                     size="2xl"
                     placeholder=" Kit Sample QTY "
+                    _light={{
+                        placeholderTextColor: "blueGray.400",
+                    }}
+                    _dark={{
+                        placeholderTextColor: "blueGray.50",
+                    }}
+                    keyboardType='numeric'
+                    minLength={0}
+                    onChangeText={(text) => setKeepSampleQty(text)}
+                    value={KeepSampleQty}
+                />
+            </View>
+        )
+    }
+
+    const rejectRemark = () =>{
+        return(
+            <View>
+                <Input
+                    disableFullscreenUI={true}
+                    size="2xl"
+                    placeholder=" Reject Remarks "
                     _light={{
                         placeholderTextColor: "blueGray.400",
                     }}
@@ -569,12 +701,18 @@ const InscpectionDetails = (props, {navigation}) =>{
                                 {RemarksComponent()}
                             </View>
                         </View>
-                        <View style={[styles.flexRow, styles.alignFlexEnd, styles.justifySpaceBetween, styles.mX1]}>
+                        <View style={[styles.flexRow, styles.alignFlexEnd, styles.justifySpaceBetween, styles.mX1, styles.mY1]}>
                             <View style={[styles.flexRow, styles.alignFlexEnd]}>
                                 <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300]}>
                                     Material Reject QTY : 
                                 </Text>
                                 {NGGoodQtyfun()}
+                            </View>
+                            <View style={[styles.flexRow, styles.alignFlexEnd]}>
+                                <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300]}>
+                                    Reject Remarks : 
+                                </Text>
+                                {RejectRemarksComponent()}
                             </View>
                         </View>
                         <View style={[styles.flexRow, styles.alignFlexEnd, styles.justifySpaceBetween, styles.mX1, styles.mY1]}>
@@ -582,7 +720,7 @@ const InscpectionDetails = (props, {navigation}) =>{
                                 <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300]}>
                                     Kit Sample QTY : 
                                 </Text>
-                                {kitSample()}
+                                {keepSample()}
                             </View>
                         </View>
                         {ButtonSaveCancel()}
