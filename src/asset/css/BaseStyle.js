@@ -881,6 +881,9 @@ const styles = StyleSheet.create({
   textUnderline: {
     textDecorationLine: 'underline'
   },
+  textLineThrough: {
+    textDecorationLine: 'line-through'
+  },
   font9: {
     fontSize: 9
   },
@@ -1000,6 +1003,9 @@ const styles = StyleSheet.create({
   borderTranparent: {
     borderColor: 'transparent'
   },
+  displayNone:{
+    display:"none"
+  }
 });
 
 export {

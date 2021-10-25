@@ -41,7 +41,7 @@ const InscpectionDetails = (props, {navigation}) =>{
 
     const [thicknessFrom, setThicknessFrom] = useState(0)
     const [thicknessTo, setThicknessTo] = useState(0) 
-    const [NGQTY, setNGQTY] = useState(0)
+    const [NGQTY, setNGQTY] = useState(null)
     const [ActualThickness, setActualThickness] = useState(0)
     const [NGRemarks, setNGRemarks] = useState(null)
     const [activeActionSheet, setactiveActionSheet] = useState(false)
@@ -51,7 +51,7 @@ const InscpectionDetails = (props, {navigation}) =>{
     const [loading, setloading] =  useState(true);
     const [NGRemarksTitle, setNGRemarksTitle] =  useState(null);
     const [RejectRemarksTitle, setRejectRemarksTitle] =  useState(null);
-    const [NGGoodQty, setNGGoodQty] =  useState(0);
+    const [NGGoodQty, setNGGoodQty] =  useState(null);
     const [kitsampleqty, setkitsampleqty] =  useState(0);
     const [RejectRemarksID, setRejectRemarksID] =  useState(null);
     const [KeepSampleQty, setKeepSampleQty] =  useState(null);
@@ -102,6 +102,7 @@ const InscpectionDetails = (props, {navigation}) =>{
                     ProductionWorkID: responseData[0].dataContent.ProductionWorkID,
                     TravelSheetNo: responseData[0].dataContent.TravelSheetNo,
                     ItemCode: responseData[0].dataContent.ItemCode,
+                    ItemName: responseData[0].dataContent.ItemName,
                     LotNo: responseData[0].dataContent.LotNo,
                     Qty: responseData[0].dataContent.Qty,
                     UpdateDate: responseData[0].dataContent.UpdateDate,
@@ -139,65 +140,59 @@ const InscpectionDetails = (props, {navigation}) =>{
         if(qtytotal > OutgoingData[0].Qty){
             alertMessage("Invalid Input, Please try again.")
         }else{
-            saveholdLot()
+            saveInspectionDetails()
         }
     }
 
      const saveInspectionDetails = async () =>{
-        if((NGQTY !== 0 && NGRemarks !== null) || (NGQTY === 0 && NGRemarks === null)){
+        var ngqtydata = NGQTY ? NGQTY : null
+        if(((ngqtydata == null && NGRemarks == null) || (ngqtydata > 0 && NGRemarks !== null))){
             if(FactoryID === 2 && (thicknessFrom == 0 || thicknessTo == 0 || ActualThickness == 0)){
                 alertMessage("Thickness must not be null")
             }else{
                 if(isNaN(NGQTY) == false && isNaN(thicknessFrom) == false && isNaN(thicknessTo) == false && isNaN(ActualThickness) == false){
-                    // setloading(true)
-                    try{
-                        console.warn(
-                            JSON.stringify({
-                                ProductionWorkID: OutgoingData[0].ProductionWorkID,
-                                ThicknessFrom: thicknessFrom,
-                                ThicknessTo: thicknessTo,
-                                ActualThickness : ActualThickness,
-                                NGQty : NGQTY,
-                                NGGoodQty : NGGoodQty,
-                                NGRemarksID : NGRemarks,
-                                KeepSampleQty : KeepSampleQty,
-                                RejectRemarksID : RejectRemarksID
-                            }) 
-                        )
-                        // const response = await fetch(domainSetting + "api/quality-inspection/save", {
-                        //     method:'POST',
-                        //     headers:{
-                        //         'Content-type': 'application/json',
-                        //         'Authorization': 'Bearer ' + token
-                        //     },
-                        //     body: JSON.stringify({
-                        //         ProductionWorkID: OutgoingData[0].ProductionWorkID,
-                        //         ThicknessFrom: thicknessFrom,
-                        //         ThicknessTo: thicknessTo,
-                        //         ActualThickness : ActualThickness,
-                        //         NGQty : NGQTY,
-                        //         NGGoodQty : NGGoodQty,
-                        //         NGRemarksID : NGRemarks,
-                        //         KeepSampleQty : KeepSampleQty,
-                        //         RejectRemarksID : RejectRemarksID
-                        //     })
-                        // })
-                        // const responseData = await response.json();
-                        // setloading(false)
-                        // if(responseData[0].status === true){
-                        //     props.navigation.goBack()
-                        // }else{
-                        //     alertMessage(responseData[0].message)
-                        // }
-                    }catch(error){
-                        alertMessage(error.message)
+                    var metrialrejectdata = NGGoodQty ? NGGoodQty : null
+
+                    if((metrialrejectdata == null && RejectRemarksID == null) || (metrialrejectdata > 0 && RejectRemarksID !== null)){
+                        setloading(true)
+                        try{
+                            const response = await fetch(domainSetting + "api/quality-inspection/save", {
+                                method:'POST',
+                                headers:{
+                                    'Content-type': 'application/json',
+                                    'Authorization': 'Bearer ' + token
+                                },
+                                body: JSON.stringify({
+                                    ProductionWorkID: OutgoingData[0].ProductionWorkID,
+                                    ThicknessFrom: thicknessFrom,
+                                    ThicknessTo: thicknessTo,
+                                    ActualThickness : ActualThickness,
+                                    NGQty : NGQTY,
+                                    NGGoodQty : NGGoodQty,
+                                    NGRemarksID : NGRemarks,
+                                    KeepSampleQty : KeepSampleQty,
+                                    RejectRemarksID : RejectRemarksID
+                                })
+                            })
+                            const responseData = await response.json();
+                            setloading(false)
+                            if(responseData[0].status === true){
+                                props.navigation.goBack()
+                            }else{
+                                alertMessage(responseData[0].message)
+                            }
+                        }catch(error){
+                            alertMessage(error.message)
+                        }
+                    }else{
+                        NGGoodQty ? alertMessage("Material Reject QTY and Reject Remarks Cannot be empty") : alertMessage("Material Reject QTY must not be null")
                     }
                 }else{
                     alertMessage("Please input a valid number")
                 }
             }
         }else{
-            alertMessage("NG Remarks and NG Quantity Cannot be empty")
+            NGQTY ? alertMessage("NG Remarks and NG Quantity Cannot be empty") : alertMessage("NG Quantity must not be null")
         }
     }
 
@@ -446,7 +441,7 @@ const InscpectionDetails = (props, {navigation}) =>{
                 <Input
                     disableFullscreenUI={true}
                     size="2xl"
-                    placeholder=" Kit Sample QTY "
+                    placeholder=" Keep Sample QTY "
                     _light={{
                         placeholderTextColor: "blueGray.400",
                     }}
@@ -554,10 +549,9 @@ const InscpectionDetails = (props, {navigation}) =>{
                 ]}>
                     <TouchableOpacity 
                         onPress={() => validateSave()}
-                        disabled ={thicknessFrom !== 0 ? (thicknessTo !== 0 ? (ActualThickness !== 0 ? false : true): true) : true}
                     >
                         <View style={[
-                            thicknessFrom !== 0 ? (thicknessTo !== 0 ? (ActualThickness !== 0 ? styles.backgroundPrimary : styles.bgGray200): styles.bgGray200) : styles.bgGray200,
+                            styles.backgroundPrimary,
                             styles.justifyCenter,
                             styles.alignCenter,
                             styles.border10,
@@ -640,12 +634,14 @@ const InscpectionDetails = (props, {navigation}) =>{
                                     { travelSheetNumber ? travelSheetNumber : "-" }
                                 </Text> 
                             </View>
-                            <View style={[styles.flexRow, styles.alignFlexEnd, styles.mL2, {marginBottom:10}]}>
+                        </View>
+                        <View>
+                            <View style={[styles.flexRow, styles.alignFlexEnd, styles.mL1, {marginBottom:10}]}>
                                 <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300]}>
-                                    Item Code : 
+                                    Product Name : 
                                 </Text>
                                 <Text style={[styles.font40]}>
-                                    { OutgoingData !== null ? (OutgoingData[0].ItemCode ? OutgoingData[0].ItemCode : "-") : "-"  }
+                                    { OutgoingData !== null ? (OutgoingData[0].ItemCode ? OutgoingData[0].ItemCode + " - " +  OutgoingData[0].ItemName: "-") : "-"  }
                                 </Text> 
                             </View>
                         </View>
@@ -718,7 +714,7 @@ const InscpectionDetails = (props, {navigation}) =>{
                         <View style={[styles.flexRow, styles.alignFlexEnd, styles.justifySpaceBetween, styles.mX1, styles.mY1]}>
                             <View style={[styles.flexRow, styles.alignFlexEnd]}>
                                 <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300]}>
-                                    Kit Sample QTY : 
+                                    Keep Sample QTY : 
                                 </Text>
                                 {keepSample()}
                             </View>
