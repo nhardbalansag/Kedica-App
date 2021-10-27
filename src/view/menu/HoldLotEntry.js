@@ -61,6 +61,8 @@ const HoldLotEntry = (props, {navigation}) =>{
     const [refreshing, setRefreshing] = useState(false);
     const [WorkEntry, setWorkEntry] = useState(null);
 
+    const FactoryID = useSelector(state => state.loginCredential.FactoryId);
+
     const table = {
         tableHead: ['Action', 'Production No', 'Lot No.', 'Order No', 'Customer Name', 'Product Name', 'Qty', 'Unit', 'Entry (Order/Product)', 'Delivery Date', 'Ship Date', 'Actual Qty'],
     }
@@ -73,7 +75,7 @@ const HoldLotEntry = (props, {navigation}) =>{
         const apiUrl = props.route.params.url;
         setRefreshing(true);
         try {
-            const response = await fetch(domainSetting + apiUrl, {
+            const response = await fetch(domainSetting + apiUrl + "/" + FactoryID, {
                 method:"GET",
                 headers:{
                     'Content-type': 'application/json',

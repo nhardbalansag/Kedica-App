@@ -168,7 +168,19 @@ const WorkResultInputScreen = (props) =>{
             })
 
             const responseData = await response.json();
-            checkLineID(responseData[0].dataContent)
+            
+            var datael = [];
+            for (const key in responseData[0].dataContent){
+                if(FactoryID === responseData[0].dataContent[key].LineFactoryID){
+                    datael.push(
+                        {
+                            LineID: responseData[0].dataContent[key].LineID,
+                            Line: responseData[0].dataContent[key].Line
+                        }
+                    )
+                }
+            }
+            checkLineID(datael)
         }catch(error){
             alertMessage(error.message);
         }
