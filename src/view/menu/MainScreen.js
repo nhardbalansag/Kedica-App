@@ -37,6 +37,7 @@ const MainScreen = ({navigation}) =>{
     const appState = useRef(AppState.currentState);
     const [appStateVisible, setAppStateVisible] = useState(appState.current);
     const [pageStatus, setPageStatus] = useState(null)
+    const [refreshing, setRefreshing] = useState(true);
 
     const domainSetting = useSelector(state => state.loginCredential.domainSetting);
     const token = useSelector(state => state.loginCredential.TokenData);
@@ -69,6 +70,11 @@ const MainScreen = ({navigation}) =>{
 
 
     const getUserAccess = async () =>{
+        setRefreshing(true)
+        setisLoading(true)
+        setIQC(false)
+        setholdlot(false)
+        setproduction(false)
         try{
             const response = await fetch(domainSetting + "api/login/user-access/get", {
                 method:"GET",
@@ -87,6 +93,8 @@ const MainScreen = ({navigation}) =>{
                     setproduction(true)
                 }
             }
+            setRefreshing(false)
+            setisLoading(false)
         }catch(error){
             alertMessage(error.message)
         }
@@ -116,7 +124,6 @@ const MainScreen = ({navigation}) =>{
         return(
             <View style={[
                     styles.w50,
-            
             ]}>
                 <TouchableOpacity
                     disabled={
@@ -136,6 +143,9 @@ const MainScreen = ({navigation}) =>{
                     <View 
                         style={[
                             styles.backgroundPrimary,
+                            item.title === "Production Work Entry" ? (production ?  styles.backgroundPrimary :  styles.bgGray300) : 
+                            item.title === "Outgoing Inspection" ? (IQC ?  styles.backgroundPrimary :  styles.bgGray300) :
+                            item.title === "Hold Lot Summary" ? (holdlot ?  styles.backgroundPrimary :  styles.bgGray300) : styles.backgroundPrimary,
                             styles.pY2,
                             styles.pX1,
                             styles.mX3,
@@ -189,6 +199,9 @@ const MainScreen = ({navigation}) =>{
                         data={ProductionScreen} 
                         renderItem={ButtonComponent} 
                         numColumns={2}
+                        refreshControl={
+                            <RefreshControl refreshing={refreshing} size="large" onRefresh={getUserAccess} />
+                        }
                     />
             }
             

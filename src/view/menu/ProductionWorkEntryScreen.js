@@ -57,6 +57,8 @@ const ProductionWorkEntryScreen = (props) =>{
     const [currentComponent, setcurrentComponent] =  useState("");
     const limiters = [15, 19]
 
+    const FactoryID = useSelector(state => state.loginCredential.FactoryId);
+
     const [WorkEntry, setWorkEntry] = useState(null);
     const dispatch = useDispatch()
     
@@ -85,7 +87,7 @@ const ProductionWorkEntryScreen = (props) =>{
         setcurrentComponent(componentTitle)
         setRefreshing(true);
         try {
-            const response = await fetch(domainSetting + apiUrl, {
+            const response = await fetch(domainSetting + apiUrl + "/" + FactoryID, {
                 method:"GET",
                 headers:{
                     'Content-type': 'application/json',
@@ -174,7 +176,7 @@ const ProductionWorkEntryScreen = (props) =>{
         // console.warn(travelsheetno + "  before")
        
         const componentTitle = props.route.params.title;
-        var productionWork =  domainSetting + "api/production-work/production-work-entry/search-production-work-table-entry/" + travelsheetno;
+        var productionWork =  domainSetting + "api/production-work/production-work-entry/search-travelsheet-details/" + travelsheetno;
         var outgoing =  domainSetting + "api/quality-inspection/get-travelsheet-details/" + travelsheetno;
         setRefreshing(true);
         try {
