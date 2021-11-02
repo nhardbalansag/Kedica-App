@@ -81,7 +81,12 @@ const HoldQtyProcess = (props, {navigation}) =>{
     }
 
     const validateSave = () =>{
-        var qtytotal = returnQty + proceedQty
+
+        var return_qty = returnQty ? returnQty : 0
+        var proceedQty_qty = proceedQty ? proceedQty : 0
+
+        var qtytotal = parseInt((return_qty !== null ? return_qty : return_qty)) + parseInt((proceedQty_qty !== null ? proceedQty_qty : 0))
+        
         if(qtytotal !== holdQtyDetails[0].ReceivedQty){
             alertMessage("Return QTY and Proceed Qty must be equal to Received QTY")
         }else{
