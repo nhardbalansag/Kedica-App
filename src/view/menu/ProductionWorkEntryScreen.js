@@ -55,7 +55,7 @@ const ProductionWorkEntryScreen = (props) =>{
     const [activeActionSheet, setactiveActionSheet] =  useState(false);
     const [filterData, setfilterData] =  useState("All");
     const [currentComponent, setcurrentComponent] =  useState("");
-    const limiters = [15, 19]
+    const limiters = [19]
 
     const FactoryID = useSelector(state => state.loginCredential.FactoryId);
 
@@ -180,21 +180,25 @@ const ProductionWorkEntryScreen = (props) =>{
         // console.warn(travelsheetno + "  before")
        
         const componentTitle = props.route.params.title;
-        var productionWork =  domainSetting + "api/production-work/production-work-entry/search-travelsheet-details/" + travelsheetno;
-        var outgoing =  domainSetting + "api/quality-inspection/get-travelsheet-details/" + travelsheetno;
+        var productionWork =  domainSetting + "api/production-work/production-work-entry/search-travelsheet-details";
+        var outgoing =  domainSetting + "api/quality-inspection/get-travelsheet-details";
         setRefreshing(true);
         try {
             const response = await fetch(componentTitle === "Outgoing Inspection" ? outgoing : productionWork, {
-                method:'GET',
+                method:'POST',
                 headers:{
                     'Content-type': 'application/json',
                     'Authorization': 'Bearer ' + token
-                }
+                },
+                body: JSON.stringify({
+                    TravelSheetNo: travelsheetno,
+                    FactoryID : FactoryID
+                })
             })
 
             const responseData = await response.json();
             setTravelSheetNo(null)
-            if(travelsheetno.includes("-") && travelsheetno.split("-").length === 3){
+            if(travelsheetno.includes("-") && (travelsheetno.split("-").length === 3 || travelsheetno.split("-").length === 4) ){
                 if(travelsheetno.split("-")[0] === "TS"){
                     if(componentTitle === "Outgoing Inspection" && responseData[0].dataContent.IsProcess === 1){
                         alertMessage("Please scan Pending/On-Going Travel Sheet.")
@@ -382,7 +386,7 @@ const ProductionWorkEntryScreen = (props) =>{
                                 ]}
                                 showSoftInputOnFocus={isEnable}
                                 autoFocus={true}
-                                onChangeText={(text) => !isEnable ? limiters.includes(text.length) ? setTravelSheetNo(text) : "" : setTravelSheetNo(text)}
+                                onChangeText={(text) => !isEnable ? (text.length === 15 || limiters.includes(text.length)) ? setTravelSheetNo(text) : "" : setTravelSheetNo(text)}
                                 value={travelSheetNo}
                             />
                         </FormControl>

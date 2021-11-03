@@ -217,16 +217,20 @@ const WorkResultInputScreen = (props) =>{
  
         setloading(true)
         try{
-            const response = await fetch(domainSetting + "api/production-work/production-work-entry/search-travelsheet-details/" + travelSheetNumber, {
-                method:'GET',
+            const response = await fetch(domainSetting + "api/production-work/production-work-entry/search-travelsheet-details", {
+                method:'POST',
                 headers:{
                     'Content-type': 'application/json',
                     'Authorization': 'Bearer ' + tokendata
-                }
+                },
+                body: JSON.stringify({
+                    TravelSheetNo: travelSheetNumber,
+                    FactoryID : FactoryID
+                })
             })
 
             const responseData = await response.json();
-            if(responseData[0].total > 0 && responseData[0].dataContent[0].DateTo === '1900-01-01 00:00:00'){
+            if(responseData[0].total > 0 && (responseData[0].dataContent[0].DateTo === '1900-01-01 00:00:00' && responseData[0].dataContent[0].DateFrom === '1900-01-01 00:00:00')){
                 var tempvar = {
                     ID:             responseData[0].dataContent[0].ID,
                     TravelSheetID:  responseData[0].dataContent[0].TravelSheetID,
@@ -256,10 +260,9 @@ const WorkResultInputScreen = (props) =>{
                }
 
                setloading(false)
-            }else if(responseData[0].dataContent[0].DateFrom != '1900-01-01 00:00:00' && responseData[0].dataContent[0].DateTo != '1900-01-01 00:00:00'){
-                alertMessage("Please Scan Pending od Ongoing Travelsheet");
             }else{
-                alertMessage("No Data Available");
+                console.warn(travelSheetNumber)
+                alertMessage("Please Scan Pending or Ongoing Travelsheet");
             }
         }catch(error){
             alertMessage(error.message);
