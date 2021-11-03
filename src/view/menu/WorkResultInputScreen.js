@@ -157,6 +157,31 @@ const WorkResultInputScreen = (props) =>{
         }
     }
 
+    const cancelProduction = async () =>{
+        try{
+            const response = await fetch(domainSetting + "api/production-work/production-work-entry/cancel-production", {
+                method:'POST',
+                headers:{
+                    'Content-type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({
+                    TravelSheetID: TravelSheetID,
+                })
+            })
+
+            const responseData = await response.json();
+            props.navigation.navigate('ProductionWorkEntryScreen',
+                {
+                    title: "Work Result Input",
+                    url: "api/production-work/production-work-entry/index",
+                }
+            )
+        }catch(error){
+            alertMessage(error.message);
+        }
+    }
+
     const getProductLine = async () =>{
         try{
             const response = await fetch(domainSetting + "api/production-work/production-work-entry/linel-list/get/" + factoryId, {
@@ -290,11 +315,10 @@ const WorkResultInputScreen = (props) =>{
         if(data != null){
             let catchPair = false
             for(let i = 0; i < data.length; i++){
+                setactiveActionSheetlabel(main_display)
+                setProductionLine(data)
                 if(data[i].Line === main_display){
                     setLineID(data[i].LineID)
-
-                    setactiveActionSheetlabel(main_display)
-                    setProductionLine(data)
                     catchPair = true
                 }
             }
@@ -524,7 +548,7 @@ const WorkResultInputScreen = (props) =>{
                                     ?
                                     boolStartProcess ? "Started" : "Start"
                                     :
-                                    (endDatetime == null ? "Processing.." : "Ended")}
+                                    (endDatetime == null ? "Ongoing" : "Ended")}
                             </Text>
                         </View>
                     </TouchableOpacity>
@@ -558,7 +582,7 @@ const WorkResultInputScreen = (props) =>{
                     </TouchableOpacity>
                 </View>
                 <View style={[styles.w30]}>
-                    <TouchableOpacity onPress={() => props.navigation.goBack()}>
+                    <TouchableOpacity onPress={() => cancelProduction()}>
                         <View style={[
                             styles.bgWarning,
                             styles.justifyCenter,
