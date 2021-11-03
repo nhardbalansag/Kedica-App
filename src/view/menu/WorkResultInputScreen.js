@@ -226,7 +226,7 @@ const WorkResultInputScreen = (props) =>{
             })
 
             const responseData = await response.json();
-            if(responseData[0].total > 0){
+            if(responseData[0].total > 0 && responseData[0].dataContent[0].DateTo === '1900-01-01 00:00:00'){
                 var tempvar = {
                     ID:             responseData[0].dataContent[0].ID,
                     TravelSheetID:  responseData[0].dataContent[0].TravelSheetID,
@@ -256,6 +256,8 @@ const WorkResultInputScreen = (props) =>{
                }
 
                setloading(false)
+            }else if(responseData[0].dataContent[0].DateFrom != '1900-01-01 00:00:00' && responseData[0].dataContent[0].DateTo != '1900-01-01 00:00:00'){
+                alertMessage("Please Scan Pending od Ongoing Travelsheet");
             }else{
                 alertMessage("No Data Available");
             }
