@@ -83,32 +83,42 @@ const InscpectionDetails = (props, {navigation}) =>{
         setactiveRejectActionSheet(true)
     }
 
+    
     const getOutgoingTravelSheetDetails = async (travelsheet) =>{
         setloading(true)
         try{
-            const response = await fetch(domainSetting + "api/quality-inspection/get-travelsheet-details/" + travelsheet, {
-                method:"GET",
+            const response = await fetch(domainSetting + "api/quality-inspection/get-travelsheet-details", {
+                method:"POST",
                 headers:{
                     'Content-type': 'application/json',
                     'Authorization': 'Bearer ' + token
-                }
+                },
+                body: JSON.stringify({
+                    TravelSheetNo: travelsheet,
+                    FactoryID : FactoryID
+                })
             })
     
             const responseData = await response.json();
 
-            setOutgoingData([
-                {
-                    ID: responseData[0].dataContent.ID,
-                    ProductionWorkID: responseData[0].dataContent.ProductionWorkID,
-                    TravelSheetNo: responseData[0].dataContent.TravelSheetNo,
-                    PlatingLotNo: responseData[0].dataContent.PlatingLotNo,
-                    ItemCode: responseData[0].dataContent.ItemCode,
-                    ItemName: responseData[0].dataContent.ItemName,
-                    LotNo: responseData[0].dataContent.LotNo,
-                    Qty: responseData[0].dataContent.Qty,
-                    UpdateDate: responseData[0].dataContent.UpdateDate,
-                }
-            ])
+            if(responseData[0].status === true){
+                setOutgoingData([
+                    {
+                        ID: responseData[0].dataContent.ID,
+                        ProductionWorkID: responseData[0].dataContent.ProductionWorkID,
+                        TravelSheetNo: responseData[0].dataContent.TravelSheetNo,
+                        PlatingLotNo: responseData[0].dataContent.PlatingLotNo,
+                        ItemCode: responseData[0].dataContent.ItemCode,
+                        ItemName: responseData[0].dataContent.ItemName,
+                        LotNo: responseData[0].dataContent.LotNo,
+                        Qty: responseData[0].dataContent.Qty,
+                        UpdateDate: responseData[0].dataContent.UpdateDate,
+                    }
+                ])
+            }else{
+                props.navigation.goBack();
+                alertMessage("Please scan valid travelsheet.")
+            }
             setloading(false)
         }catch(error){
             alertMessage(error.message)
