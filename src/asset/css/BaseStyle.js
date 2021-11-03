@@ -85,6 +85,9 @@ const styles = StyleSheet.create({
   w80: {
     width: '80%'
   },
+  w75: {
+    width: '75%'
+  },
   w70: {
     width: '70%'
   },
@@ -93,6 +96,9 @@ const styles = StyleSheet.create({
   },
   w50: {
     width: '50%'
+  },
+  w55: {
+    width: '55%'
   },
   w45: {
     width: '45%'
@@ -111,6 +117,12 @@ const styles = StyleSheet.create({
   },
   w20: {
     width: '20%'
+  },
+  w22: {
+    width: '22%'
+  },
+  w23: {
+    width: '23%'
   },
   w15: {
     width: '15%'

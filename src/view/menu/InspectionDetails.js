@@ -101,6 +101,7 @@ const InscpectionDetails = (props, {navigation}) =>{
                     ID: responseData[0].dataContent.ID,
                     ProductionWorkID: responseData[0].dataContent.ProductionWorkID,
                     TravelSheetNo: responseData[0].dataContent.TravelSheetNo,
+                    PlatingLotNo: responseData[0].dataContent.PlatingLotNo,
                     ItemCode: responseData[0].dataContent.ItemCode,
                     ItemName: responseData[0].dataContent.ItemName,
                     LotNo: responseData[0].dataContent.LotNo,
@@ -393,10 +394,11 @@ const InscpectionDetails = (props, {navigation}) =>{
 
     const NGQuantityComponent = () =>{
         return(
-            <View>
+            <View style={[styles.w75]}>
                 <Input
                     disableFullscreenUI={true}
                     size="2xl"
+                    width="100%"
                     placeholder=" Quantity "
                     _light={{
                         placeholderTextColor: "blueGray.400",
@@ -415,7 +417,7 @@ const InscpectionDetails = (props, {navigation}) =>{
 
     const NGGoodQtyfun = () =>{
         return(
-            <View>
+            <View >
                 <Input
                     disableFullscreenUI={true}
                     size="2xl"
@@ -437,7 +439,7 @@ const InscpectionDetails = (props, {navigation}) =>{
 
     const keepSample = () =>{
         return(
-            <View>
+            <View style={[{width:"41%"}]}>
                 <Input
                     disableFullscreenUI={true}
                     size="2xl"
@@ -625,55 +627,57 @@ const InscpectionDetails = (props, {navigation}) =>{
                 :
                 <ScrollView>
                     <View style={[styles.mX3, styles.mY2]}>
-                        <View style={[styles.flexRow, styles.alignFlexEnd, styles.justifySpaceBetween, styles.mX1]}>
-                            <View style={[styles.flexRow, styles.alignFlexEnd, {marginBottom:10}]}>
-                                <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300]}>
-                                    Travel Sheet No. : 
-                                </Text>
-                                <Text style={[styles.font40]}>
-                                    { travelSheetNumber ? travelSheetNumber : "-" }
-                                </Text> 
-                            </View>
+                        <View style={[styles.flexRow, styles.alignFlexEnd, styles.mL1, {marginBottom:10}]}>
+                            <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300, styles.w23]}>
+                                Travel Sheet No. : 
+                            </Text>
+                            <Text style={[styles.font40, styles.w80]}>
+                                { travelSheetNumber ? travelSheetNumber : "-" }
+                            </Text> 
                         </View>
-                        <View>
-                            <View style={[styles.flexRow, styles.alignFlexEnd, styles.mL1, {marginBottom:10}]}>
-                                <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300]}>
-                                    Product Name : 
-                                </Text>
-                                <Text style={[styles.font40]}>
-                                    { OutgoingData !== null ? (OutgoingData[0].ItemCode ? OutgoingData[0].ItemCode + " - " +  OutgoingData[0].ItemName: "-") : "-"  }
-                                </Text> 
-                            </View>
+                        <View style={[styles.flexRow, styles.alignFlexEnd, styles.mL1, {marginBottom:10}]}>
+                            <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300, styles.w23]}>
+                                Product Name : 
+                            </Text>
+                            <Text style={[styles.font40, styles.w80]}>
+                                { OutgoingData !== null ? (OutgoingData[0].ItemCode ? OutgoingData[0].ItemCode + " - " +  OutgoingData[0].ItemName: "-") : "-"  }
+                            </Text> 
                         </View>
-                        <View style={[styles.flexRow, styles.alignFlexEnd, styles.justifySpaceBetween, styles.mX1]}>
-                            <View style={[styles.flexRow, styles.alignFlexEnd, {marginBottom:10}]}>
-                                <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300]}>
-                                    Lot No. : 
-                                </Text>
-                                <Text style={[styles.font40]}>
-                                    { OutgoingData !== null ? (OutgoingData[0].LotNo ? OutgoingData[0].LotNo : "-") : "-" }
-                                </Text>
-                            </View> 
-                            <View style={[styles.flexRow, styles.alignFlexEnd, {marginBottom:10}]}>
-                                <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300]}>
-                                    Output Qty : 
-                                </Text>
-                                <Text style={[styles.font40]}>
-                                    { OutgoingData !== null ? (OutgoingData[0].Qty ? OutgoingData[0].Qty : "-") : "-"  }
-                                </Text> 
-                            </View>
+                        <View style={[styles.flexRow, styles.alignFlexEnd, styles.mL1, {marginBottom:10}]}>
+                            <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300, styles.w23]}>
+                                Lot No. : 
+                            </Text>
+                            <Text style={[styles.font40]}>
+                                { OutgoingData !== null ? (OutgoingData[0].LotNo ? OutgoingData[0].LotNo : "-") : "-" }
+                            </Text>
+                        </View> 
+                        <View style={[styles.flexRow, styles.alignFlexEnd, styles.mL1, {marginBottom:10}]}>
+                            <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300, styles.w23]}>
+                                Plating Lot No. : 
+                            </Text>
+                            <Text style={[styles.font40, styles.w80]}>
+                                { OutgoingData !== null ? (OutgoingData[0].PlatingLotNo ? OutgoingData[0].PlatingLotNo : "-") : "-"  }
+                            </Text> 
+                        </View>
+                        <View style={[styles.flexRow, styles.alignFlexEnd, styles.mL1, {marginBottom:10}]}>
+                            <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300, styles.w23]}>
+                                Output Qty : 
+                            </Text>
+                            <Text style={[styles.font40, styles.w80]}>
+                            { OutgoingData !== null ? (OutgoingData[0].Qty ? OutgoingData[0].Qty : "-") : "-"  }
+                            </Text> 
                         </View>
                         {
                             FactoryID === 2
                             ?
-                                <View style={[styles.flexRow, styles.alignFlexEnd, styles.justifySpaceBetween, styles.mX1]}>
-                                    <View style={[styles.flexRow, styles.alignFlexEnd, styles.justifySpaceBetween, {marginBottom:10}]}>
+                                <View style={[styles.flexRow, styles.alignFlexEnd, styles.mX1]}>
+                                    <View style={[styles.flexRow, styles.alignFlexEnd, styles.justifySpaceBetween, {marginBottom:10}, styles.w50, styles.mR1]}>
                                         <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300]}>
                                             Thickness : 
                                         </Text>
                                         {ThicknessComponent()}
                                     </View>
-                                    <View style={[styles.flexRow, styles.alignFlexEnd, styles.justifySpaceBetween, {marginBottom:10}]}>
+                                    <View style={[styles.flexRow, styles.alignFlexEnd, styles.justifySpaceBetween, {marginBottom:10},styles.w30]}>
                                         <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300]}>
                                             Actual Thickness : 
                                         </Text>
@@ -683,35 +687,35 @@ const InscpectionDetails = (props, {navigation}) =>{
                             :
                                 <></>
                         }
-                        <View style={[styles.flexRow, styles.alignFlexEnd, styles.justifySpaceBetween, styles.mX1]}>
-                            <View style={[styles.flexRow, styles.alignFlexEnd]}>
-                                <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300]}>
+                        <View style={[styles.flexRow, styles.alignFlexEnd, styles.mX1]}>
+                            <View style={[styles.flexRow, styles.alignFlexEnd, styles.w50, styles.mR1]}>
+                                <Text style={[styles.font30,styles.textBold, styles.mR2, styles.textGray300, styles.w20]}>
                                     NG Qty : 
                                 </Text>
                                 {NGQuantityComponent()}
                             </View>
-                            <View style={[styles.flexRow, styles.alignFlexEnd]}>
-                                <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300]}>
+                            <View style={[styles.flexRow, styles.alignFlexEnd, styles.w30]}>
+                                <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300, styles.w70]}>
                                     NG Remarks : 
                                 </Text>
                                 {RemarksComponent()}
                             </View>
                         </View>
-                        <View style={[styles.flexRow, styles.alignFlexEnd, styles.justifySpaceBetween, styles.mX1, styles.mY1]}>
-                            <View style={[styles.flexRow, styles.alignFlexEnd]}>
-                                <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300]}>
+                        <View style={[styles.flexRow, styles.alignFlexEnd, styles.mX1, styles.mY1]}>
+                            <View style={[styles.flexRow, styles.alignFlexEnd, styles.w50, styles.mR1]}>
+                                <Text style={[styles.font30,styles.textBold, styles.mR2, styles.textGray300,styles.w50]}>
                                     Material Reject QTY : 
                                 </Text>
                                 {NGGoodQtyfun()}
                             </View>
-                            <View style={[styles.flexRow, styles.alignFlexEnd]}>
-                                <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300]}>
+                            <View style={[styles.flexRow, styles.alignFlexEnd, styles.w30]}>
+                                <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300, styles.w70]}>
                                     Reject Remarks : 
                                 </Text>
                                 {RejectRemarksComponent()}
                             </View>
                         </View>
-                        <View style={[styles.flexRow, styles.alignFlexEnd, styles.justifySpaceBetween, styles.mX1, styles.mY1]}>
+                        <View style={[styles.flexRow, styles.alignFlexEnd, styles.mX1, styles.mY1]}>
                             <View style={[styles.flexRow, styles.alignFlexEnd]}>
                                 <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300]}>
                                     Keep Sample QTY : 
