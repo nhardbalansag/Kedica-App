@@ -272,12 +272,28 @@ const WorkResultInputScreen = (props) =>{
 
     const checkLineID = async (data) =>{
         var name = await DeviceInfo.getDeviceName()
+        var temp = name.split(" ")
+        var number = null;
+        var displayTitle = ""
+        var main_display = ""
+        for(let i = 0; i < temp.length; i++){
+            if(temp[i].includes('-')){
+                var splitnumber = temp[i].split('-')
+                number = splitnumber[0]
+            }else{
+                displayTitle = displayTitle + (temp[i] + " ")
+            }
+        }
+
+        main_display = displayTitle + (number !== null ? number : "")
+
         if(data != null){
             let catchPair = false
             for(let i = 0; i < data.length; i++){
-                if(data[i].Line === name){
+                if(data[i].Line === main_display){
                     setLineID(data[i].LineID)
-                    setactiveActionSheetlabel(data[i].Line)
+
+                    setactiveActionSheetlabel(main_display)
                     setProductionLine(data)
                     catchPair = true
                 }
@@ -299,47 +315,9 @@ const WorkResultInputScreen = (props) =>{
         realtime();
     },[])
 
-    const mainContent = () =>{
-        return(
-            <NativeBaseProvider>
-<View style={[styles.flexRow]}>
-    <View style={[
-        styles.flexRow,
-        styles.alignCenter,
-        styles.mL2
-    ]}>
-        <Text style={[
-            styles.font30,
-            styles.textBold,
-            styles.mR1
-        ]}>
-            Travel Sheet No. :
-        </Text>
-        <Text style={[
-            styles.font40
-        ]}>
-            {travelSheetNumber}
-        </Text>
-    </View>
-    <View style={[
-        styles.flexRow,
-        styles.alignCenter,
-        styles.mL2
-    ]}>
-        <Text style={[
-            styles.font30,
-            styles.textBold,
-            styles.mR1
-        ]}>
-            Plating Lot No. :
-        </Text>
-        <Text style={[
-            styles.font40
-        ]}>
-            {plating == null ? "--" : plating}
-        </Text>
-    </View>
-</View>
+    const mainContent = () =>(
+        <NativeBaseProvider>
+            <View style={[styles.flexRow]}>
                 <View style={[
                     styles.flexRow,
                     styles.alignCenter,
@@ -350,19 +328,12 @@ const WorkResultInputScreen = (props) =>{
                         styles.textBold,
                         styles.mR1
                     ]}>
-                        From(Datetime) :
+                        Travel Sheet No. :
                     </Text>
                     <Text style={[
                         styles.font40
                     ]}>
-                        {
-                            startedDatetime == null
-                            ?
-                                (boolStartProcess ? startProcessDateTime + " " + AMPM : DisplayTime + " " + AMPM)
-                            :
-                                startedDatetime
-                        }
-                        
+                        {travelSheetNumber}
                     </Text>
                 </View>
                 <View style={[
@@ -375,215 +346,262 @@ const WorkResultInputScreen = (props) =>{
                         styles.textBold,
                         styles.mR1
                     ]}>
-                        To(Datetime) :
+                        Plating Lot No. :
                     </Text>
                     <Text style={[
                         styles.font40
                     ]}>
-                        {
-                            endDatetime == null ? DisplayTime + " " + AMPM : endDatetime
-                        }
-                        
+                        {plating == null ? "--" : plating}
                     </Text>
                 </View>
-                
-                <View style={[
-                    styles.flexRow,
-                    styles.alignCenter,
-                    styles.mL2
+            </View>
+            <View style={[
+                styles.flexRow,
+                styles.alignCenter,
+                styles.mL2
+            ]}>
+                <Text style={[
+                    styles.font30,
+                    styles.textBold,
+                    styles.mR1
                 ]}>
-                    <Text style={[
-                        styles.font30,
-                        styles.textBold,
-                        styles.mR1
-                    ]}>
-                        Prod. Line :
-                    </Text>
-                    <View>
-                        <TouchableOpacity disabled={prodlineButton} onPress={ () => actionsheet()}>
-                            <View style={[
-                                !prodlineButton ? styles.backgroundPrimary : styles.bgGray200,
-                                styles.justifyCenter,
-                                styles.alignCenter,
-                                styles.flexRow,
-                                styles.border10,
-                                styles.pY1,
-                                styles.pX2
-                            ]}>
-                                <Text style={[styles.font30, styles.textWhite, styles.mR1]}>{activeActionSheetlabel !== null ? activeActionSheetlabel : "Select Production Line"}</Text>
-                                <Icon name="mouse-pointer" size={30} color={colors.lightColor} />
-                            </View>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-                <View style={[
-                    styles.flexRow,
-                    styles.alignCenter,
-                    styles.mL2
+                    From(Datetime) :
+                </Text>
+                <Text style={[
+                    styles.font40
                 ]}>
-                    <Text style={[
-                        styles.font30,
-                        styles.textBold,
-                        styles.mR1
-                    ]}>
-                        Total Qty :
-                    </Text>
-                    <Text style={[
-                        styles.font40
-                    ]}>
-                        {Qty}
-                    </Text>
+                    {startedDatetime == null
+                        ?
+                        (boolStartProcess ? startProcessDateTime + " " + AMPM : DisplayTime + " " + AMPM)
+                        :
+                        startedDatetime}
+
+                </Text>
+            </View>
+            <View style={[
+                styles.flexRow,
+                styles.alignCenter,
+                styles.mL2
+            ]}>
+                <Text style={[
+                    styles.font30,
+                    styles.textBold,
+                    styles.mR1
+                ]}>
+                    To(Datetime) :
+                </Text>
+                <Text style={[
+                    styles.font40
+                ]}>
+                    {endDatetime == null ? DisplayTime + " " + AMPM : endDatetime}
+
+                </Text>
+            </View>
+
+            <View style={[
+                styles.flexRow,
+                styles.alignCenter,
+                styles.mL2
+            ]}>
+                <Text style={[
+                    styles.font30,
+                    styles.textBold,
+                    styles.mR1
+                ]}>
+                    Prod. Line :
+                </Text>
+                <View>
+                    <TouchableOpacity disabled={prodlineButton} onPress={() => actionsheet()}>
+                        <View style={[
+                            !prodlineButton ? styles.backgroundPrimary : styles.bgGray200,
+                            styles.justifyCenter,
+                            styles.alignCenter,
+                            styles.flexRow,
+                            styles.border10,
+                            styles.pY1,
+                            styles.pX2
+                        ]}>
+                            <Text style={[styles.font30, styles.textWhite, styles.mR1]}>{activeActionSheetlabel !== null ? activeActionSheetlabel : "Select Production Line"}</Text>
+                            <Icon name="mouse-pointer" size={30} color={colors.lightColor} />
+                        </View>
+                    </TouchableOpacity>
                 </View>
-                
-                <Actionsheet isOpen={activeActionSheet} onClose={onClose}  hideDragIndicator={true}>
-                    <Actionsheet.Content style={[styles.alignFlexStart]}>
-                        <Actionsheet.Item>
-                            <View>
-                                <TouchableOpacity onPress={() => setactiveActionSheet(false)}>
-                                    <View style={[
-                                        styles.flexRow,
-                                        styles.justifySpaceBetween,
-                                        styles.alignCenter,
-                                        styles.pL5,
-                                    ]}>
-                                        <Icon name="times" size={40} color={colors.dangerColor} />
-                                        <Text style={[styles.font40, styles.mL2, styles.textDanger]}>{productionLine == null ? "No production line connected to this device Please Setup your device name in tablet settings." : "Cancel"}</Text>
-                                    </View>
-                                </TouchableOpacity>
-                            </View>
-                        </Actionsheet.Item>
-                        <ScrollView>
-                        {
-                            productionLine != null?
-                            productionLine.map((data, index)=>
-                                <Actionsheet.Item key={index}>
-                                    <View>
-                                        <TouchableOpacity onPress={() => closeActionSheet(data.LineID, data.Line)}>
-                                            <View style={[
-                                                styles.flexRow,
-                                                styles.justifySpaceBetween,
-                                                styles.alignCenter,
-                                                styles.pL5,
-                                            ]}>
-                                                <Icon name="circle" size={40} color={lineId == data.LineID ? colors.primaryColor : colors.gray200} />
-                                                <Text style={[styles.font40, styles.mL2]}>{data.Line}</Text>
-                                            </View>
-                                        </TouchableOpacity>
-                                    </View>
-                                </Actionsheet.Item>
+            </View>
+            <View style={[
+                styles.flexRow,
+                styles.alignCenter,
+                styles.mL2
+            ]}>
+                <Text style={[
+                    styles.font30,
+                    styles.textBold,
+                    styles.mR1
+                ]}>
+                    Total Qty :
+                </Text>
+                <Text style={[
+                    styles.font40
+                ]}>
+                    {Qty}
+                </Text>
+            </View>
+
+            <Actionsheet isOpen={activeActionSheet} onClose={onClose} hideDragIndicator={true}>
+                <Actionsheet.Content style={[styles.alignFlexStart]}>
+                    <Actionsheet.Item>
+                        <View>
+                            <TouchableOpacity onPress={() => setactiveActionSheet(false)}>
+                                <View style={[
+                                    styles.flexRow,
+                                    styles.justifySpaceBetween,
+                                    styles.alignCenter,
+                                    styles.pL5,
+                                ]}>
+                                    <Icon name="times" size={40} color={colors.dangerColor} />
+                                    <Text style={[styles.font40, styles.mL2, styles.textDanger]}>{productionLine == null ? "No production line connected to this device Please Setup your device name in tablet settings." : "Cancel"}</Text>
+                                </View>
+                            </TouchableOpacity>
+                        </View>
+                    </Actionsheet.Item>
+                    <ScrollView>
+                        {productionLine != null ?
+                            productionLine.map((data, index) => <Actionsheet.Item key={index}>
+                                <View>
+                                    <TouchableOpacity onPress={() => closeActionSheet(data.LineID, data.Line)}>
+                                        <View style={[
+                                            styles.flexRow,
+                                            styles.justifySpaceBetween,
+                                            styles.alignCenter,
+                                            styles.pL5,
+                                        ]}>
+                                            <Icon name="circle" size={40} color={lineId == data.LineID ? colors.primaryColor : colors.gray200} />
+                                            <Text style={[styles.font40, styles.mL2]}>{data.Line}</Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                </View>
+                            </Actionsheet.Item>
                             )
                             :
-                            <></>
-                        }
-                        </ScrollView>
-                    </Actionsheet.Content>
-                </Actionsheet>
+                            <></>}
+                    </ScrollView>
+                </Actionsheet.Content>
+            </Actionsheet>
 
-                <View style={[
-                    styles.mX2,
-                    styles.flexRow,
-                    styles.alignCenter,
-                    styles.justifySpaceAround
-                ]}>
-                    <View style={[
-                        styles.mY1
-                    ]}>
-                        <TouchableOpacity
-                            disabled={boolStartProcess}
-                            onPress={() => startProcess()}
-                        >
-                            <View style={[
-                                boolStartProcess ? styles.bgGray200 :styles.bgSuccess ,
-                                styles.justifyCenter,
-                                styles.alignCenter,
-                                styles.flexRow,
-                                styles.border10,
-                                styles.pY100,
-                                styles.pX2
-                            ]}>
-                               <>
-                                    <Icon 
-                                        name={
-                                            startedDatetime == null
-                                            ?
-                                                "hourglass-start"
-                                            :
-                                                "exclamation-circle"
-                                        }
-                                        size={70} 
-                                        color={colors.lightColor} 
-                                    />
-                                </>
-                                
-                                <Text style={[styles.font60, styles.mL2, styles.textWhite]}> 
-                                    {
-                                        startedDatetime == null
+            <View style={[
+                styles.flexRow,
+                styles.alignCenter,
+                styles.justifySpaceAround,
+                styles.w100,
+                styles.pB5
+            ]}>
+                <View style={[styles.w30]}>
+                    <TouchableOpacity
+                        disabled={boolStartProcess}
+                        onPress={() => startProcess()}
+                    >
+                        <View style={[
+                            boolStartProcess ? styles.bgGray200 : styles.bgSuccess,
+                            styles.justifyCenter,
+                            styles.alignCenter,
+                            styles.flexRow,
+                            styles.border10,
+                            styles.pY100,
+                            styles.pX2
+                        ]}>
+                            <>
+                                <Icon
+                                    name={startedDatetime == null
                                         ?
-                                            boolStartProcess ? "Process started" : "START PROCESS"
+                                        "hourglass-start"
                                         :
-                                            (endDatetime == null ? "Processing..." : "Process Ended")
-                                            
-                                    }
-                                </Text>
-                            </View>
-                        </TouchableOpacity>
-                    </View> 
-                    <View>
-                        <TouchableOpacity 
-                            onPress={() => endProcess()}
-                            disabled={
-                                !boolStartProcess ? true : (boolEndProcess)
-                            }
-                        >
-                            <View style={[
-                                !boolStartProcess ? styles.bgGray200 : (boolEndProcess ? styles.bgGray200 :styles.backgroundPrimary),
-                                styles.justifyCenter,
-                                styles.alignCenter,
-                                styles.flexRow,
-                                styles.border10,
-                                styles.pY100,
-                                styles.pX2
-                            ]}>
-                                <Icon 
-                                    name={
-                                        boolEndProcess == null
-                                        ?
-                                            "hourglass-end"
-                                        :
-                                            "exclamation-circle"
-                                    }
-                                    size={70} 
-                                    color={colors.lightColor} 
-                                />
-                                <Text style={[styles.font60, styles.mL2, styles.textWhite]}>
-                                    {boolEndProcess ? "Process Ended" : "END PROCESS"}
-                                </Text>
-                            </View>
-                        </TouchableOpacity>
-                    </View> 
+                                        "exclamation-circle"}
+                                    size={70}
+                                    color={colors.lightColor} />
+                            </>
+
+                            <Text style={[styles.font60, styles.mL2, styles.textWhite, styles.textCenter]}>
+                                {startedDatetime == null
+                                    ?
+                                    boolStartProcess ? "Started" : "Start"
+                                    :
+                                    (endDatetime == null ? "Processing.." : "Ended")}
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
                 </View>
-            </NativeBaseProvider>
-        )
-    }
+                <View style={[styles.w30]}>
+                    <TouchableOpacity
+                        onPress={() => endProcess()}
+                        disabled={!boolStartProcess ? true : (boolEndProcess)}
+                    >
+                        <View style={[
+                            !boolStartProcess ? styles.bgGray200 : (boolEndProcess ? styles.bgGray200 : styles.backgroundPrimary),
+                            styles.justifyCenter,
+                            styles.alignCenter,
+                            styles.flexRow,
+                            styles.border10,
+                            styles.pY100,
+                            styles.pX2
+                        ]}>
+                            <Icon
+                                name={boolEndProcess == null
+                                    ?
+                                    "hourglass-end"
+                                    :
+                                    "exclamation-circle"}
+                                size={70}
+                                color={colors.lightColor} />
+                            <Text style={[styles.font60, styles.mL2, styles.textWhite, styles.textCenter]}>
+                                {boolEndProcess ? "Ended" : "End"}
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
+                </View>
+                <View style={[styles.w30]}>
+                    <TouchableOpacity onPress={() => props.navigation.goBack()}>
+                        <View style={[
+                            styles.bgWarning,
+                            styles.justifyCenter,
+                            styles.alignCenter,
+                            styles.flexRow,
+                            styles.border10,
+                            styles.pY100,
+                            styles.pX2
+                        ]}>
+                            <Icon
+                                name="times"
+                                size={70}
+                                color={colors.lightColor} />
+                            <Text style={[styles.font60, styles.mL2, styles.textWhite, styles.textCenter]}>
+                                Cancel
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </NativeBaseProvider>
+    )
 
      return(
-        <>
-        {
-            !loading  
-            ?
-                mainContent()
-            :
-                <>
-                    <View style={[
-                            styles.alignCenter,
-                            styles.justifyCenter,
-                            styles.flex1
-                        ]}>
-                        <ActivityIndicator  size="large" color={colors.primaryColor}/>
-                    </View>
-                </>
-        }
-        </>
+        <NativeBaseProvider>
+            <ScrollView>
+            {
+                !loading  
+                ?
+                    mainContent()
+                :
+                    <>
+                        <View style={[
+                                styles.alignCenter,
+                                styles.justifyCenter,
+                                styles.flex1
+                            ]}>
+                            <ActivityIndicator  size="large" color={colors.primaryColor}/>
+                        </View>
+                    </>
+            }
+            </ScrollView>
+        </NativeBaseProvider>
     )
 }
 
