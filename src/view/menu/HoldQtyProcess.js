@@ -107,8 +107,8 @@ const HoldQtyProcess = (props, {navigation}) =>{
                     HoldLotID: holdQtyDetails[0].HoldLotID,
                     ProductionWorkID: holdQtyDetails[0].ProductionWorkID,
                     LotNo: holdQtyDetails[0].LotNo,
-                    ReturnQty: returnQty,
-                    ProceedQty: proceedQty,
+                    ReturnQty: returnQty ? returnQty : 0,
+                    ProceedQty: proceedQty ? proceedQty : 0,
                     IsStrip: IsStrip,
                     IsReplate: IsReplate
                 })

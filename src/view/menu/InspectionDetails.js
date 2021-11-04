@@ -147,7 +147,12 @@ const InscpectionDetails = (props, {navigation}) =>{
     }
 
     const validateSave = () =>{
-        var qtytotal = NGGoodQty + NGQTY
+
+        var NGGoodQty_val = parseFloat(NGGoodQty ? NGGoodQty : 0)
+        var NGQTY_val = parseFloat(NGQTY ? NGQTY : 0)
+
+        var qtytotal = parseFloat((NGGoodQty_val !== null ? NGGoodQty_val : 0)) + parseFloat((NGQTY_val !== null ? NGQTY_val : 0))
+
         if(qtytotal > OutgoingData[0].Qty){
             alertMessage("Invalid Input, Please try again.")
         }else{
@@ -175,13 +180,13 @@ const InscpectionDetails = (props, {navigation}) =>{
                                 },
                                 body: JSON.stringify({
                                     ProductionWorkID: OutgoingData[0].ProductionWorkID,
-                                    ThicknessFrom: thicknessFrom,
-                                    ThicknessTo: thicknessTo,
-                                    ActualThickness : ActualThickness,
-                                    NGQty : NGQTY,
-                                    NGGoodQty : NGGoodQty,
+                                    ThicknessFrom: parseFloat(thicknessFrom),
+                                    ThicknessTo: parseFloat(thicknessTo),
+                                    ActualThickness : parseFloat(ActualThickness),
+                                    NGQty : parseFloat(NGQTY),
+                                    NGGoodQty : parseFloat(NGGoodQty),
                                     NGRemarksID : NGRemarks,
-                                    KeepSampleQty : KeepSampleQty,
+                                    KeepSampleQty : parseFloat(KeepSampleQty),
                                     RejectRemarksID : RejectRemarksID
                                 })
                             })
