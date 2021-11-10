@@ -111,6 +111,7 @@ const ProductionWorkEntryScreen = (props) =>{
                                     responseData[0].dataContent[key].TravelSheetNo,
                                     responseData[0].dataContent[key].PlatingLotNo,
                                     responseData[0].dataContent[key].ItemCode + "\n" + responseData[0].dataContent[key].ItemName,
+                                    responseData[0].dataContent[key].LotNo,
                                     responseData[0].dataContent[key].Priority,
                                     responseData[0].dataContent[key].Age + " Days",
                                     responseData[0].dataContent[key].ShipDate,
@@ -124,6 +125,7 @@ const ProductionWorkEntryScreen = (props) =>{
                                     responseData[0].dataContent[key].TravelSheetNo,
                                     responseData[0].dataContent[key].PlatingLotNo,
                                     responseData[0].dataContent[key].ItemCode + "\n" + responseData[0].dataContent[key].ItemName,
+                                    responseData[0].dataContent[key].LotNo,
                                     responseData[0].dataContent[key].Priority,
                                     responseData[0].dataContent[key].Age + " Days",
                                     responseData[0].dataContent[key].ShipDate,
@@ -137,6 +139,7 @@ const ProductionWorkEntryScreen = (props) =>{
                                     responseData[0].dataContent[key].TravelSheetNo,
                                     responseData[0].dataContent[key].PlatingLotNo,
                                     responseData[0].dataContent[key].ItemCode + "\n" + responseData[0].dataContent[key].ItemName,
+                                    responseData[0].dataContent[key].LotNo,
                                     responseData[0].dataContent[key].Priority,
                                     responseData[0].dataContent[key].Age + " Days",
                                     responseData[0].dataContent[key].ShipDate,
@@ -151,6 +154,7 @@ const ProductionWorkEntryScreen = (props) =>{
                                 responseData[0].dataContent[key].TravelSheetNo,
                                 responseData[0].dataContent[key].PlatingLotNo,
                                 responseData[0].dataContent[key].ItemCode + "\n" + responseData[0].dataContent[key].ItemName,
+                                responseData[0].dataContent[key].LotNo,
                                 responseData[0].dataContent[key].Priority,
                                 responseData[0].dataContent[key].Age + " Days",
                                 responseData[0].dataContent[key].ShipDate,
@@ -259,7 +263,7 @@ const ProductionWorkEntryScreen = (props) =>{
     },[travelSheetNo, isFocused, filterData])
 
     const table = {
-        tableHead: ['Start Process', 'End Process', 'Travel Sheet No.', 'Plating Lot No.', 'Product Name', 'Priority No.', 'Age', 'Ship Date'],
+        tableHead: ['Start Process', 'End Process', 'Travel Sheet No.', 'Plating Lot No.', 'Product Name', 'Lot No.', 'Priority No.', 'Age', 'Ship Date'],
     }
 
     const actionViewComponent = (data, index) =>{
@@ -307,7 +311,7 @@ const ProductionWorkEntryScreen = (props) =>{
                         <Row 
                             data={table.tableHead} 
                             textStyle={CustomStyle.tableText}
-                            widthArr={[280, 280, 320, 280, 280, 280, 280, 280]}
+                            widthArr={[280, 280, 320, 280, 280, 280, 280, 280, 280]}
                         />
                         {
                             WorkEntry !== null ?

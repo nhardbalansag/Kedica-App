@@ -61,6 +61,7 @@ const WorkResultInputScreen = (props) =>{
     const [activeActionSheetlabel, setactiveActionSheetlabel] =  useState(null);
     const [prodlineButton, setprodlineButton] =  useState(false);
     const [plating, setPlating] =  useState(null);
+    const [lotnumber, setlotnumber] =  useState(null);
 
     const FactoryID = useSelector(state => state.loginCredential.FactoryId);
 
@@ -77,12 +78,12 @@ const WorkResultInputScreen = (props) =>{
         // current seconds
         let seconds = date_ob.getSeconds();
 
-        var ampm = hours >= 12 ? 'PM' : 'AM';
-        hours = hours % 12;
-        hours = hours ? hours : 12; // the hour '0' should be '12'
-        minutes = minutes < 10 ? '0' + minutes : minutes;
-        seconds = seconds < 10 ? '0' + seconds : seconds;
-        setAMPM(ampm)
+        // var ampm = hours >= 12 ? 'PM' : 'AM';
+        // hours = hours % 12;
+        // hours = hours ? hours : 12; // the hour '0' should be '12'
+        // minutes = minutes < 10 ? '0' + minutes : minutes;
+        // seconds = seconds < 10 ? '0' + seconds : seconds;
+        // setAMPM(ampm)
         var dateTimeNow = formatYmd(new Date()) + " " + hours + ":" + minutes + ":" + seconds
 
         return dateTimeNow;
@@ -239,6 +240,7 @@ const WorkResultInputScreen = (props) =>{
                     ItemName:       responseData[0].dataContent[0].ItemName,
                     Qty:            responseData[0].dataContent[0].Qty,
                     Line:           responseData[0].dataContent[0].Line,
+                    LotNo:          responseData[0].dataContent[0].LotNo,
                     PlatingLotNo:   responseData[0].dataContent[0].PlatingLotNo,
                     DateFrom:       responseData[0].dataContent[0].DateFrom,
                     DateTo:         responseData[0].dataContent[0].DateTo
@@ -250,7 +252,8 @@ const WorkResultInputScreen = (props) =>{
                setendDatetime(tempvar.DateTo == "1900-01-01 00:00:00" ? null : tempvar.DateTo)
                setQty(tempvar.Qty)
                setTravelSheetID(tempvar.TravelSheetID)
-
+               setlotnumber(tempvar.LotNo)
+               
                if(tempvar.Line !== ""){
                     setactiveActionSheetlabel(tempvar.Line)
                     setPlating(tempvar.PlatingLotNo)
@@ -346,8 +349,7 @@ const WorkResultInputScreen = (props) =>{
 
     const mainContent = () =>(
         <NativeBaseProvider>
-            <View style={[styles.flexRow]}>
-                <View style={[
+            <View style={[
                     styles.flexRow,
                     styles.alignCenter,
                     styles.mL2
@@ -365,116 +367,61 @@ const WorkResultInputScreen = (props) =>{
                         {travelSheetNumber}
                     </Text>
                 </View>
-                <View style={[
-                    styles.flexRow,
-                    styles.alignCenter,
-                    styles.mL2
-                ]}>
-                    <Text style={[
-                        styles.font30,
-                        styles.textBold,
-                        styles.mR1
-                    ]}>
-                        Plating Lot No. :
-                    </Text>
-                    <Text style={[
-                        styles.font40
-                    ]}>
-                        {plating == null ? "--" : plating}
-                    </Text>
+            <View style={[styles.flexRow, styles.alignCenter ,styles.mL2]}>
+                <View style={[styles.flexRow]}>
+                    <View style={[styles.flexRow,styles.alignCenter, styles.w50]}>
+                        <Text style={[styles.font30,styles.textBold,styles.mR1]}>Material Lot No. :</Text>
+                        <Text style={[styles.font40]}>{lotnumber == null ? "--" : lotnumber}</Text>
+                    </View>
+                </View>
+                <View style={[styles.flexRow,styles.alignCenter]}>
+                    <Text style={[styles.font30,styles.textBold,styles.mR1]}>Plating Lot No. :</Text>
+                    <Text style={[styles.font40]}>{plating == null ? "--" : plating}</Text>
                 </View>
             </View>
-            <View style={[
-                styles.flexRow,
-                styles.alignCenter,
-                styles.mL2
-            ]}>
-                <Text style={[
-                    styles.font30,
-                    styles.textBold,
-                    styles.mR1
-                ]}>
-                    From(Datetime) :
-                </Text>
-                <Text style={[
-                    styles.font40
-                ]}>
-                    {startedDatetime == null
-                        ?
-                        (boolStartProcess ? startProcessDateTime + " " + AMPM : DisplayTime + " " + AMPM)
-                        :
-                        startedDatetime}
-
-                </Text>
-            </View>
-            <View style={[
-                styles.flexRow,
-                styles.alignCenter,
-                styles.mL2
-            ]}>
-                <Text style={[
-                    styles.font30,
-                    styles.textBold,
-                    styles.mR1
-                ]}>
-                    To(Datetime) :
-                </Text>
-                <Text style={[
-                    styles.font40
-                ]}>
-                    {endDatetime == null ? DisplayTime + " " + AMPM : endDatetime}
-
-                </Text>
-            </View>
-
-            <View style={[
-                styles.flexRow,
-                styles.alignCenter,
-                styles.mL2
-            ]}>
-                <Text style={[
-                    styles.font30,
-                    styles.textBold,
-                    styles.mR1
-                ]}>
-                    Prod. Line :
-                </Text>
-                <View>
-                    <TouchableOpacity disabled={prodlineButton} onPress={() => actionsheet()}>
-                        <View style={[
-                            !prodlineButton ? styles.backgroundPrimary : styles.bgGray200,
-                            styles.justifyCenter,
-                            styles.alignCenter,
-                            styles.flexRow,
-                            styles.border10,
-                            styles.pY1,
-                            styles.pX2
-                        ]}>
-                            <Text style={[styles.font30, styles.textWhite, styles.mR1]}>{activeActionSheetlabel !== null ? activeActionSheetlabel : "Select Production Line"}</Text>
-                            <Icon name="mouse-pointer" size={30} color={colors.lightColor} />
-                        </View>
-                    </TouchableOpacity>
+            <View style={[styles.flexRow,styles.alignCenter,styles.mL2]}>
+                <View style={[styles.flexRow, styles.alignCenter, styles.w50]}>
+                    <Text style={[styles.font30,styles.textBold,styles.mR1]}>From(Datetime) :</Text>
+                    <Text style={[styles.font40]}>
+                        {
+                            startedDatetime == null
+                                ?
+                                    (boolStartProcess ? startProcessDateTime : DisplayTime)
+                                :
+                                    startedDatetime
+                        }
+                    </Text>
+                </View>
+                <View style={[styles.flexRow, styles.alignCenter]}>
+                    <Text style={[styles.font30, styles.textBold, styles.mR1]}>To(Datetime) :</Text>
+                    <Text style={[styles.font40]}>{endDatetime == null ? DisplayTime : endDatetime}</Text> 
                 </View>
             </View>
-            <View style={[
-                styles.flexRow,
-                styles.alignCenter,
-                styles.mL2
-            ]}>
-                <Text style={[
-                    styles.font30,
-                    styles.textBold,
-                    styles.mR1
-                ]}>
-                    Total Qty :
-                </Text>
-                <Text style={[
-                    styles.font40
-                ]}>
-                    {Qty}
-                </Text>
+            <View style={[styles.flexRow,styles.alignCenter,styles.mL2, styles.mB2]}>
+                <View style={[styles.flexRow, styles.alignCenter, styles.w50]}>
+                    <Text style={[styles.font30,styles.textBold,styles.mR1]}>Prod. Line :</Text>
+                    <View>
+                        <TouchableOpacity disabled={prodlineButton} onPress={() => actionsheet()}>
+                            <View style={[
+                                !prodlineButton ? styles.backgroundPrimary : styles.bgGray200,
+                                styles.justifyCenter,
+                                styles.alignCenter,
+                                styles.flexRow,
+                                styles.border10,
+                                styles.pY1,
+                                styles.pX2
+                            ]}>
+                                <Text style={[styles.font30, styles.textWhite, styles.mR1]}>{activeActionSheetlabel !== null ? activeActionSheetlabel : "Select Production Line"}</Text>
+                                <Icon name="mouse-pointer" size={30} color={colors.lightColor} />
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+                <View style={[styles.flexRow, styles.alignCenter]}>
+                    <Text style={[styles.font30, styles.textBold, styles.mR1]}>Total Qty :</Text>
+                    <Text style={[styles.font40]}>{Qty}</Text>
+                </View>
             </View>
-
             <Actionsheet isOpen={activeActionSheet} onClose={onClose} hideDragIndicator={true}>
                 <Actionsheet.Content style={[styles.alignFlexStart]}>
                     <Actionsheet.Item>
