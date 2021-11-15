@@ -163,10 +163,11 @@ const InscpectionDetails = (props, {navigation}) =>{
      const saveInspectionDetails = async () =>{
         var ngqtydata = NGQTY ? NGQTY : null
         if(((ngqtydata == null && NGRemarks == null) || (ngqtydata > 0 && NGRemarks !== null))){
-            if(FactoryID === 2 && (thicknessFrom == 0 || thicknessTo == 0 || ActualThickness == 0)){
-                alertMessage("Thickness must not be null")
-            }else{
-                if(isNaN(NGQTY) == false && isNaN(thicknessFrom) == false && isNaN(thicknessTo) == false && isNaN(ActualThickness) == false){
+            // if(FactoryID === 2 && (thicknessFrom == 0 || thicknessTo == 0 || ActualThickness == 0)){
+            //     alertMessage("Thickness must not be null")
+            // }else{
+                // if(isNaN(NGQTY) == false && isNaN(thicknessFrom) == false && isNaN(thicknessTo) == false && isNaN(ActualThickness) == false){
+                if(isNaN(NGQTY) == false){
                     var metrialrejectdata = NGGoodQty ? NGGoodQty : null
 
                     if((metrialrejectdata == null && RejectRemarksID == null) || (metrialrejectdata > 0 && RejectRemarksID !== null)){
@@ -180,9 +181,12 @@ const InscpectionDetails = (props, {navigation}) =>{
                                 },
                                 body: JSON.stringify({
                                     ProductionWorkID: OutgoingData[0].ProductionWorkID,
-                                    ThicknessFrom: parseFloat(thicknessFrom),
-                                    ThicknessTo: parseFloat(thicknessTo),
-                                    ActualThickness : parseFloat(ActualThickness),
+                                    // ThicknessFrom: parseFloat(thicknessFrom),
+                                    // ThicknessTo: parseFloat(thicknessTo),
+                                    // ActualThickness : parseFloat(ActualThickness),
+                                    ThicknessFrom: null,
+                                    ThicknessTo: null,
+                                    ActualThickness : null,
                                     NGQty : parseFloat(NGQTY),
                                     NGGoodQty : parseFloat(NGGoodQty),
                                     NGRemarksID : NGRemarks,
@@ -206,7 +210,7 @@ const InscpectionDetails = (props, {navigation}) =>{
                 }else{
                     alertMessage("Please input a valid number")
                 }
-            }
+            // }
         }else{
             NGQTY ? alertMessage("NG Remarks and NG Quantity Cannot be empty") : alertMessage("NG Quantity must not be null")
         }
@@ -682,7 +686,7 @@ const InscpectionDetails = (props, {navigation}) =>{
                             { OutgoingData !== null ? (OutgoingData[0].Qty ? OutgoingData[0].Qty : "-") : "-"  }
                             </Text> 
                         </View>
-                        {
+                        {/* {
                             FactoryID === 2
                             ?
                                 <View style={[styles.flexRow, styles.alignFlexEnd, styles.mX1]}>
@@ -701,7 +705,7 @@ const InscpectionDetails = (props, {navigation}) =>{
                                 </View>
                             :
                                 <></>
-                        }
+                        } */}
                         <View style={[styles.flexRow, styles.alignFlexEnd, styles.mX1]}>
                             <View style={[styles.flexRow, styles.alignFlexEnd, styles.w50, styles.mR1]}>
                                 <Text style={[styles.font30,styles.textBold, styles.mR2, styles.textGray300, styles.w20]}>
