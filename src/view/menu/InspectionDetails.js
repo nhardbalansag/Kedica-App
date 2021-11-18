@@ -14,8 +14,6 @@ import {
     TouchableOpacity,
     Alert,
     ActivityIndicator,
-    TextInput,
-    FlatList
 } from "react-native";
 
 import {
@@ -82,11 +80,10 @@ const InscpectionDetails = (props, {navigation}) =>{
     const Rejectactionsheet = () =>{
         setactiveRejectActionSheet(true)
     }
-
     
     const getOutgoingTravelSheetDetails = async (travelsheet) =>{
-        setloading(true)
         try{
+            setloading(true)
             const response = await fetch(domainSetting + "api/quality-inspection/get-travelsheet-details", {
                 method:"POST",
                 headers:{
@@ -98,10 +95,10 @@ const InscpectionDetails = (props, {navigation}) =>{
                     FactoryID : FactoryID
                 })
             })
-    
+            
             const responseData = await response.json();
 
-            if(responseData[0].status === true){
+            if(responseData[0].status === true && responseData[0].dataContent.IsProcess === 0){
                 setOutgoingData([
                     {
                         ID: responseData[0].dataContent.ID,
@@ -115,18 +112,19 @@ const InscpectionDetails = (props, {navigation}) =>{
                         UpdateDate: responseData[0].dataContent.UpdateDate,
                     }
                 ])
+                setloading(false)
             }else{
                 props.navigation.goBack();
                 alertMessage("Please scan valid travelsheet.")
             }
-            setloading(false)
+            
         }catch(error){
+            setloading(false)
             alertMessage(error.message)
         }
     }
 
     const getRemarks = async () =>{
-        setloading(true)
         try{
             const response = await fetch(domainSetting + "api/remarks/get-remarks", {
                 method:"GET",
@@ -139,8 +137,6 @@ const InscpectionDetails = (props, {navigation}) =>{
             const responseData = await response.json();
 
             setdataRemarks(responseData[0].dataContent)
-            setloading(false)
-           
         }catch(error){
             alertMessage(error.message)
         }
@@ -217,8 +213,8 @@ const InscpectionDetails = (props, {navigation}) =>{
     }
 
     useEffect(() =>{
-        getOutgoingTravelSheetDetails(travelSheetNumber)
         getRemarks()
+        getOutgoingTravelSheetDetails(travelSheetNumber)
     },[])
 
     const alertMessage = (message) =>{
