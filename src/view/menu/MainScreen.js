@@ -8,7 +8,6 @@ import React,
 import { 
     View,
     Text,
-    SafeAreaView,
     TouchableOpacity,
     FlatList,
     RefreshControl,
@@ -68,22 +67,25 @@ const MainScreen = ({navigation}) =>{
         );
     }
 
-
     const getUserAccess = async () =>{
         setRefreshing(true)
         setisLoading(true)
         setIQC(false)
         setholdlot(false)
         setproduction(false)
-        try{
-            const response = await fetch(domainSetting + "api/login/user-access/get", {
-                method:"GET",
-                headers:{
-                    'Content-type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                }
-            })
-            const responseData = await response.json();
+
+        await fetch(domainSetting + "api/login/user-access/get", {
+            method:"GET",
+            headers:{
+                'Content-type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            }
+        }).then(data => {
+            if (!data.ok) {
+                throw Error(data.status);
+            }
+            return data.json();
+        }).then(responseData => {
             for(const key in responseData[0].dataContent){
                 if(responseData[0].dataContent[key].PageName === 'OutgoingInspection' && responseData[0].dataContent[key].Status === 1){
                     setIQC(true)
@@ -95,9 +97,11 @@ const MainScreen = ({navigation}) =>{
             }
             setRefreshing(false)
             setisLoading(false)
-        }catch(error){
+        }).catch(error => {
             alertMessage(error.message)
-        }
+            setRefreshing(false)
+            setisLoading(false)
+        }); 
     }
 
     useEffect(() =>{
@@ -122,9 +126,7 @@ const MainScreen = ({navigation}) =>{
 
     const ButtonComponent = ({item}) => {
         return(
-            <View style={[
-                    styles.w50,
-            ]}>
+            <View style={[styles.w50]}>
                 <TouchableOpacity
                     disabled={
                         item.title === "Production Work Entry" ? (production ? false : true) : 
@@ -177,18 +179,11 @@ const MainScreen = ({navigation}) =>{
     }
 
     return (
-        <View
-            style={[
-                styles.alignCenter,
-            ]}
-        >
+        <View style={[ styles.alignCenter, ]} >
             {
                 loading ?
                     <>
-                        <View style={[
-                                styles.alignCenter,
-                                styles.justifyCenter,
-                            ]}>
+                        <View style={[ styles.alignCenter, styles.justifyCenter, ]}>
                             <ActivityIndicator  size="large" color={colors.primaryColor}/>
                             <Text style={[styles.font20]}>Checking Device Information, please wait..</Text>
                         </View>

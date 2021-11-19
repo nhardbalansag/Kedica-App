@@ -82,22 +82,23 @@ const InscpectionDetails = (props, {navigation}) =>{
     }
     
     const getOutgoingTravelSheetDetails = async (travelsheet) =>{
-        try{
-            setloading(true)
-            const response = await fetch(domainSetting + "api/quality-inspection/get-travelsheet-details", {
-                method:"POST",
-                headers:{
-                    'Content-type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                },
-                body: JSON.stringify({
-                    TravelSheetNo: travelsheet,
-                    FactoryID : FactoryID
-                })
+        setloading(true)
+        await fetch(domainSetting + "api/quality-inspection/get-travelsheet-details", {
+            method:"POST",
+            headers:{
+                'Content-type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({
+                TravelSheetNo: travelsheet,
+                FactoryID : FactoryID
             })
-            
-            const responseData = await response.json();
-
+        }).then(data => {
+            if (!data.ok) {
+                throw Error(data.status);
+            }
+            return data.json();
+        }).then(responseData => {
             if(responseData[0].status === true && responseData[0].dataContent.IsProcess === 0){
                 setOutgoingData([
                     {
@@ -117,29 +118,29 @@ const InscpectionDetails = (props, {navigation}) =>{
                 props.navigation.goBack();
                 alertMessage("Please scan valid travelsheet.")
             }
-            
-        }catch(error){
+        }).catch(error => {
             setloading(false)
             alertMessage(error.message)
-        }
+        }); 
     }
 
-    const getRemarks = async () =>{
-        try{
-            const response = await fetch(domainSetting + "api/remarks/get-remarks", {
-                method:"GET",
-                headers:{
-                    'Content-type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                }
-            })
-    
-            const responseData = await response.json();
-
+    const getRemarks = () =>{
+        fetch(domainSetting + "api/remarks/get-remarks", {
+            method:"GET",
+            headers:{
+                'Content-type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            }
+        }).then(data => {
+            if (!data.ok) {
+                throw Error(data.status);
+            }
+            return data.json();
+        }).then(responseData => {
             setdataRemarks(responseData[0].dataContent)
-        }catch(error){
+        }).catch(error => {
             alertMessage(error.message)
-        }
+        }); 
     }
 
     const validateSave = () =>{
@@ -168,38 +169,41 @@ const InscpectionDetails = (props, {navigation}) =>{
 
                     if((metrialrejectdata == null && RejectRemarksID == null) || (metrialrejectdata > 0 && RejectRemarksID !== null)){
                         setloading(true)
-                        try{
-                            const response = await fetch(domainSetting + "api/quality-inspection/save", {
-                                method:'POST',
-                                headers:{
-                                    'Content-type': 'application/json',
-                                    'Authorization': 'Bearer ' + token
-                                },
-                                body: JSON.stringify({
-                                    ProductionWorkID: OutgoingData[0].ProductionWorkID,
-                                    // ThicknessFrom: parseFloat(thicknessFrom),
-                                    // ThicknessTo: parseFloat(thicknessTo),
-                                    // ActualThickness : parseFloat(ActualThickness),
-                                    ThicknessFrom: null,
-                                    ThicknessTo: null,
-                                    ActualThickness : null,
-                                    NGQty : parseFloat(NGQTY),
-                                    NGGoodQty : parseFloat(NGGoodQty),
-                                    NGRemarksID : NGRemarks,
-                                    KeepSampleQty : parseFloat(KeepSampleQty),
-                                    RejectRemarksID : RejectRemarksID
-                                })
+                        await fetch(domainSetting + "api/quality-inspection/save", {
+                            method:'POST',
+                            headers:{
+                                'Content-type': 'application/json',
+                                'Authorization': 'Bearer ' + token
+                            },
+                            body: JSON.stringify({
+                                ProductionWorkID: OutgoingData[0].ProductionWorkID,
+                                // ThicknessFrom: parseFloat(thicknessFrom),
+                                // ThicknessTo: parseFloat(thicknessTo),
+                                // ActualThickness : parseFloat(ActualThickness),
+                                ThicknessFrom: null,
+                                ThicknessTo: null,
+                                ActualThickness : null,
+                                NGQty : parseFloat(NGQTY),
+                                NGGoodQty : parseFloat(NGGoodQty),
+                                NGRemarksID : NGRemarks,
+                                KeepSampleQty : parseFloat(KeepSampleQty),
+                                RejectRemarksID : RejectRemarksID
                             })
-                            const responseData = await response.json();
+                        }).then(data => {
+                            if (!data.ok) {
+                                throw Error(data.status);
+                            }
+                            return data.json();
+                        }).then(responseData => {
                             setloading(false)
                             if(responseData[0].status === true){
                                 props.navigation.goBack()
                             }else{
                                 alertMessage(responseData[0].message)
                             }
-                        }catch(error){
+                        }).catch(error => {
                             alertMessage(error.message)
-                        }
+                        }); 
                     }else{
                         NGGoodQty ? alertMessage("Material Reject QTY and Reject Remarks Cannot be empty") : alertMessage("Material Reject QTY must not be null")
                     }
@@ -310,15 +314,7 @@ const InscpectionDetails = (props, {navigation}) =>{
         return(
             <View>
                 <TouchableOpacity onPress={ () => Rejectactionsheet()}>
-                    <View style={[
-                        styles.backgroundPrimary,
-                        styles.justifyCenter,
-                        styles.alignCenter,
-                        styles.flexRow,
-                        styles.border10,
-                        styles.pY1,
-                        styles.pX2
-                    ]}>
+                    <View style={[ styles.backgroundPrimary, styles.justifyCenter, styles.alignCenter, styles.flexRow, styles.border10, styles.pY1, styles.pX2 ]}>
                         <Text style={[styles.font30, styles.textWhite, styles.mR1]}>{RejectRemarksTitle !== null ? RejectRemarksTitle : "Select Remarks"}</Text>
                         <Icon name="mouse-pointer" size={30} color={colors.lightColor} />
                     </View>
@@ -328,12 +324,7 @@ const InscpectionDetails = (props, {navigation}) =>{
                         <Actionsheet.Item>
                             <View>
                                 <TouchableOpacity onPress={() => setactiveRejectActionSheet(false)}>
-                                    <View style={[
-                                        styles.flexRow,
-                                        styles.justifySpaceBetween,
-                                        styles.alignCenter,
-                                        styles.pL5,
-                                    ]}>
+                                    <View style={[ styles.flexRow, styles.justifySpaceBetween, styles.alignCenter, styles.pL5, ]}>
                                         <Icon name="times" size={40} color={colors.dangerColor} />
                                         <Text style={[styles.font40, styles.mL2, styles.textDanger]}>Cancel</Text>
                                     </View>
@@ -344,12 +335,7 @@ const InscpectionDetails = (props, {navigation}) =>{
                             <Actionsheet.Item>
                                 <View>
                                     <TouchableOpacity onPress={() => RejectcloseActionSheet(null, "Select Remarks")}>
-                                        <View style={[
-                                            styles.flexRow,
-                                            styles.justifySpaceBetween,
-                                            styles.alignCenter,
-                                            styles.pL5,
-                                        ]}>
+                                        <View style={[ styles.flexRow, styles.justifySpaceBetween, styles.alignCenter, styles.pL5, ]}>
                                             <Icon name="circle" size={40} color={NGRemarks == null ? colors.primaryColor : colors.gray200} />
                                             <Text style={[styles.font40, styles.mL2, styles.warningColor]}>None</Text>
                                         </View>
@@ -362,12 +348,7 @@ const InscpectionDetails = (props, {navigation}) =>{
                                     <Actionsheet.Item key={index}>
                                         <View>
                                             <TouchableOpacity onPress={() => RejectcloseActionSheet(data.ID, data.NGRemarks)}>
-                                                <View style={[
-                                                    styles.flexRow,
-                                                    styles.justifySpaceBetween,
-                                                    styles.alignCenter,
-                                                    styles.pL5,
-                                                ]}>
+                                                <View style={[ styles.flexRow, styles.justifySpaceBetween, styles.alignCenter, styles.pL5, ]}>
                                                     <Icon name="circle" size={40} color={NGRemarks == data.ID ? colors.primaryColor : colors.gray200} />
                                                     <Text style={[styles.font40, styles.mL2]}>{data.NGRemarks}</Text>
                                                 </View>
@@ -500,13 +481,7 @@ const InscpectionDetails = (props, {navigation}) =>{
         return(
             <View style={[styles.flexRow]}>
                 <View style={[styles.flexRow , styles.justifyCenter, styles.alignFlexEnd]}>
-                    <Text style={[
-                        styles.font30,
-                        styles.textBold,
-                        styles.mR1
-                    ]}>
-                        From :
-                    </Text>
+                    <Text style={[ styles.font30, styles.textBold, styles.mR1 ]}> From : </Text>
                     <Input
                         disableFullscreenUI={true}
                         size="2xl"
@@ -524,13 +499,7 @@ const InscpectionDetails = (props, {navigation}) =>{
                     />
                 </View>
                 <View style={[styles.flexRow , styles.justifyCenter, styles.alignFlexEnd]}>
-                    <Text style={[
-                        styles.font30,
-                        styles.textBold,
-                        styles.mX1
-                    ]}>
-                        To :
-                    </Text>
+                    <Text style={[ styles.font30, styles.textBold, styles.mX1 ]}> To : </Text>
                     <Input
                         disableFullscreenUI={true}
                         size="2xl"
@@ -553,69 +522,23 @@ const InscpectionDetails = (props, {navigation}) =>{
 
     const ButtonSaveCancel = () =>{
         return(
-            <View style={[
-                styles.flexRow,
-                styles.alignCenter,
-                styles.justifySpaceAround,
-            ]}>
-                <View style={[
-                    styles.mY1,
-                    styles.alignCenter,
-                    styles.justifyCenter,
-                    styles.flexRow,
-                ]}>
-                    <TouchableOpacity 
-                        onPress={() => validateSave()}
-                    >
-                        <View style={[
-                            styles.backgroundPrimary,
-                            styles.justifyCenter,
-                            styles.alignCenter,
-                            styles.border10,
-                            styles.pY100,
-                            styles.w100,
-                            styles.pX9,
-                        ]}>
-                            <View style={[
-                                styles.flexRow
-                            ]}>
-                                <Icon 
-                                    name={"save"}
-                                    size={70} 
-                                    color={colors.lightColor} 
-                                />
-                                
-                                <Text style={[styles.font60, styles.mL2, styles.textWhite]}> 
-                                    Save
-                                </Text>
+            <View style={[ styles.flexRow, styles.alignCenter, styles.justifySpaceAround, ]}>
+                <View style={[ styles.mY1, styles.alignCenter, styles.justifyCenter, styles.flexRow, ]}>
+                    <TouchableOpacity onPress={() => validateSave()} >
+                        <View style={[ styles.backgroundPrimary, styles.justifyCenter, styles.alignCenter, styles.border10, styles.pY100, styles.w100, styles.pX9, ]}>
+                            <View style={[styles.flexRow ]}>
+                                <Icon name={"save"} size={70} color={colors.lightColor}/>
+                                <Text style={[styles.font60, styles.mL2, styles.textWhite]}>Save</Text>
                             </View>
                         </View>
                     </TouchableOpacity>
                 </View> 
-                <View style={[
-                    styles.mY1
-                ]}>
+                <View style={[styles.mY1]}>
                     <TouchableOpacity onPress={() => props.navigation.goBack()}>
-                        <View style={[
-                            styles.bgWarning,
-                            styles.justifyCenter,
-                            styles.alignCenter,
-                            styles.border10,
-                            styles.pY100,
-                            styles.w100,
-                            styles.pX8
-                        ]}>
-                            <View style={[
-                                styles.flexRow
-                            ]}>
-                                <Icon 
-                                    name={"times"}
-                                    size={70} 
-                                    color={colors.lightColor} 
-                                />
-                                <Text style={[styles.font60, styles.mL2, styles.textWhite]}>
-                                    Cancel
-                                </Text>
+                        <View style={[styles.bgWarning,styles.justifyCenter,styles.alignCenter,styles.border10,styles.pY100,styles.w100,styles.pX8]}>
+                            <View style={[styles.flexRow]}>
+                                <Icon name={"times"} size={70} color={colors.lightColor} />
+                                <Text style={[styles.font60, styles.mL2, styles.textWhite]}>Cancel</Text>
                             </View>
                         </View>
                     </TouchableOpacity>
@@ -631,11 +554,7 @@ const InscpectionDetails = (props, {navigation}) =>{
                 loading 
                 ? 
                     <>
-                        <View style={[
-                                styles.alignCenter,
-                                styles.justifyCenter,
-                                styles.flex1
-                            ]}>
+                        <View style={[styles.alignCenter,styles.justifyCenter,styles.flex1]}>
                             <ActivityIndicator  size="large" color={colors.primaryColor}/>
                         </View>
                     </>

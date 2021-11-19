@@ -74,18 +74,20 @@ const HoldLotEntry = (props, {navigation}) =>{
     const holdlotEntryList = async () =>{
         const apiUrl = props.route.params.url;
         setRefreshing(true);
-        try {
-            const response = await fetch(domainSetting + apiUrl + "/" + FactoryID, {
-                method:"GET",
-                headers:{
-                    'Content-type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                }
-            })
-    
-            const responseData = await response.json();
+        await fetch(domainSetting + apiUrl + "/" + FactoryID, {
+            method:"GET",
+            headers:{
+                'Content-type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            }
+        }).then(data => {
+            if (!data.ok) {
+                throw Error(data.status);
+            }
+            return data.json();
+        }).then(responseData => {
             var datael = [];
-            
+        
             if(!responseData[0].status){
                 alertMessage("An Error Occured: No data fetched");
             }else{
@@ -112,9 +114,9 @@ const HoldLotEntry = (props, {navigation}) =>{
                 setWorkEntry(datael)
             }
             setRefreshing(false);
-        } catch (error) {
+        }).catch(error => {
             alertMessage(error.message);
-        }
+        }); 
     }
 
     useEffect(() =>{
@@ -136,13 +138,7 @@ const HoldLotEntry = (props, {navigation}) =>{
                     }
                 )}
             >
-                <View style={[
-                    styles.justifyCenter,
-                    styles.alignCenter,
-                    styles.flexRow,
-                    styles.pY1,
-                    styles.pX2
-                ]}>
+                <View style={[styles.justifyCenter,styles.alignCenter, styles.flexRow, styles.pY1, styles.pX2 ]}>
                     <Icon name="eye" size={25} color={colors.primaryColor} />
                     <Text style={[styles.font25, styles.textPrimary, styles.mL1]}>View</Text>
                 </View>
@@ -186,22 +182,9 @@ const HoldLotEntry = (props, {navigation}) =>{
 
     const loadbutton = () =>{
         return(
-            <View style={[
-                styles.justifyCenter,
-                styles.alignCenter,
-                styles.mT2,
-                styles.mB3
-            ]}>
+            <View style={[ styles.justifyCenter, styles.alignCenter, styles.mT2, styles.mB3 ]}>
                 <TouchableOpacity>
-                    <View style={[
-                        styles.backgroundPrimary,
-                        styles.justifyCenter,
-                        styles.alignCenter,
-                        styles.flexRow,
-                        styles.border10,
-                        styles.pY1,
-                        styles.pX2
-                    ]}>
+                    <View style={[ styles.backgroundPrimary, styles.justifyCenter, styles.alignCenter, styles.flexRow, styles.border10, styles.pY1, styles.pX2 ]}>
                         <Icon name="spinner" size={30} color={colors.lightColor} />
                         <Text style={[styles.font30, styles.textWhite, styles.mL1]}>Load More</Text>
                     </View>
@@ -216,11 +199,7 @@ const HoldLotEntry = (props, {navigation}) =>{
             refreshing
             ?
                 <>
-                    <View style={[
-                        styles.alignCenter,
-                        styles.justifyCenter,
-                        styles.flex1
-                    ]}>
+                    <View style={[ styles.alignCenter, styles.justifyCenter, styles.flex1 ]}>
                         <ActivityIndicator  size="large" color={colors.primaryColor}/>
                     </View>
                 </>

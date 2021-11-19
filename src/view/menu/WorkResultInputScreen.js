@@ -101,80 +101,94 @@ const WorkResultInputScreen = (props) =>{
             setBoolEndProcess(false)
             setstartProcessDateTime(getcurrentdate())
             
-            try{
-                fetch(domainSetting + "api/production-work/production-work-entry/save-production", {
-                    method:'POST',
-                    headers:{
-                        'Content-type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify({
-                        TravelSheetID: TravelSheetID,
-                        LineID: lineId,
-                        DateFrom: getcurrentdate(),
-                        FactoryID: FactoryID,
-                        DateTo : "1900-01-01 00:00:00"
-                    })
+            fetch(domainSetting + "api/production-work/production-work-entry/save-production", {
+                method:'POST',
+                headers:{
+                    'Content-type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({
+                    TravelSheetID: TravelSheetID,
+                    LineID: lineId,
+                    DateFrom: getcurrentdate(),
+                    FactoryID: FactoryID,
+                    DateTo : "1900-01-01 00:00:00"
                 })
+            }).then(data => {
+                if (!data.ok) {
+                    throw Error(data.status);
+                }
+                return data.json();
+            }).then(responseData => {
                 navigate()
-            }catch(error){
+            }).catch(error => {
                 alertMessage(error.message);
-            }
+            }); 
+
         }else{
             alertMessageNote("Please Select Production Line");
         }
     }
     
     const endProcess = () =>{
-        try{
-            fetch(domainSetting + "api/production-work/production-work-entry/update-production-work-date-to", {
-                method:'POST',
-                headers:{
-                    'Content-type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                },
-                body: JSON.stringify({
-                    TravelSheetID: TravelSheetID,
-                    DateTo : getcurrentdate()
-                })
+        fetch(domainSetting + "api/production-work/production-work-entry/update-production-work-date-to", {
+            method:'POST',
+            headers:{
+                'Content-type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({
+                TravelSheetID: TravelSheetID,
+                DateTo : getcurrentdate()
             })
+        }).then(data => {
+            if (!data.ok) {
+                throw Error(data.status);
+            }
+            return data.json();
+        }).then(responseData => {
             setBoolStartProcess(false)
             navigate()
-        }catch(error){
+        }).catch(error => {
             alertMessage(error.message);
-        }
+        }); 
     }
 
     const cancelProduction = () =>{
-        try{
-            fetch(domainSetting + "api/production-work/production-work-entry/cancel-production", {
-                method:'POST',
-                headers:{
-                    'Content-type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                },
-                body: JSON.stringify({
-                    TravelSheetID: TravelSheetID,
-                })
+        fetch(domainSetting + "api/production-work/production-work-entry/cancel-production", {
+            method:'POST',
+            headers:{
+                'Content-type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({
+                TravelSheetID: TravelSheetID,
             })
+        }).then(data => {
+            if (!data.ok) {
+                throw Error(data.status);
+            }
+            return data.json();
+        }).then(responseData => {
             navigate()
-        }catch(error){
+        }).catch(error => {
             alertMessage(error.message);
-        }
+        }); 
     }
 
-    const getProductLine = async () =>{
-        try{
-            const response = await fetch(domainSetting + "api/production-work/production-work-entry/linel-list/get/" + factoryId, {
-                method:'GET',
-                headers:{
-                    'Content-type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                }
-            })
-
-            const responseData = await response.json();
-            
+    const getProductLine = () =>{
+        fetch(domainSetting + "api/production-work/production-work-entry/linel-list/get/" + factoryId, {
+            method:'GET',
+            headers:{
+                'Content-type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            }
+        }).then(data => {
+            if (!data.ok) {
+                throw Error(data.status);
+            }
+            return data.json();
+        }).then(responseData => {
             var datael = [];
             for (const key in responseData[0].dataContent){
                 if(FactoryID === responseData[0].dataContent[key].LineFactoryID){
@@ -187,9 +201,9 @@ const WorkResultInputScreen = (props) =>{
                 }
             }
             checkLineID(datael)
-        }catch(error){
+        }).catch(error => {
             alertMessage(error.message);
-        }
+        }); 
     }
 
     const search = async (tokendata, domainSetting) =>{
@@ -197,21 +211,22 @@ const WorkResultInputScreen = (props) =>{
         const travelSheetNumber = props.route.params.dataContent.number;
 
         if(travelSheetNumber.includes("-") && (travelSheetNumber.split("-").length === 3 || travelSheetNumber.split("-").length === 4) && travelSheetNumber.split("-")[0] === "TS"){
-            try{
-                const response = await fetch(domainSetting + "api/production-work/production-work-entry/search-travelsheet-details", {
-                    method:'POST',
-                    headers:{
-                        'Content-type': 'application/json',
-                        'Authorization': 'Bearer ' + tokendata
-                    },
-                    body: JSON.stringify({
-                        TravelSheetNo: travelSheetNumber,
-                        FactoryID : FactoryID
-                    })
+            await fetch(domainSetting + "api/production-work/production-work-entry/search-travelsheet-details", {
+                method:'POST',
+                headers:{
+                    'Content-type': 'application/json',
+                    'Authorization': 'Bearer ' + tokendata
+                },
+                body: JSON.stringify({
+                    TravelSheetNo: travelSheetNumber,
+                    FactoryID : FactoryID
                 })
-                
-                const responseData = await response.json();
-
+            }).then(data => {
+                if (!data.ok) {
+                    throw Error(data.status);
+                }
+                return data.json();
+            }).then(responseData => {
                 if(responseData[0].total > 0 && ((responseData[0].dataContent[0].DateTo === '1900-01-01 00:00:00' && responseData[0].dataContent[0].DateFrom === '1900-01-01 00:00:00') || (responseData[0].dataContent[0].DateTo === '1900-01-01 00:00:00' && responseData[0].dataContent[0].DateFrom !== '1900-01-01 00:00:00'))){
                     var tempvar = {
                         ID:             responseData[0].dataContent[0].ID,
@@ -225,35 +240,35 @@ const WorkResultInputScreen = (props) =>{
                         PlatingLotNo:   responseData[0].dataContent[0].PlatingLotNo,
                         DateFrom:       responseData[0].dataContent[0].DateFrom,
                         DateTo:         responseData[0].dataContent[0].DateTo
-                   }
+                    }
     
-                   tempvar.DateFrom == "1900-01-01 00:00:00" ? setBoolStartProcess(false) : setBoolStartProcess(true)
-                   tempvar.DateTo == "1900-01-01 00:00:00" ? setBoolEndProcess(false) : setBoolEndProcess(true)
-                   setstartedDatetime(tempvar.DateFrom == "1900-01-01 00:00:00" ? null : tempvar.DateFrom)
-                   setendDatetime(tempvar.DateTo == "1900-01-01 00:00:00" ? null : tempvar.DateTo)
-                   setQty(tempvar.Qty)
-                   setTravelSheetID(tempvar.TravelSheetID)
-                   setlotnumber(tempvar.LotNo)
-                   
-                   if(tempvar.Line !== ""){
+                    tempvar.DateFrom == "1900-01-01 00:00:00" ? setBoolStartProcess(false) : setBoolStartProcess(true)
+                    tempvar.DateTo == "1900-01-01 00:00:00" ? setBoolEndProcess(false) : setBoolEndProcess(true)
+                    setstartedDatetime(tempvar.DateFrom == "1900-01-01 00:00:00" ? null : tempvar.DateFrom)
+                    setendDatetime(tempvar.DateTo == "1900-01-01 00:00:00" ? null : tempvar.DateTo)
+                    setQty(tempvar.Qty)
+                    setTravelSheetID(tempvar.TravelSheetID)
+                    setlotnumber(tempvar.LotNo)
+                    
+                    if(tempvar.Line !== ""){
                         setactiveActionSheetlabel(tempvar.Line)
                         setPlating(tempvar.PlatingLotNo)
                         setprodlineButton(true)
-                   }else{
+                    }else{
                         getProductLine()
-                   }
-                   setloading(false)
+                    }
+                    setloading(false)
                 }else{
                     alertMessage("Please Scan Pending or Ongoing Travel Sheet");
                 }
-                
-            }catch(error){
+            }).catch(error => {
                 alertMessage(error.message);
-            }
+            }); 
         }else{
             alertMessage("Please scan a valid Travel Sheet")
         }
     }
+
     const navigate = () =>{
         props.navigation.navigate('ProductionWorkEntryScreen',
             {
@@ -264,6 +279,7 @@ const WorkResultInputScreen = (props) =>{
         )
         setloading(false)
     }
+
     const alertMessage = (message) =>{
         Alert.alert(
             "Note",

@@ -130,6 +130,9 @@ const styles = StyleSheet.create({
   w10: {
     width: '10%'
   },
+  w5: {
+    width: '5%'
+  },
   w100n: {
     width: 100
   },

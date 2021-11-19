@@ -83,42 +83,48 @@ const ProductionWorkEntryScreen = (props) =>{
     }
 
     const nextpage = () =>{
-        // if ((parseInt(pageStart) + parseInt(pagelength)) < parseInt(totaldata)) {
-        // }
-        // else if ((parseInt(pageStart) + parseInt(pagelength)) > parseInt(pagelength)) {
-            var newpagestart = parseInt(pageStart) + parseInt(pagelength); 
-        // }
-        getProductionWorkEntryList(newpagestart, pagelength)
+        var newpagestart = parseInt(pageStart) + parseInt(pagelength); 
+        if(newpagestart > totaldata){
+            var length = newpagestart - totaldata
+            newpagestart = newpagestart - length
+            getProductionWorkEntryList(newpagestart, length)
+        }else{
+            getProductionWorkEntryList(newpagestart, pagelength)
+        }
     }
 
     const prevpage = () =>{
-        // if ((parseInt(pageStart) + parseInt(pagelength)) > parseInt(pagelength)) {
-        //     // console.warn(parseInt(pageStart))
-        // }
-        // else if ((parseInt(pageStart) + parseInt(pagelength)) < parseInt(pagelength)) {
-            var newpagestart = parseInt(pageStart) - parseInt(pagelength); 
-        // }
+        var newpagestart = parseInt(pageStart) - parseInt(pagelength); 
+        if(newpagestart <= 0){
+            newpagestart = 0
+        }
         getProductionWorkEntryList(newpagestart, pagelength)
     }
-    const getProductionWorkEntryList = async (PageStart, PageLength) =>{
+
+    const getProductionWorkEntryList = (PageStart, PageLength) =>{
+        setpagestart(PageStart)
         const apiUrl = props.route.params.url;
         const componentTitle = props.route.params.title;
         setcurrentComponent(componentTitle)
-        try {
-            setRefreshing(true);
-            const response = await fetch(domainSetting + apiUrl, {
-                method:"POST",
-                headers:{
-                    'Content-type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                },
-                body: JSON.stringify({
-                    FactoryID: FactoryID,
-                    PageStart: PageStart,
-                    PageLength: PageLength
-                })
-            })          
-            const responseData = await response.json();
+        setRefreshing(true);
+        fetch(domainSetting + apiUrl, {
+            method:"POST",
+            headers:{
+                'Content-type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({
+                FactoryID: FactoryID,
+                PageStart: PageStart,
+                PageLength: PageLength
+            })
+        }).then(data => {
+            if (!data.ok) {
+                throw Error(data.status);
+            }
+            return data.json();
+        }).then(responseData => {
+            setRefreshing(false);
             settotaldata(responseData[0].total)
             var datael = [];
             if(!responseData[0].status){
@@ -187,11 +193,10 @@ const ProductionWorkEntryScreen = (props) =>{
                 }
                 setWorkEntry(datael)
             }
-            setRefreshing(false);
-        } catch (error) {
+        }).catch(error => {
             setRefreshing(false);
             alertMessage(error.message);
-        }
+        });     
     }
 
     const alertMessage = (message) =>{
@@ -243,7 +248,7 @@ const ProductionWorkEntryScreen = (props) =>{
     const actionViewComponent = (data, index) =>{
         return(
             <TouchableOpacity style={[styles.pY1]} onPress={() => props.route.params.title === "Outgoing Inspection" ? goToWorkResult("InscpectionDetails", data) : goToWorkResult("WorkResultInputScreen", data)}>
-                <View style={[styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.pY1,styles.pX2]}>
+                <View style={[styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.pX2]}>
                     <Icon name="mouse-pointer" size={25} color={colors.primaryColor} />
                     <Text style={[styles.font25, styles.textPrimary, styles.mL1]}>{data}</Text>
                 </View>
@@ -254,16 +259,8 @@ const ProductionWorkEntryScreen = (props) =>{
     const tableComponent = () =>{
         return(
             <NativeBaseProvider>
-                {
-                    currentComponent === "Outgoing Inspection"
-                    ? <></>
-                    :
-                        <View style={[styles.justifyCenter,styles.alignCenter,styles.mT1]}>
-                            <Text style={[styles.font30,styles.textBold,styles.textUppercase]}>{filterData}</Text>
-                        </View>
-                }
                 <ScrollView horizontal={true} style={[CustomStyle.tableScroll]}>
-                    <Table onPress={() => console.warn("hello")} borderStyle={{borderWidth: 2, borderColor: '#c8e1ff'}}>
+                    <Table borderStyle={{borderWidth: 2, borderColor: '#c8e1ff'}}>
                         <Row 
                             data={table.tableHead} 
                             textStyle={CustomStyle.tableText}
@@ -295,20 +292,48 @@ const ProductionWorkEntryScreen = (props) =>{
 
     const loadbutton = () =>{
         return(
-            <View style={[styles.flexRow, styles.justifyCenter,styles.alignCenter,styles.mT2,styles.mB3]}>
-                <TouchableOpacity  onPress={() => prevpage()}>
-                    <View style={[styles.backgroundPrimary,styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.border10,styles.pY1,styles.pX2, styles.mR1]}>
-                        <Icon name="caret-left" size={30} color={colors.lightColor} />
-                        <Text style={[styles.font30, styles.textWhite, styles.mL1]}>Prev</Text>
-                    </View>
-                </TouchableOpacity>
-                
-                <TouchableOpacity onPress={() => nextpage()}>
-                    <View style={[styles.backgroundPrimary,styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.border10,styles.pY1,styles.pX2, styles.mL1]}>
-                        <Icon name="caret-right" size={30} color={colors.lightColor} />
-                        <Text style={[styles.font30, styles.textWhite, styles.mL1]}>Next</Text>
-                    </View>
-                </TouchableOpacity>
+            <View style={[styles.flexRow, styles.justifySpaceAround,styles.alignCenter]}>
+                <View style={[styles.w30]}>
+                    <Text style={[styles.font25]}>Showing {pageStart + 1} to {parseInt(pageStart) + parseInt(pagelength)} of {totaldata} Items</Text>
+                </View>
+                <View style={[styles.w60, styles.flexRow, styles.justifyStart,styles.alignCenter,styles.mT2,styles.mB3]}>
+                    <TouchableOpacity disabled={(parseInt(pageStart)) > 0 ? false : true} onPress={() => prevpage()}>
+                        <View style={[(parseInt(pageStart)) > 0 ? styles.backgroundPrimary : styles.bgGray200,styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.border10,styles.pY1,styles.pX2, styles.mR1]}>
+                            {
+                                refreshing
+                                ?
+                                    <>
+                                        <ActivityIndicator style={[styles.w10]}  size={20} color={colors.lightColor}/>
+                                        <Text style={[styles.font30, styles.textWhite, styles.mL1]}>Prev</Text>
+                                    </>
+                                :
+                                <>
+                                    <Icon name="caret-left" size={30} style={[styles.w10]} color={colors.lightColor} />
+                                    <Text style={[styles.font30, styles.textWhite, styles.mL1]}>Prev</Text>
+                                </>
+                            }
+                        </View>
+                    </TouchableOpacity>
+                    
+                    <TouchableOpacity disabled={(parseInt(pageStart) + parseInt(pagelength)) >= totaldata ? true : false} onPress={() => nextpage()}>
+                        
+                        <View style={[(parseInt(pageStart) + parseInt(pagelength)) >= totaldata ? styles.bgGray200 : styles.backgroundPrimary,styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.border10,styles.pY1,styles.pX2, styles.mL1]}>
+                        {
+                            refreshing
+                            ?
+                                <>
+                                    <Text style={[styles.font30, styles.textWhite, styles.mR1]}>Next</Text>
+                                    <ActivityIndicator style={[styles.w10]} size={20} color={colors.lightColor}/>
+                                </>
+                            :
+                            <>
+                                <Text style={[styles.font30, styles.textWhite, styles.mR1]}>Next</Text>
+                                <Icon name="caret-right" style={[styles.w10]} size={30} color={colors.lightColor} />
+                            </>
+                        }
+                        </View>
+                    </TouchableOpacity>
+                </View>
             </View>
         )
     }
@@ -317,21 +342,22 @@ const ProductionWorkEntryScreen = (props) =>{
         <NativeBaseProvider>
             <View style={[styles.mT1]}>
                 <View style={[styles.flexRow,styles.justifySpaceAround,styles.alignFlexEnd]}>
-                    <View style={[styles.w50,]}>
+                    <View style={[styles.w50]}>
                         <FormControl>
-                            <Text style={[styles.font30]}>Travel Sheet No.</Text>
                             <TextInput  
                                 ref={textInputRef}
                                 disableFullscreenUI={true}
-                                style={[styles.font40,styles.borderedNoRadius,styles.textDark]}
+                                style={[styles.font25,styles.borderedNoRadius,styles.textDark]}
                                 showSoftInputOnFocus={false}
                                 autoFocus={true}
+                                placeholder="Travel Sheet No."
+                                placeholderTextColor="#000"
                                 onChangeText={(text) => !isEnable ? (text.length === 15 || limiters.includes(text.length)) ? setTravelSheetNo(text) : "" : setTravelSheetNo(text)}
                                 value={travelSheetNo}
                             />
                         </FormControl>
                     </View>
-                    <View style={[styles.flexRow,styles.w35,styles.alignFlexEnd,styles.justifySpaceAround]}>
+                    <View style={[styles.flexRow,styles.w35,styles.alignFlexEnd, styles.justifyFlexEnd]}>
                         <View>
                             {
                                 currentComponent === "Outgoing Inspection" 
@@ -339,8 +365,8 @@ const ProductionWorkEntryScreen = (props) =>{
                                 :
                                 <TouchableOpacity onPress={() => actionsheet()} >
                                     <View style={[ styles.backgroundLightBlue,styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.border10,styles.pY1,styles.pX2,styles.mT1]}>
-                                        <Icon name="filter" size={30} color={colors.lightColor} />
-                                        <Text style={[styles.font30, styles.textWhite, styles.mL1]}>Filter</Text>
+                                        <Icon name="filter" size={25} color={colors.lightColor} />
+                                        <Text style={[styles.font25, styles.textWhite, styles.mL1]}>{filterData}</Text>
                                     </View>
                                 </TouchableOpacity>
                             }
@@ -349,26 +375,14 @@ const ProductionWorkEntryScreen = (props) =>{
                     </View>
                 </View>
             </View>
-            {
-                refreshing
-                ?
-                    <>
-                        <View style={[styles.alignCenter,styles.justifyCenter,styles.flex1]}>
-                            <ActivityIndicator  size="large" color={colors.primaryColor}/>
-                        </View>
-                    </>
-                :
-                    <>
-                        <FlatList 
-                            ListHeaderComponent={tableComponent}
-                            ListFooterComponent={loadbutton}
-                            numColumns={1}
-                            refreshControl={
-                                <RefreshControl refreshing={refreshing} size="large" onRefresh={refreshPage} />
-                            }
-                        />
-                    </>
-            }
+            <FlatList 
+                ListHeaderComponent={tableComponent}
+                ListFooterComponent={loadbutton}
+                numColumns={1}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} size="large" onRefresh={refreshPage} />
+                }
+            />
             <Actionsheet isOpen={activeActionSheet} onClose={onClose}  hideDragIndicator={true}>
                 <Actionsheet.Content style={[styles.alignFlexStart]}>
                     <Actionsheet.Item>

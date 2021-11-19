@@ -23,36 +23,40 @@ export const login = (username, password, domainSetting) =>{
     }
 
     formBody = formBody.join("&");
-    return async (dispatch) =>{
-        const response = await fetch(domainSetting + "token", {
+    return (dispatch) =>{
+        fetch(domainSetting + "token", {
             method : 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
             },
             body: formBody
-        })
-
-        const responseData = await response.json();
-       
-        if(Object.keys(responseData).length == 3){
+        }).then(data => {
+            if (!data.ok) {
+                throw Error(data.status);
+            }
+            return data.json();
+        }).then(responseData => {
+            if(Object.keys(responseData).length == 3){
             
-            dispatch({
-                type: SET_CREDENTIALS, 
-                TokenData: responseData.access_token
-            });
-            
-        }else if(Object.keys(responseData).length < 3){
-
+                dispatch({
+                    type: SET_CREDENTIALS, 
+                    TokenData: responseData.access_token
+                });
+                
+            }else if(Object.keys(responseData).length < 3){
+    
+                throw new Error(false)
+    
+            }
+        }).catch(error => {
             throw new Error(false)
-
-        }
+        }); 
     }
 }
 
 export const getUserDetails = (username, password, domainSetting) =>{
-    return async (dispatch) =>{
-
-        const response = await fetch(domainSetting + "api/login/user-information/get", {
+    return (dispatch) =>{
+        fetch(domainSetting + "api/login/user-information/get", {
             method : 'POST',
             headers:{
                 'Content-type': 'application/json'
@@ -61,18 +65,24 @@ export const getUserDetails = (username, password, domainSetting) =>{
                 Username: username,
                 Password : password
             })
-        })
-
-        const responseData = await response.json();
-
-        dispatch({
-            type: SET_USER_INFORMATION, 
-            FactoryId: responseData[0].FactoryID,
-            UserName: responseData[0].UserName,
-            FirstName: responseData[0].FirstName,
-            MiddleName: responseData[0].MiddleName,
-            LastName: responseData[0].LastName
-        });
+        }).then(data => {
+            if (!data.ok) {
+                throw Error(data.status);
+            }
+            return data.json();
+        }).then(responseData => {
+            dispatch({
+                type: SET_USER_INFORMATION, 
+                FactoryId: responseData[0].FactoryID,
+                UserName: responseData[0].UserName,
+                FirstName: responseData[0].FirstName,
+                MiddleName: responseData[0].MiddleName,
+                LastName: responseData[0].LastName
+            });
+        }).catch(error => {
+            
+        }); 
+        
     }
 }
 

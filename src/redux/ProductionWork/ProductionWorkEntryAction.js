@@ -7,24 +7,28 @@ import ProductionWorkEntry from "../../model/ProductionWork/ProductionWorkEntry"
 
 export const getProductionWorkEntryList = (token) =>{
     
-    return async (dispatch) =>{
-        const response = await fetch(APP_URL + "api/ProductionWork/ProductionWorkEntry/get", {
+    return (dispatch) =>{
+        fetch(APP_URL + "api/ProductionWork/ProductionWorkEntry/get", {
             method:'GET',
             headers:{
                 'Content-type': 'application/json',
                 'Authorization': 'Bearer ' + token
             }
-        })
-
-        const responseData = await response.json();
-        const productionWorkEntryData = [];
-
-        dispatch({
-            type:       GET_PRODUCTIONWORKENTRYLIST,
-            Data:       responseData.data,
-            Message:    responseData.message,
-            Total:      responseData.total
-        })
+        }).then(data => {
+            if (!data.ok) {
+                throw Error(data.status);
+            }
+            return data.json();
+        }).then(responseData => {
+            dispatch({
+                type:       GET_PRODUCTIONWORKENTRYLIST,
+                Data:       responseData.data,
+                Message:    responseData.message,
+                Total:      responseData.total
+            })
+        }).catch(error => {
+            
+        }); 
     }
 }
 
