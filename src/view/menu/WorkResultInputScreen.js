@@ -270,7 +270,6 @@ const WorkResultInputScreen = (props) =>{
             alertMessage("Please scan a valid Travel Sheet")
         }
     }
-
     const navigate = () =>{
         props.navigation.navigate('ProductionWorkEntryScreen',
             {
@@ -281,7 +280,6 @@ const WorkResultInputScreen = (props) =>{
         )
         setloading(false)
     }
-
     const alertMessage = (message) =>{
         Alert.alert(
             "Note",
