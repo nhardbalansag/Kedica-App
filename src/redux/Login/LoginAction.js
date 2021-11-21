@@ -23,8 +23,8 @@ export const login = (username, password, domainSetting) =>{
     }
 
     formBody = formBody.join("&");
-    return (dispatch) =>{
-        fetch(domainSetting + "token", {
+    return async (dispatch) =>{
+        await fetch(domainSetting + "token", {
             method : 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
@@ -37,26 +37,22 @@ export const login = (username, password, domainSetting) =>{
             return data.json();
         }).then(responseData => {
             if(Object.keys(responseData).length == 3){
-            
                 dispatch({
                     type: SET_CREDENTIALS, 
                     TokenData: responseData.access_token
                 });
-                
             }else if(Object.keys(responseData).length < 3){
-    
                 throw new Error(false)
-    
             }
         }).catch(error => {
-            throw new Error(false)
+            throw new Error("Invalid username and password or check your ip configuration")
         }); 
     }
 }
 
 export const getUserDetails = (username, password, domainSetting) =>{
-    return (dispatch) =>{
-        fetch(domainSetting + "api/login/user-information/get", {
+    return async (dispatch) =>{
+        await fetch(domainSetting + "api/login/user-information/get", {
             method : 'POST',
             headers:{
                 'Content-type': 'application/json'
@@ -80,9 +76,8 @@ export const getUserDetails = (username, password, domainSetting) =>{
                 LastName: responseData[0].LastName
             });
         }).catch(error => {
-            
+            throw new Error("Invalid username and password or check your ip configuration")
         }); 
-        
     }
 }
 

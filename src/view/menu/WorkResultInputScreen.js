@@ -96,6 +96,7 @@ const WorkResultInputScreen = (props) =>{
     }
 
     const startProcess = () =>{
+        navigate()
         if(lineId !== null){
             setBoolStartProcess(true)
             setBoolEndProcess(false)
@@ -120,7 +121,7 @@ const WorkResultInputScreen = (props) =>{
                 }
                 return data.json();
             }).then(responseData => {
-                navigate()
+               
             }).catch(error => {
                 alertMessage(error.message);
             }); 
@@ -155,6 +156,7 @@ const WorkResultInputScreen = (props) =>{
     }
 
     const cancelProduction = () =>{
+        navigate()
         fetch(domainSetting + "api/production-work/production-work-entry/cancel-production", {
             method:'POST',
             headers:{
@@ -170,7 +172,7 @@ const WorkResultInputScreen = (props) =>{
             }
             return data.json();
         }).then(responseData => {
-            navigate()
+            
         }).catch(error => {
             alertMessage(error.message);
         }); 
