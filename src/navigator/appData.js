@@ -119,7 +119,7 @@ const ProductionScreen = [
         navigationScreen: "HoldLotEntry",
         api: {
             url: "api/receiving/get-hold-summary-list",
-            method: "GET"
+            method: "POST"
         }
     }
 ];
