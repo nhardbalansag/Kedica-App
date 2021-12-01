@@ -99,6 +99,7 @@ const InscpectionDetails = (props, {navigation}) =>{
             }
             return data.json();
         }).then(responseData => {
+            console.log(responseData[0].dataContent)
             if(responseData[0].status === true && responseData[0].dataContent.IsProcess === 0){
                 setOutgoingData([
                     {
@@ -110,6 +111,7 @@ const InscpectionDetails = (props, {navigation}) =>{
                         ItemName: responseData[0].dataContent.ItemName,
                         LotNo: responseData[0].dataContent.LotNo,
                         Qty: responseData[0].dataContent.Qty,
+                        ActualQty: responseData[0].dataContent.ActualQty,
                         UpdateDate: responseData[0].dataContent.UpdateDate,
                     }
                 ])
@@ -599,6 +601,14 @@ const InscpectionDetails = (props, {navigation}) =>{
                             </Text>
                             <Text style={[styles.font40, styles.w80]}>
                             { OutgoingData !== null ? (OutgoingData[0].Qty ? OutgoingData[0].Qty : "-") : "-"  }
+                            </Text> 
+                        </View>
+                        <View style={[styles.flexRow, styles.alignFlexEnd, styles.mL1, {marginBottom:10}]}>
+                            <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300, styles.w23]}>
+                                Actual Qty : 
+                            </Text>
+                            <Text style={[styles.font40, styles.w80]}>
+                            { OutgoingData !== null ? (OutgoingData[0].ActualQty ? OutgoingData[0].ActualQty : "-") : "-"  }
                             </Text> 
                         </View>
                         {/* {
