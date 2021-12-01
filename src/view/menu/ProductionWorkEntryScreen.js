@@ -19,6 +19,8 @@ import {
 
 import { Table, TableWrapper, Row, Cell } from 'react-native-table-component';
 
+import { DataTable } from 'react-native-paper';
+
 import {
     styles,
     colors,
@@ -42,6 +44,22 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { parse } from "react-native-svg";
 
+const table = {
+    dataFilter: [
+        {filterType: "Start Process",       value: "StartProcess"},
+        {filterType: "End Process",         value: "EndProcess"},
+        {filterType: "Travel Sheet No.",    value: "TravelSheetNo"},
+        {filterType: "Plating Lot No.",     value: "PlatingLotNo"},
+        {filterType: "Product Name",        value: "ItemName"},
+        {filterType: "Lot No.",             value: "LotNo"},
+        {filterType: "Priority No.",        value: "PriorityNo"},
+        {filterType: "Age",                 value: "Age"},
+        {filterType: "Ship Date",           value: "ShipDate"}
+    ],
+    data_width: [300, 300, 500, 500, 500, 500, 500, 300, 200],
+    tableHead: ['Start Process', 'End Process', 'Travel Sheet No.', 'Plating Lot No.', 'Product Name', 'Lot No.', 'Priority No.', 'Age', 'Ship Date'],
+}
+
 const ProductionWorkEntryScreen = (props) =>{
 
     const { isOpen, onOpen, onClose } = useDisclose()
@@ -57,6 +75,9 @@ const ProductionWorkEntryScreen = (props) =>{
     const [activeActionSheet, setactiveActionSheet] =  useState(false);
     const [filterData, setfilterData] =  useState("All");
     const [currentComponent, setcurrentComponent] =  useState("");
+    const [column_state, set_column_state] = useState("StartProcess");
+    const [sort_state, set_sort_state] = useState("desc");
+
     const limiters = [19]
 
     const FactoryID = useSelector(state => state.loginCredential.FactoryId);
@@ -87,9 +108,9 @@ const ProductionWorkEntryScreen = (props) =>{
         if(newpagestart > totaldata){
             var length = newpagestart - totaldata
             newpagestart = newpagestart - length
-            getProductionWorkEntryList(newpagestart, length)
+            getProductionWorkEntryList(newpagestart, length, sort_state, column_state)
         }else{
-            getProductionWorkEntryList(newpagestart, pagelength)
+            getProductionWorkEntryList(newpagestart, pagelength, sort_state, column_state)
         }
     }
 
@@ -98,25 +119,30 @@ const ProductionWorkEntryScreen = (props) =>{
         if(newpagestart <= 0){
             newpagestart = 0
         }
-        getProductionWorkEntryList(newpagestart, pagelength)
+        getProductionWorkEntryList(newpagestart, pagelength, sort_state, column_state)
     }
 
-    const getProductionWorkEntryList = (PageStart, PageLength) =>{
+    const getProductionWorkEntryList = async (PageStart, PageLength, order_status, order_column) =>{
+        
         setpagestart(PageStart)
         const apiUrl = props.route.params.url;
         const componentTitle = props.route.params.title;
+        set_column_state(order_column)
+        set_sort_state(order_status)
         setcurrentComponent(componentTitle)
         setRefreshing(true);
-        fetch(domainSetting + apiUrl, {
+        await fetch(domainSetting + apiUrl, {
             method:"POST",
             headers:{
                 'Content-type': 'application/json',
                 'Authorization': 'Bearer ' + token
             },
             body: JSON.stringify({
+                sortColumnName:order_column,
+                sortDirection:order_status,
                 FactoryID: FactoryID,
-                PageStart: PageStart,
-                PageLength: PageLength
+                PageStart: PageStart ? PageStart : 0,
+                PageLength: PageLength ? PageLength : 5
             })
         }).then(data => {
             if (!data.ok) {
@@ -124,7 +150,6 @@ const ProductionWorkEntryScreen = (props) =>{
             }
             return data.json();
         }).then(responseData => {
-            setRefreshing(false);
             settotaldata(responseData[0].total)
             var datael = [];
             if(!responseData[0].status){
@@ -193,10 +218,11 @@ const ProductionWorkEntryScreen = (props) =>{
                 }
                 setWorkEntry(datael)
             }
+            setRefreshing(false);
         }).catch(error => {
             setRefreshing(false);
             alertMessage(error.message);
-        });     
+        });   
     }
 
     const alertMessage = (message) =>{
@@ -223,70 +249,72 @@ const ProductionWorkEntryScreen = (props) =>{
     }
 
     const refreshPage = () =>{
-        getProductionWorkEntryList(pageStart, pagelength)
+        getProductionWorkEntryList(pageStart, pagelength, sort_state, column_state)
     }
     
     useEffect(() =>{
-        if(isFocused){ 
-            getProductionWorkEntryList(pageStart, pagelength)
+        // if(isFocused){
+            setpagestart(0)
+            setpagelength(5)
+            getProductionWorkEntryList(0, 5, sort_state, column_state)
             if(travelSheetNo !== null){
                 props.route.params.title === "Outgoing Inspection" ? goToWorkResult("InscpectionDetails", travelSheetNo) : goToWorkResult("WorkResultInputScreen", travelSheetNo)
             }
-        }
+        // }
         if(textInputRef.current){
             const unsubscribe = props.navigation.addListener('focus', () => {
               textInputRef.current?.focus()
             });
            return unsubscribe;
         }
-    },[travelSheetNo, isFocused, filterData, textInputRef])
-
-    const table = {
-        tableHead: ['Start Process', 'End Process', 'Travel Sheet No.', 'Plating Lot No.', 'Product Name', 'Lot No.', 'Priority No.', 'Age', 'Ship Date'],
-    }
-
-    const actionViewComponent = (data, index) =>{
-        return(
-            <TouchableOpacity style={[styles.pY1]} onPress={() => props.route.params.title === "Outgoing Inspection" ? goToWorkResult("InscpectionDetails", data) : goToWorkResult("WorkResultInputScreen", data)}>
-                <View style={[styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.pX2]}>
-                    <Icon name="mouse-pointer" size={25} color={colors.primaryColor} />
-                    <Text style={[styles.font25, styles.textPrimary, styles.mL1]}>{data}</Text>
-                </View>
-            </TouchableOpacity>
-        )
-    }
+    },[travelSheetNo, filterData, textInputRef])
 
     const tableComponent = () =>{
         return(
-            <NativeBaseProvider>
-                <ScrollView horizontal={true} style={[CustomStyle.tableScroll]}>
-                    <Table borderStyle={{borderWidth: 2, borderColor: '#c8e1ff'}}>
-                        <Row 
-                            data={table.tableHead} 
-                            textStyle={CustomStyle.tableText}
-                            widthArr={[280, 280, 320, 280, 280, 280, 280, 280, 280]}
-                        />
+            <ScrollView horizontal>
+                <DataTable style={[styles.mT1]}>
+                    <DataTable.Header style={[styles.bgGray200]}>
                         {
-                            WorkEntry !== null ?
-                            WorkEntry.map((rowData, index) => (
-                                <TableWrapper key={index} style={[styles.flexRow]}>
-                                  {
-                                    rowData.map((cellData, cellIndex) => (
-                                        <Cell 
-                                            key={cellIndex} 
-                                            data={cellIndex === 2 ? actionViewComponent(cellData, index) : cellData} 
-                                            textStyle={[CustomStyle.tableDataText]}
-                                            width={cellIndex === 2 ? 320 : 280}
-                                        />
-                                    ))
-                                  }
-                                </TableWrapper>
-                            ))
+                            table.tableHead !== null ?
+                                table.tableHead.map((rowData, index) => (
+                                    <DataTable.Title style={[styles.justifyCenter, {width: table.data_width[index]}]} key={index} sortDirection={sort_state == "asc" ? "ascending" : "descending"}>
+                                        <TouchableOpacity 
+                                        onPress={() =>{
+                                            set_column_state(table.dataFilter[index].value); 
+                                            setpagestart(0);
+                                            setpagelength(5);
+                                            getProductionWorkEntryList(0, 5, sort_state == "asc" ? "desc": "asc", table.dataFilter[index].value)
+                                        }}>
+                                            <Text style={[styles.font25, styles.textWhite]} >{rowData}</Text>
+                                        </TouchableOpacity>
+                                    </DataTable.Title>
+                                ))
                             :<></>
                         }
-                    </Table>
-                </ScrollView>
-            </NativeBaseProvider>
+                    </DataTable.Header>
+                        {
+                            WorkEntry !== null ?
+                                WorkEntry.map((rowData, index) => (
+                                    <DataTable.Row>
+                                        {
+                                            rowData.map((cellData, cellIndex) => (
+                                                <DataTable.Cell key={cellIndex} style={[styles.justifyCenter, {width: table.data_width[cellIndex]}]}>
+                                                    <TouchableOpacity 
+                                                        onPress={() => props.route.params.title === "Outgoing Inspection" ? goToWorkResult("InscpectionDetails", rowData[2]) : goToWorkResult("WorkResultInputScreen", rowData[2])}
+                                                    >
+                                                        <View style={[styles.justifyCenter,styles.alignCenter, styles.flexRow ]}>
+                                                            <Text style={[styles.font25, styles.mL1]}>{cellData ? cellData : "--"}</Text>
+                                                        </View>
+                                                    </TouchableOpacity>
+                                                </DataTable.Cell>
+                                            ))
+                                        }
+                                    </DataTable.Row>
+                                ))
+                            :<></>
+                        }
+                </DataTable>
+            </ScrollView>
         )
     }
 
@@ -375,14 +403,22 @@ const ProductionWorkEntryScreen = (props) =>{
                     </View>
                 </View>
             </View>
-            <FlatList 
-                ListHeaderComponent={tableComponent}
-                ListFooterComponent={loadbutton}
-                numColumns={1}
-                refreshControl={
-                    <RefreshControl refreshing={refreshing} size="large" onRefresh={refreshPage} />
-                }
-            />
+            {/* {
+                 refreshing
+                 ?
+                     <View style={[styles.justifyCenter, styles.alignCenter, styles.flex1]}>
+                         <ActivityIndicator style={[styles.w10]}  size={100} color={colors.primaryColor}/>
+                     </View>
+                 : */}
+                 <FlatList 
+                    ListHeaderComponent={tableComponent}
+                    ListFooterComponent={loadbutton}
+                    numColumns={1}
+                    refreshControl={
+                        <RefreshControl refreshing={refreshing} size="large" onRefresh={refreshPage} />
+                    }
+                />
+            {/* } */}
             <Actionsheet isOpen={activeActionSheet} onClose={onClose}  hideDragIndicator={true}>
                 <Actionsheet.Content style={[styles.alignFlexStart]}>
                     <Actionsheet.Item>

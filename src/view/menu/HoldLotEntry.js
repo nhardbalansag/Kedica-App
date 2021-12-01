@@ -32,6 +32,8 @@ import {
     colors,
 } from "../../asset/css/BaseStyle";
 
+import { DataTable } from 'react-native-paper';
+
 import CustomStyle from "../../asset/css/CustomStyle";
 
 import { APP_URL } from "../../config/AppConfig";
@@ -52,6 +54,24 @@ import {
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 
+const table = {
+    dataFilter: [
+        {filterType: "Production No.",          value: "ProductionNo",  strColumnVal: "PONo"},
+        {filterType: "Lot No.",                 value: "LotNo",         strColumnVal: "LotNo"},
+        {filterType: "Order No.",               value: "OrderNo",       strColumnVal: "JONo"},
+        {filterType: "Customer Name",           value: "CustomerName",  strColumnVal: "CustomerName"},
+        {filterType: "Product Name",            value: "ProductName",   strColumnVal: "ProductName"},
+        {filterType: "Quantity",                value: "Qty",           strColumnVal: "Qty"},
+        {filterType: "Unit",                    value: "Unit",          strColumnVal: "EntryDate"},
+        {filterType: "Entry (Order/Product)",   value: "EntryDate",     strColumnVal: "PONo"},
+        {filterType: "Delivery Date",           value: "DeliveryDate",  strColumnVal: "DeliveryDate"},
+        {filterType: "Ship Date",               value: "ShipDate",      strColumnVal: "ShipDate"},
+        {filterType: "Actual Qty",              value: "ActualQty",     strColumnVal: "ActualQty"}
+    ], 
+    data_width: [300, 200, 200, 500, 500, 100, 100, 300, 200, 200, 150],
+    tableHead: ['Production Number', 'Lot No.', 'Order No', 'Customer Name', 'Product Name', 'Qty', 'Unit', 'Entry (Order/Product)', 'Delivery Date', 'Ship Date', 'Actual Qty'],
+}
+
 const HoldLotEntry = (props, {navigation}) =>{
 
     const { isOpen, onOpen, onClose } = useDisclose()
@@ -62,36 +82,18 @@ const HoldLotEntry = (props, {navigation}) =>{
     const [searchdata, setSearch] = useState(null);
     const [totaldata, settotaldata] = useState(null);
     const [activeActionSheet, setactiveActionSheet] =  useState(false);
-    const [filterData, setfilterData] =  useState("PONo");
+    const [filterData, setfilterData] =  useState(0);
     const [filterDataVal, setfilterDataVal] =  useState("Production No.");
     const token = useSelector(state => state.loginCredential.TokenData);
     const domainSetting = useSelector(state => state.loginCredential.domainSetting);
 
+    const [column_state, set_column_state] = useState("");
+    const [sort_state, set_sort_state] = useState("asc");
+
     const [refreshing, setRefreshing] = useState(true);
     const [WorkEntry, setWorkEntry] = useState(null);
 
-    const dataFilter = [
-        {filterType: "Production No.", value: "PONo"},
-        {filterType: "Lot No.", value: "LotNo"},
-        {filterType: "Order No.", value: "JONo"},
-        {filterType: "Customer Name", value: "CustomerName"},
-        {filterType: "Product Name", value: "ProductName"},
-        {filterType: "Quantity", value: "Qty"},
-        {filterType: "Entry (Order/Product)", value: "EntryDate"},
-        {filterType: "Delivery Date", value: "DeliveryDate"},
-        {filterType: "Ship Date", value: "ShipDate"},
-        {filterType: "Actual Qty", value: "ActualQty"}
-    ]
-
     const FactoryID = useSelector(state => state.loginCredential.FactoryId);
-
-    const table = {
-        tableHead: ['Action', 'Production No', 'Lot No.', 'Order No', 'Customer Name', 'Product Name', 'Qty', 'Unit', 'Entry (Order/Product)', 'Delivery Date', 'Ship Date', 'Actual Qty'],
-    }
-
-    const refreshPage = () =>{
-        holdlotEntryList()
-    }
 
     const actionsheet = () =>{
         setactiveActionSheet(true)
@@ -108,9 +110,9 @@ const HoldLotEntry = (props, {navigation}) =>{
         if(newpagestart > totaldata){
             var length = newpagestart - totaldata
             newpagestart = newpagestart - length
-            holdlotEntryList(newpagestart, length)
+            holdlotEntryList(newpagestart, length, sort_state, column_state, "", "")
         }else{
-            holdlotEntryList(newpagestart, pagelength)
+            holdlotEntryList(newpagestart, pagelength, sort_state, column_state, "")
         }
     }
 
@@ -119,15 +121,75 @@ const HoldLotEntry = (props, {navigation}) =>{
         if(newpagestart <= 0){
             newpagestart = 0
         }
-        holdlotEntryList(newpagestart, pagelength)
+        holdlotEntryList(newpagestart, pagelength, sort_state, column_state, "", "")
+    }
+                   
+    const loadbutton = () =>{
+        return(
+            <View style={[styles.flexRow, styles.justifySpaceAround,styles.alignCenter]}>
+                <View style={[styles.w30]}>
+                    <Text style={[styles.font25]}>Showing {pageStart + 1} to {parseInt(pageStart) + parseInt(pagelength)} of {totaldata} Items</Text>
+                </View>
+                <View style={[styles.w60, styles.flexRow, styles.justifyStart,styles.alignCenter,styles.mT2,styles.mB3]}>
+                    <TouchableOpacity disabled={(parseInt(pageStart)) > 0 ? false : true} onPress={() => prevpage()}>
+                        <View style={[(parseInt(pageStart)) > 0 ? styles.backgroundPrimary : styles.bgGray200,styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.border10,styles.pY1,styles.pX2, styles.mR1]}>
+                            {
+                                refreshing
+                                ?
+                                    <>
+                                        <ActivityIndicator style={[styles.w10]}  size={20} color={colors.lightColor}/>
+                                        <Text style={[styles.font30, styles.textWhite, styles.mL1]}>Prev</Text>
+                                    </>
+                                :
+                                <>
+                                    <Icon name="caret-left" size={30} style={[styles.w10]} color={colors.lightColor} />
+                                    <Text style={[styles.font30, styles.textWhite, styles.mL1]}>Prev</Text>
+                                </>
+                            }
+                        </View>
+                    </TouchableOpacity>
+                    
+                    <TouchableOpacity disabled={(parseInt(pageStart) + parseInt(pagelength)) >= totaldata ? true : false} onPress={() => nextpage()}>
+                        <View style={[(parseInt(pageStart) + parseInt(pagelength)) >= totaldata ? styles.bgGray200 : styles.backgroundPrimary,styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.border10,styles.pY1,styles.pX2, styles.mL1]}>
+                        {
+                            refreshing
+                            ?
+                                <>
+                                    <Text style={[styles.font30, styles.textWhite, styles.mR1]}>Next</Text>
+                                    <ActivityIndicator style={[styles.w10]} size={20} color={colors.lightColor}/>
+                                </>
+                            :
+                            <>
+                                <Text style={[styles.font30, styles.textWhite, styles.mR1]}>Next</Text>
+                                <Icon name="caret-right" style={[styles.w10]} size={30} color={colors.lightColor} />
+                            </>
+                        }
+                        </View>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        )
     }
 
-    const holdlotEntryList = (pageStart, pagelength) =>{
+    const holdlotEntryList = async (pageStart, pagelength, order_status, order_column, searchData, searchCol) =>{
+        
         setpagestart(pageStart ? pageStart : 0)
-        var search_data = searchdata ? searchdata : ""
+        set_column_state(order_column)
+        set_sort_state(order_status)
+        var search_data = searchData ? searchData : ""
         const apiUrl = props.route.params.url;
+
+        console.warn(JSON.stringify({
+            FactoryID: FactoryID,
+            sortColumnName:searchCol, // for table column sorting
+            sortDirection:order_status ? order_status : "",
+            strColumn: order_column ? order_column : "",
+            strSearch: search_data ? search_data : "",
+            PageStart: pageStart ? pageStart : 0,
+            PageLength: pagelength ? pagelength : 5
+        })    )    
         setRefreshing(true);
-        fetch(domainSetting + apiUrl, {
+        await fetch(domainSetting + apiUrl, {
             method:"POST",
             headers:{
                 'Content-type': 'application/json',
@@ -135,7 +197,9 @@ const HoldLotEntry = (props, {navigation}) =>{
             },
             body: JSON.stringify({
                 FactoryID: FactoryID,
-                strColumn: filterData,
+                sortColumnName:searchCol, // for table column sorting
+                sortDirection:order_status,
+                strColumn: order_column,
                 strSearch: search_data,
                 PageStart: pageStart ? pageStart : 0,
                 PageLength: pagelength ? pagelength : 5
@@ -175,6 +239,7 @@ const HoldLotEntry = (props, {navigation}) =>{
                 setWorkEntry(datael)
             }
         }).catch(error => {
+            setRefreshing(false);
             alertMessage(error.message);
         }); 
     }
@@ -190,27 +255,28 @@ const HoldLotEntry = (props, {navigation}) =>{
     }
 
     useEffect(() =>{
-        if(isFocused){ 
-            holdlotEntryList(pageStart, pagelength)
-        }
-    },[isFocused, filterData])
+        // if(isFocused){ 
+            setpagestart(0);
+            setpagelength(5);
+            holdlotEntryList(0, 5, sort_state, column_state, "", table.dataFilter[filterData].value)
+        // }
+    },[ pagelength])
 
-    const actionViewComponent = (data, index) =>{
-       
+    const actionViewComponent = (data, index, data_id) =>{
         return(
             <TouchableOpacity 
+                key={index}
                 onPress={() => props.navigation.navigate("HoldQtyProcess",
                     {
                         title: "Hold Qty Return/Proceed",
                         dataContent: {
-                            number: String(data),
+                            number: String(data_id),
                         },
                     }
                 )}
             >
-                <View style={[styles.justifyCenter,styles.alignCenter, styles.flexRow, styles.pY1, styles.pX2 ]}>
-                    <Icon name="eye" size={25} color={colors.primaryColor} />
-                    <Text style={[styles.font25, styles.textPrimary, styles.mL1]}>View</Text>
+                <View style={[styles.justifyCenter,styles.alignCenter, styles.flexRow ]}>
+                    <Text style={[styles.font25, styles.mL1]}>{data ? data : "--"}</Text>
                 </View>
             </TouchableOpacity>
         )
@@ -218,83 +284,43 @@ const HoldLotEntry = (props, {navigation}) =>{
 
     const holdLotTable = () =>{
         return(
-            <NativeBaseProvider>
-                <ScrollView horizontal={true} style={[CustomStyle.tableScroll]}>
-                    <Table borderStyle={{borderWidth: 2, borderColor: '#c8e1ff'}}>
-                        <Row 
-                            data={table.tableHead} 
-                            textStyle={CustomStyle.tableText}
-                            widthArr={[280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280, 280]}
-                        />
+            <ScrollView horizontal>
+                <DataTable style={[styles.mT1]}>
+                    <DataTable.Header style={[styles.bgGray200]}>
                         {
-                            WorkEntry !== null ?
-                            WorkEntry.map((rowData, index) => (
-                                <TableWrapper key={index} style={[styles.flexRow]}>
-                                  {
-                                    rowData.map((cellData, cellIndex) => (
-                                        <Cell 
-                                            key={cellIndex} 
-                                            data={cellIndex === 0 ? actionViewComponent(cellData, index) : cellData} 
-                                            textStyle={[CustomStyle.tableDataText]}
-                                            width={280}
-                                        />
-                                    ))
-                                  }
-                                </TableWrapper>
-                            ))
+                            table.tableHead !== null ?
+                                table.tableHead.map((rowData, index) => (
+                                    <DataTable.Title style={[styles.justifyCenter, {width: table.data_width[index]}]} key={index} sortDirection={sort_state == "asc" ? "ascending" : "descending"}>
+                                        <TouchableOpacity onPress={() =>{
+                                            setfilterData(index); 
+                                            setpagestart(0);
+                                            setpagelength(5);
+                                            holdlotEntryList(0, 5, sort_state == "asc" ? "desc": "asc", table.dataFilter[index].strColumnVal, "", table.dataFilter[index].value)
+                                        }}>
+                                            <Text style={[styles.font25, styles.textWhite]} >{rowData}</Text>
+                                        </TouchableOpacity>
+                                    </DataTable.Title>
+                                ))
                             :<></>
                         }
-                    </Table>
-                </ScrollView>
-            </NativeBaseProvider>
-        )
-    }
-
-    const loadbutton = () =>{
-        return(
-            <View style={[styles.flexRow, styles.justifySpaceAround,styles.alignCenter]}>
-                <View style={[styles.w30]}>
-                    <Text style={[styles.font25]}>Showing {pageStart + 1} to {parseInt(pageStart) + parseInt(pagelength)} of {totaldata} Items</Text>
-                </View>
-                <View style={[styles.w60, styles.flexRow, styles.justifyStart,styles.alignCenter,styles.mT2,styles.mB3]}>
-                    <TouchableOpacity disabled={(parseInt(pageStart)) > 0 ? false : true} onPress={() => prevpage()}>
-                        <View style={[(parseInt(pageStart)) > 0 ? styles.backgroundPrimary : styles.bgGray200,styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.border10,styles.pY1,styles.pX2, styles.mR1]}>
-                            {
-                                refreshing
-                                ?
-                                    <>
-                                        <ActivityIndicator style={[styles.w10]}  size={20} color={colors.lightColor}/>
-                                        <Text style={[styles.font30, styles.textWhite, styles.mL1]}>Prev</Text>
-                                    </>
-                                :
-                                <>
-                                    <Icon name="caret-left" size={30} style={[styles.w10]} color={colors.lightColor} />
-                                    <Text style={[styles.font30, styles.textWhite, styles.mL1]}>Prev</Text>
-                                </>
-                            }
-                        </View>
-                    </TouchableOpacity>
-                    
-                    <TouchableOpacity disabled={(parseInt(pageStart) + parseInt(pagelength)) >= totaldata ? true : false} onPress={() => nextpage()}>
-                        
-                        <View style={[(parseInt(pageStart) + parseInt(pagelength)) >= totaldata ? styles.bgGray200 : styles.backgroundPrimary,styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.border10,styles.pY1,styles.pX2, styles.mL1]}>
-                        {
-                            refreshing
-                            ?
-                                <>
-                                    <Text style={[styles.font30, styles.textWhite, styles.mR1]}>Next</Text>
-                                    <ActivityIndicator style={[styles.w10]} size={20} color={colors.lightColor}/>
-                                </>
-                            :
-                            <>
-                                <Text style={[styles.font30, styles.textWhite, styles.mR1]}>Next</Text>
-                                <Icon name="caret-right" style={[styles.w10]} size={30} color={colors.lightColor} />
-                            </>
-                        }
-                        </View>
-                    </TouchableOpacity>
-                </View>
-            </View>
+                    </DataTable.Header>
+                    {
+                        WorkEntry !== null ?
+                            WorkEntry.map((rowData, index) => (
+                                <DataTable.Row key={index}>
+                                    {
+                                        rowData.map((cellData, cellIndex) => (
+                                            <DataTable.Cell key={cellIndex} style={[styles.pY1, styles.justifyCenter, {width: table.data_width[cellIndex]}]}>
+                                                {cellIndex != 11 ? actionViewComponent(rowData[cellIndex + 1], cellIndex, rowData[0]) : ""}
+                                            </DataTable.Cell>
+                                        ))
+                                    }
+                                </DataTable.Row>
+                            ))
+                        :<></>
+                    }
+                </DataTable>
+            </ScrollView>
         )
     }
 
@@ -324,7 +350,7 @@ const HoldLotEntry = (props, {navigation}) =>{
                     </View>
                     <View style={[styles.flexRow,styles.w15,styles.alignFlexEnd, styles.justifyFlexEnd]}>
                         <View>
-                            <TouchableOpacity onPress={() => holdlotEntryList()} >
+                            <TouchableOpacity onPress={() => holdlotEntryList(0, 5, sort_state, table.dataFilter[filterData].value, searchdata, table.dataFilter[filterData].value)} >
                                 <View style={[ styles.backgroundPrimary,styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.border10,styles.pY1,styles.pX2,styles.mT1]}>
                                     <Icon name="search" size={25} color={colors.lightColor} />
                                 </View>
@@ -333,14 +359,23 @@ const HoldLotEntry = (props, {navigation}) =>{
                     </View>
                 </View>
             </View>
-            <FlatList 
-                ListHeaderComponent={holdLotTable}
-                ListFooterComponent={loadbutton}
-                numColumns={1}
-                refreshControl={
-                    <RefreshControl refreshing={refreshing} size="large" onRefresh={refreshPage} />
-                }
-            />
+
+            {/* {
+                refreshing
+                ?
+                    <View style={[styles.justifyCenter, styles.alignCenter, styles.flex1]}>
+                        <ActivityIndicator style={[styles.w10]}  size={100} color={colors.primaryColor}/>
+                    </View>
+                : */}
+                    <FlatList 
+                        ListHeaderComponent={holdLotTable}
+                        ListFooterComponent={loadbutton}
+                        numColumns={1}
+                        refreshControl={
+                            <RefreshControl refreshing={refreshing} size="large" onRefresh={() => holdlotEntryList(pageStart, pagelength, "asc", "", "", "ProductionNo")} />
+                        }
+                    />
+            {/* } */}
             <Actionsheet isOpen={activeActionSheet} onClose={onClose}  hideDragIndicator={true}>
                 <Actionsheet.Content style={[styles.alignFlexStart]}>
                     <Actionsheet.Item>
@@ -355,21 +390,21 @@ const HoldLotEntry = (props, {navigation}) =>{
                     </Actionsheet.Item>
                     <ScrollView>
                         {
-                            dataFilter != null?
-                            dataFilter.map((data, index)=>
-                                <Actionsheet.Item key={index}>
-                                    <View>
-                                        <TouchableOpacity onPress={() => closeActionSheet(data.value, data.filterType)}>
-                                            <View style={[styles.flexRow,styles.justifySpaceBetween,styles.alignCenter,styles.pL5]}>
-                                                <Icon name="circle" size={40} color={filterData == data.value ? colors.primaryColor : colors.gray200} />
-                                                <Text style={[styles.font40, styles.mL2]}>{data.filterType}</Text>
-                                            </View>
-                                        </TouchableOpacity>
-                                    </View>
-                                </Actionsheet.Item>
-                            )
+                            table.dataFilter != null?
+                                table.dataFilter.map((data, index)=>
+                                    <Actionsheet.Item key={index}>
+                                        <View>
+                                            <TouchableOpacity onPress={() => closeActionSheet(index, data.filterType)}>
+                                                <View style={[styles.flexRow,styles.justifySpaceBetween,styles.alignCenter,styles.pL5]}>
+                                                    <Icon name="circle" size={40} color={table.dataFilter[filterData].strColumnVal == data.strColumnVal ? colors.primaryColor : colors.gray200} />
+                                                    <Text style={[styles.font40, styles.mL2]}>{data.filterType}</Text>
+                                                </View>
+                                            </TouchableOpacity>
+                                        </View>
+                                    </Actionsheet.Item>
+                                )
                             :
-                            <></>
+                                <></>
                         }
                     </ScrollView>
                 </Actionsheet.Content>
@@ -379,3 +414,4 @@ const HoldLotEntry = (props, {navigation}) =>{
 }
 
 export default HoldLotEntry;
+

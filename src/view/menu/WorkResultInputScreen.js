@@ -13,7 +13,7 @@ import {
     Text,
     TouchableOpacity,
     Alert,
-    ActivityIndicator
+    ActivityIndicator,
 } from "react-native";
 
 import {
@@ -26,7 +26,8 @@ import {
     Actionsheet,
     useDisclose,
     Modal,
-    ScrollView
+    ScrollView,
+    Input
 } from 'native-base';
 
 import DeviceInfo from 'react-native-device-info';
@@ -53,6 +54,7 @@ const WorkResultInputScreen = (props) =>{
     const [lineId, setLineID] =  useState(null);
     const [productionLine, setProductionLine] =  useState(null);
     const [Qty, setQty] =  useState(0);
+    const [ActualQty, setActualQtyQty] =  useState(0);
     const [AMPM, setAMPM] =  useState();
     const [startedDatetime, setstartedDatetime] =  useState(null);
     const [endDatetime, setendDatetime] =  useState(null);
@@ -60,8 +62,10 @@ const WorkResultInputScreen = (props) =>{
     const [activeActionSheet, setactiveActionSheet] =  useState(false);
     const [activeActionSheetlabel, setactiveActionSheetlabel] =  useState(null);
     const [prodlineButton, setprodlineButton] =  useState(false);
+    const [actualqtyState, setactualqtyState] =  useState(false);
     const [plating, setPlating] =  useState(null);
     const [lotnumber, setlotnumber] =  useState(null);
+    const [get_actualQTY, set_actualQTY] = useState(0)
 
     const FactoryID = useSelector(state => state.loginCredential.FactoryId);
 
@@ -96,37 +100,44 @@ const WorkResultInputScreen = (props) =>{
     }
 
     const startProcess = () =>{
+        var actualqty = get_actualQTY ? get_actualQTY : 0
         navigate()
         if(lineId !== null){
-            setBoolStartProcess(true)
-            setBoolEndProcess(false)
-            setstartProcessDateTime(getcurrentdate())
-            
-            fetch(domainSetting + "api/production-work/production-work-entry/save-production", {
-                method:'POST',
-                headers:{
-                    'Content-type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                },
-                body: JSON.stringify({
-                    TravelSheetID: TravelSheetID,
-                    LineID: lineId,
-                    DateFrom: getcurrentdate(),
-                    FactoryID: FactoryID,
-                    DateTo : "1900-01-01 00:00:00"
-                })
-            }).then(data => {
-                if (!data.ok) {
-                    throw Error(data.status);
-                }
-                return data.json();
-            }).then(responseData => {
-               
-            }).catch(error => {
-                alertMessage(error.message);
-            }); 
-
-        }else{
+            if(parseFloat(actualqty) === 0){
+                alertMessageNote("Actual Quantity is Required.");
+            }else if(parseFloat(actualqty) < 0){
+                alertMessageNote("Actual Quantity must not less than 0.");
+            }else{
+                setBoolStartProcess(true)
+                setBoolEndProcess(false)
+                setstartProcessDateTime(getcurrentdate())
+                
+                fetch(domainSetting + "api/production-work/production-work-entry/save-production", {
+                    method:'POST',
+                    headers:{
+                        'Content-type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({
+                        TravelSheetID: TravelSheetID,
+                        LineID: lineId,
+                        DateFrom: getcurrentdate(),
+                        FactoryID: FactoryID,
+                        ActualQty:parseFloat(actualqty),
+                        DateTo : "1900-01-01 00:00:00"
+                    })
+                }).then(data => {
+                    if (!data.ok) {
+                        throw Error(data.status);
+                    }
+                    return data.json();
+                }).then(responseData => {
+                
+                }).catch(error => {
+                    alertMessage(error.message);
+                }); 
+            }
+        }else if(lineId === null){
             alertMessageNote("Please Select Production Line");
         }
     }
@@ -211,7 +222,7 @@ const WorkResultInputScreen = (props) =>{
     const search = async (tokendata, domainSetting) =>{
 
         const travelSheetNumber = props.route.params.dataContent.number;
-
+       
         if(travelSheetNumber.includes("-") && (travelSheetNumber.split("-").length === 3 || travelSheetNumber.split("-").length === 4) && travelSheetNumber.split("-")[0] === "TS"){
             await fetch(domainSetting + "api/production-work/production-work-entry/search-travelsheet-details", {
                 method:'POST',
@@ -237,13 +248,14 @@ const WorkResultInputScreen = (props) =>{
                         ItemCode:       responseData[0].dataContent[0].ItemCode,
                         ItemName:       responseData[0].dataContent[0].ItemName,
                         Qty:            responseData[0].dataContent[0].Qty,
+                        ActualQty:      responseData[0].dataContent[0].ActualQty,
                         Line:           responseData[0].dataContent[0].Line,
                         LotNo:          responseData[0].dataContent[0].LotNo,
                         PlatingLotNo:   responseData[0].dataContent[0].PlatingLotNo,
                         DateFrom:       responseData[0].dataContent[0].DateFrom,
                         DateTo:         responseData[0].dataContent[0].DateTo
                     }
-    
+                    console.warn(responseData[0].dataContent[0])
                     tempvar.DateFrom == "1900-01-01 00:00:00" ? setBoolStartProcess(false) : setBoolStartProcess(true)
                     tempvar.DateTo == "1900-01-01 00:00:00" ? setBoolEndProcess(false) : setBoolEndProcess(true)
                     setstartedDatetime(tempvar.DateFrom == "1900-01-01 00:00:00" ? null : tempvar.DateFrom)
@@ -251,7 +263,12 @@ const WorkResultInputScreen = (props) =>{
                     setQty(tempvar.Qty)
                     setTravelSheetID(tempvar.TravelSheetID)
                     setlotnumber(tempvar.LotNo)
-                    
+
+                    if(tempvar.Qty > 0){
+                        setactualqtyState(true)
+                        setActualQtyQty(tempvar.ActualQty)
+                    }
+
                     if(tempvar.Line !== ""){
                         setactiveActionSheetlabel(tempvar.Line)
                         setPlating(tempvar.PlatingLotNo)
@@ -386,7 +403,7 @@ const WorkResultInputScreen = (props) =>{
                 <View style={[styles.flexRow, styles.alignCenter, styles.w50]}>
                     <Text style={[styles.font30,styles.textBold,styles.mR1]}>Prod. Line :</Text>
                     <View>
-                        <TouchableOpacity disabled={prodlineButton} onPress={() => actionsheet(true)}>
+                        <TouchableOpacity disabled={prodlineButton} onPress={() => setactiveActionSheet(true)}>
                             <View style={[!prodlineButton ? styles.backgroundPrimary : styles.bgGray200,styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.border10,styles.pY1,styles.pX2]}>
                                 <Text style={[styles.font30, styles.textWhite, styles.mR1]}>{activeActionSheetlabel !== null ? activeActionSheetlabel : "Select Production Line"}</Text>
                                 <Icon name="mouse-pointer" size={30} color={colors.lightColor} />
@@ -397,6 +414,32 @@ const WorkResultInputScreen = (props) =>{
                 <View style={[styles.flexRow, styles.alignCenter]}>
                     <Text style={[styles.font30, styles.textBold, styles.mR1]}>Total Qty :</Text>
                     <Text style={[styles.font40]}>{Qty}</Text>
+                </View>
+            </View>
+            <View style={[styles.flexRow,styles.alignCenter,styles.mL2, styles.mB2]}>
+                <View style={[styles.flexRow, styles.alignCenter]}>
+                    <Text style={[styles.font30, styles.textBold, styles.mR1]}>Actual Qty :</Text>
+                    {
+                        ActualQty > 0
+                        ?
+                            <Text style={[styles.font40]}>{ActualQty}</Text>
+                        :
+                            <Input
+                                disableFullscreenUI={true}
+                                size="2xl"
+                                placeholder=" 0 "
+                                _light={{
+                                    placeholderTextColor: "blueGray.400",
+                                }}
+                                _dark={{
+                                    placeholderTextColor: "blueGray.50",
+                                }}
+                                keyboardType={'numeric'}
+                                minLength={0}
+                                onChangeText={(text) => set_actualQTY(text)}
+                                value={get_actualQTY}
+                            />
+                    }
                 </View>
             </View>
             <Actionsheet isOpen={activeActionSheet} onClose={onClose} hideDragIndicator={true}>
