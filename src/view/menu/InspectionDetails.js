@@ -48,6 +48,7 @@ const InscpectionDetails = (props, {navigation}) =>{
     const [dataRemarks, setdataRemarks] = useState(null)
     const [loading, setloading] =  useState(true);
     const [NGRemarksTitle, setNGRemarksTitle] =  useState(null);
+    const [getActualQTY, setActualQTY] =  useState(null);
     const [RejectRemarksTitle, setRejectRemarksTitle] =  useState(null);
     const [NGGoodQty, setNGGoodQty] =  useState(null);
     const [kitsampleqty, setkitsampleqty] =  useState(0);
@@ -116,6 +117,7 @@ const InscpectionDetails = (props, {navigation}) =>{
                     }
                 ])
                 setloading(false)
+                setActualQTY(responseData[0].dataContent.ActualQty)
             }else{
                 props.navigation.goBack();
                 alertMessage("Please scan valid travelsheet.")
@@ -166,52 +168,59 @@ const InscpectionDetails = (props, {navigation}) =>{
             //     alertMessage("Thickness must not be null")
             // }else{
                 // if(isNaN(NGQTY) == false && isNaN(thicknessFrom) == false && isNaN(thicknessTo) == false && isNaN(ActualThickness) == false){
-                if(isNaN(NGQTY) == false){
+                // if(isNaN(NGQTY) == false){
                     var metrialrejectdata = NGGoodQty ? NGGoodQty : null
 
                     if((metrialrejectdata == null && RejectRemarksID == null) || (metrialrejectdata > 0 && RejectRemarksID !== null)){
-                        setloading(true)
-                        await fetch(domainSetting + "api/quality-inspection/save", {
-                            method:'POST',
-                            headers:{
-                                'Content-type': 'application/json',
-                                'Authorization': 'Bearer ' + token
-                            },
-                            body: JSON.stringify({
-                                ProductionWorkID: OutgoingData[0].ProductionWorkID,
-                                // ThicknessFrom: parseFloat(thicknessFrom),
-                                // ThicknessTo: parseFloat(thicknessTo),
-                                // ActualThickness : parseFloat(ActualThickness),
-                                ThicknessFrom: null,
-                                ThicknessTo: null,
-                                ActualThickness : null,
-                                NGQty : parseFloat(NGQTY),
-                                NGGoodQty : parseFloat(NGGoodQty),
-                                NGRemarksID : NGRemarks,
-                                KeepSampleQty : parseFloat(KeepSampleQty),
-                                RejectRemarksID : RejectRemarksID
-                            })
-                        }).then(data => {
-                            if (!data.ok) {
-                                throw Error(data.status);
-                            }
-                            return data.json();
-                        }).then(responseData => {
-                            setloading(false)
-                            if(responseData[0].status === true){
-                                props.navigation.goBack()
-                            }else{
-                                alertMessage(responseData[0].message)
-                            }
-                        }).catch(error => {
-                            alertMessage(error.message)
-                        }); 
+                        var _setActualQTY = getActualQTY ? getActualQTY : 0;
+                        console.log(_setActualQTY)
+                        if(_setActualQTY >= 0){
+                            setloading(true)
+                            await fetch(domainSetting + "api/quality-inspection/save", {
+                                method:'POST',
+                                headers:{
+                                    'Content-type': 'application/json',
+                                    'Authorization': 'Bearer ' + token
+                                },
+                                body: JSON.stringify({
+                                    ProductionWorkID: OutgoingData[0].ProductionWorkID,
+                                    // ThicknessFrom: parseFloat(thicknessFrom),
+                                    // ThicknessTo: parseFloat(thicknessTo),
+                                    // ActualThickness : parseFloat(ActualThickness),
+                                    ThicknessFrom: null,
+                                    ThicknessTo: null,
+                                    ActualThickness : null,
+                                    NGQty : parseFloat(NGQTY),
+                                    NGGoodQty : parseFloat(NGGoodQty),
+                                    NGRemarksID : NGRemarks,
+                                    ActualQty : parseFloat(getActualQTY),
+                                    KeepSampleQty : parseFloat(KeepSampleQty),
+                                    RejectRemarksID : RejectRemarksID
+                                })
+                            }).then(data => {
+                                if (!data.ok) {
+                                    throw Error(data.status);
+                                }
+                                return data.json();
+                            }).then(responseData => {
+                                setloading(false)
+                                if(responseData[0].status === true){
+                                    props.navigation.goBack()
+                                }else{
+                                    alertMessage(responseData[0].message)
+                                }
+                            }).catch(error => {
+                                alertMessage(error.message)
+                            });
+                        }else{
+                            alertMessage("Please input a valid number")
+                        }
                     }else{
                         NGGoodQty ? alertMessage("Material Reject QTY and Reject Remarks Cannot be empty") : alertMessage("Material Reject QTY must not be null")
                     }
-                }else{
-                    alertMessage("Please input a valid number")
-                }
+                // }else{
+                //     alertMessage("Please input a valid number")
+                // }
             // }
         }else{
             NGQTY ? alertMessage("NG Remarks and NG Quantity Cannot be empty") : alertMessage("NG Quantity must not be null")
@@ -607,9 +616,26 @@ const InscpectionDetails = (props, {navigation}) =>{
                             <Text style={[styles.font30,styles.textBold, styles.mR1, styles.textGray300, styles.w23]}>
                                 Actual Qty : 
                             </Text>
-                            <Text style={[styles.font40, styles.w80]}>
+                            <View>
+                                <Input
+                                    disableFullscreenUI={true}
+                                    size="2xl"
+                                    placeholder=" Actual QTY "
+                                    _light={{
+                                        placeholderTextColor: "blueGray.400",
+                                    }}
+                                    _dark={{
+                                        placeholderTextColor: "blueGray.50",
+                                    }}
+                                    keyboardType='numeric'
+                                    minLength={0}
+                                    value={String(getActualQTY)}
+                                    onChangeText={(text) => setActualQTY(text)}
+                                />
+                            </View>
+                            {/* <Text style={[styles.font40, styles.w80]}>
                             { OutgoingData !== null ? (OutgoingData[0].ActualQty ? OutgoingData[0].ActualQty : "-") : "-"  }
-                            </Text> 
+                            </Text>  */}
                         </View>
                         {/* {
                             FactoryID === 2

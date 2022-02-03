@@ -17,6 +17,8 @@ import {
     TextInput 
 } from "react-native";
 
+import DeviceInfo from 'react-native-device-info';
+
 import { Table, TableWrapper, Row, Cell } from 'react-native-table-component';
 
 import { DataTable } from 'react-native-paper';
@@ -77,6 +79,8 @@ const ProductionWorkEntryScreen = (props) =>{
     const [currentComponent, setcurrentComponent] =  useState("");
     const [column_state, set_column_state] = useState("StartProcess");
     const [sort_state, set_sort_state] = useState("desc");
+    const [lineId, setLineID] =  useState(null);
+    const [factoryId, setfactoryId] =  useState(0);
 
     const limiters = [19]
 
@@ -108,9 +112,9 @@ const ProductionWorkEntryScreen = (props) =>{
         if(newpagestart > totaldata){
             var length = newpagestart - totaldata
             newpagestart = newpagestart - length
-            getProductionWorkEntryList(newpagestart, length, sort_state, column_state)
+            getProductionWorkEntryList(newpagestart, length, sort_state, column_state, lineId)
         }else{
-            getProductionWorkEntryList(newpagestart, pagelength, sort_state, column_state)
+            getProductionWorkEntryList(newpagestart, pagelength, sort_state, column_state, lineId)
         }
     }
 
@@ -119,11 +123,76 @@ const ProductionWorkEntryScreen = (props) =>{
         if(newpagestart <= 0){
             newpagestart = 0
         }
-        getProductionWorkEntryList(newpagestart, pagelength, sort_state, column_state)
+        getProductionWorkEntryList(newpagestart, pagelength, sort_state, column_state, lineId)
     }
 
-    const getProductionWorkEntryList = async (PageStart, PageLength, order_status, order_column) =>{
-        
+    const checkLineID = async (data) =>{
+        var name = await DeviceInfo.getDeviceName()
+        var temp = name.split(" ")
+        var number = null;
+        var displayTitle = ""
+        var main_display = ""
+        for(let i = 0; i < temp.length; i++){
+            if(temp[i].includes('-')){
+                var splitnumber = temp[i].split('-')
+                number = splitnumber[0]
+            }else{
+                displayTitle = displayTitle + (temp[i] + " ")
+            }
+        }
+
+        main_display = displayTitle + (number !== null ? number : "")
+
+        if(data != null){
+            let catchPair = false
+            for(let i = 0; i < data.length; i++){
+                var line_db = String(data[i].Line)
+                if(line_db.includes(name)){
+                    setLineID(data[i].LineID)
+                    getProductionWorkEntryList(0, 5, sort_state, column_state, data[i].LineID)
+                    catchPair = true
+                }
+            }
+            if(!catchPair){
+                alertMessage("No Production line Connected to this device Please Setup your device in tablet settings.")
+            }
+        }
+    }
+
+    const getProductLine = () =>{
+        fetch(domainSetting + "api/production-work/production-work-entry/linel-list/get/" + factoryId, {
+            method:'GET',
+            headers:{
+                'Content-type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            }
+        }).then(data => {
+            if (!data.ok) {
+                throw Error(data.status);
+            }
+            return data.json();
+        }).then(responseData => {
+            var datael = [];
+            for (const key in responseData[0].dataContent){
+                if(FactoryID === responseData[0].dataContent[key].LineFactoryID){
+                    datael.push(
+                        {
+                            LineID: responseData[0].dataContent[key].LineID,
+                            Line: responseData[0].dataContent[key].Line
+                        }
+                    )
+                }
+            }
+            checkLineID(datael)
+        }).catch(error => {
+            alertMessage(error.message);
+        }); 
+    }
+
+    const getProductionWorkEntryList = async (PageStart, PageLength, order_status, order_column, lineid = null) =>{
+        console.warn(lineid)
+        lineid > 0 ? setLineID(lineid) : lineid
+       
         setpagestart(PageStart)
         const apiUrl = props.route.params.url;
         const componentTitle = props.route.params.title;
@@ -142,7 +211,8 @@ const ProductionWorkEntryScreen = (props) =>{
                 sortDirection:order_status,
                 FactoryID: FactoryID,
                 PageStart: PageStart ? PageStart : 0,
-                PageLength: PageLength ? PageLength : 5
+                PageLength: PageLength ? PageLength : 5,
+                LineID: parseInt(lineid ? lineid : (lineId ? lineId : 0))
             })
         }).then(data => {
             if (!data.ok) {
@@ -249,25 +319,26 @@ const ProductionWorkEntryScreen = (props) =>{
     }
 
     const refreshPage = () =>{
-        getProductionWorkEntryList(pageStart, pagelength, sort_state, column_state)
+        getProductionWorkEntryList(pageStart, pagelength, sort_state, column_state, lineId)
     }
     
     useEffect(() =>{
-        // if(isFocused){
+        
+        if(isFocused){
             setpagestart(0)
             setpagelength(5)
-            getProductionWorkEntryList(0, 5, sort_state, column_state)
+            getProductLine();
             if(travelSheetNo !== null){
                 props.route.params.title === "Outgoing Inspection" ? goToWorkResult("InscpectionDetails", travelSheetNo) : goToWorkResult("WorkResultInputScreen", travelSheetNo)
             }
-        // }
+        }
         if(textInputRef.current){
             const unsubscribe = props.navigation.addListener('focus', () => {
               textInputRef.current?.focus()
             });
            return unsubscribe;
         }
-    },[travelSheetNo, filterData, textInputRef])
+    },[travelSheetNo, isFocused, filterData, textInputRef])
 
     const tableComponent = () =>{
         return(
@@ -283,7 +354,7 @@ const ProductionWorkEntryScreen = (props) =>{
                                             set_column_state(table.dataFilter[index].value); 
                                             setpagestart(0);
                                             setpagelength(5);
-                                            getProductionWorkEntryList(0, 5, sort_state == "asc" ? "desc": "asc", table.dataFilter[index].value)
+                                            getProductionWorkEntryList(0, 5, sort_state == "asc" ? "desc": "asc", table.dataFilter[index].value, lineId)
                                         }}>
                                             <Text style={[styles.font25, styles.textWhite]} >{rowData}</Text>
                                         </TouchableOpacity>
@@ -376,7 +447,7 @@ const ProductionWorkEntryScreen = (props) =>{
                                 ref={textInputRef}
                                 disableFullscreenUI={true}
                                 style={[styles.font25,styles.borderedNoRadius,styles.textDark]}
-                                showSoftInputOnFocus={false}
+                                // showSoftInputOnFocus={false}
                                 autoFocus={true}
                                 placeholder="Travel Sheet No."
                                 placeholderTextColor="#000"
