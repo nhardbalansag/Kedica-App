@@ -65,7 +65,8 @@ const WorkResultInputScreen = (props) =>{
     const [actualqtyState, setactualqtyState] =  useState(false);
     const [plating, setPlating] =  useState(null);
     const [lotnumber, setlotnumber] =  useState(null);
-    const [get_actualQTY, set_actualQTY] = useState(0)
+    const [get_actualQTY, set_actualQTY] = useState(null)
+    const [get_actualQTY_display, set_actualQTY_display] = useState(null)
 
     const FactoryID = useSelector(state => state.loginCredential.FactoryId);
 
@@ -103,9 +104,7 @@ const WorkResultInputScreen = (props) =>{
         var actualqty = get_actualQTY ? get_actualQTY : 0
         navigate()
         if(lineId !== null){
-            if(parseFloat(actualqty) === 0){
-                alertMessageNote("Actual Quantity is Required.");
-            }else if(parseFloat(actualqty) < 0){
+            if(parseFloat(actualqty) < 0){
                 alertMessageNote("Actual Quantity must not less than 0.");
             }else{
                 setBoolStartProcess(true)
@@ -143,6 +142,7 @@ const WorkResultInputScreen = (props) =>{
     }
     
     const endProcess = () =>{
+        var actualqty = get_actualQTY ? get_actualQTY : 0
         fetch(domainSetting + "api/production-work/production-work-entry/update-production-work-date-to", {
             method:'POST',
             headers:{
@@ -151,6 +151,7 @@ const WorkResultInputScreen = (props) =>{
             },
             body: JSON.stringify({
                 TravelSheetID: TravelSheetID,
+                ActualQty:parseFloat(actualqty),
                 DateTo : getcurrentdate()
             })
         }).then(data => {
@@ -167,6 +168,8 @@ const WorkResultInputScreen = (props) =>{
     }
 
     const cancelProduction = () =>{
+        var actualqty = get_actualQTY ? get_actualQTY : 0
+        console.log("cancel => " + actualqty)
         navigate()
         fetch(domainSetting + "api/production-work/production-work-entry/cancel-production", {
             method:'POST',
@@ -176,6 +179,7 @@ const WorkResultInputScreen = (props) =>{
             },
             body: JSON.stringify({
                 TravelSheetID: TravelSheetID,
+                ActualQty:parseFloat(actualqty)
             })
         }).then(data => {
             if (!data.ok) {
@@ -214,6 +218,7 @@ const WorkResultInputScreen = (props) =>{
                 }
             }
             checkLineID(datael)
+            console.warn(datael)
         }).catch(error => {
             alertMessage(error.message);
         }); 
@@ -263,12 +268,12 @@ const WorkResultInputScreen = (props) =>{
                     setQty(tempvar.Qty)
                     setTravelSheetID(tempvar.TravelSheetID)
                     setlotnumber(tempvar.LotNo)
-
                     if(tempvar.Qty > 0){
                         setactualqtyState(true)
                         setActualQtyQty(tempvar.ActualQty)
                     }
-
+                    set_actualQTY(tempvar.ActualQty)
+                    set_actualQTY_display(tempvar.ActualQty)
                     if(tempvar.Line !== ""){
                         setactiveActionSheetlabel(tempvar.Line)
                         setPlating(tempvar.PlatingLotNo)
@@ -341,7 +346,17 @@ const WorkResultInputScreen = (props) =>{
             for(let i = 0; i < data.length; i++){
                 setactiveActionSheetlabel(main_display)
                 setProductionLine(data)
-                if(data[i].Line === main_display){
+                var line_db = String(data[i].Line)
+                var line_dip = String(main_display)
+                // if(line_dip.charAt(line_dip.length - 1) === " "){
+                //     line_dip = line_dip.slice(0, -1)
+                // }
+                // if(line_db.includes(line_dip)){
+                //     setLineID(data[i].LineID)
+                //     catchPair = true
+                // }
+
+                if(line_db.includes(name)){
                     setLineID(data[i].LineID)
                     catchPair = true
                 }
@@ -419,27 +434,20 @@ const WorkResultInputScreen = (props) =>{
             <View style={[styles.flexRow,styles.alignCenter,styles.mL2, styles.mB2]}>
                 <View style={[styles.flexRow, styles.alignCenter]}>
                     <Text style={[styles.font30, styles.textBold, styles.mR1]}>Actual Qty :</Text>
-                    {
-                        ActualQty > 0
-                        ?
-                            <Text style={[styles.font40]}>{ActualQty}</Text>
-                        :
-                            <Input
-                                disableFullscreenUI={true}
-                                size="2xl"
-                                placeholder=" 0 "
-                                _light={{
-                                    placeholderTextColor: "blueGray.400",
-                                }}
-                                _dark={{
-                                    placeholderTextColor: "blueGray.50",
-                                }}
-                                keyboardType={'numeric'}
-                                minLength={0}
-                                onChangeText={(text) => set_actualQTY(text)}
-                                value={get_actualQTY}
-                            />
-                    }
+                    <Input
+                        disableFullscreenUI={true}
+                        size="2xl"
+                        _light={{
+                            placeholderTextColor: "blueGray.400",
+                        }}
+                        _dark={{
+                            placeholderTextColor: "blueGray.50",
+                        }}
+                        keyboardType={'numeric'}
+                        minLength={0}
+                        onChangeText={(text) => set_actualQTY(text)}
+                        value={String(get_actualQTY)}
+                    />      
                 </View>
             </View>
             <Actionsheet isOpen={activeActionSheet} onClose={onClose} hideDragIndicator={true}>

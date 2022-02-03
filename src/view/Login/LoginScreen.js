@@ -48,9 +48,10 @@ const LoginScreen = () => {
     const domainSetting = useSelector(state => state.loginCredential.domainSetting);
 
     const [username, setUsername] = useState("")
+    const [password, setPassword] = useState("")
     // const [username, setUsername] = useState("sitpf1")
     // const [password, setPassword] = useState("12345678")
-    const [password, setPassword] = useState("")
+ 
     const [loadingstate, setloadingstate] = useState(false);
     const [modalVisible, setModalVisible] = useState(false)
     const [showModal, setShowModal] = useState(false)

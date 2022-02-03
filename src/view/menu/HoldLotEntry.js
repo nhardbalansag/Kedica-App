@@ -255,12 +255,12 @@ const HoldLotEntry = (props, {navigation}) =>{
     }
 
     useEffect(() =>{
-        // if(isFocused){ 
+        if(isFocused){ 
             setpagestart(0);
             setpagelength(5);
             holdlotEntryList(0, 5, sort_state, column_state, "", table.dataFilter[filterData].value)
-        // }
-    },[ pagelength])
+        }
+    },[ pagelength, isFocused])
 
     const actionViewComponent = (data, index, data_id) =>{
         return(
