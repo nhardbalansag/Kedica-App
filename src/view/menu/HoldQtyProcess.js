@@ -47,17 +47,18 @@ const HoldQtyProcess = (props, {navigation}) =>{
 
     const getdetails = async () =>{
         setloading(true)
-        try{
-            const response = await fetch(domainSetting + "api/receiving/get-hold-lot-details/" + detailsId, {
-                method:"GET",
-                headers:{
-                    'Content-type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                }
-            })
-    
-            const responseData = await response.json();
-            
+        await fetch(domainSetting + "api/receiving/get-hold-lot-details/" + detailsId, {
+            method:"GET",
+            headers:{
+                'Content-type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            }
+        }).then(data => {
+            if (!data.ok) {
+                throw Error(data.status);
+            }
+            return data.json();
+        }).then(responseData => {
             setholdQtyDetails([
                 {
                     OrderEntryID: responseData[0].dataContent[0].OrderEntryID,
@@ -75,13 +76,17 @@ const HoldQtyProcess = (props, {navigation}) =>{
                 }
             ])
             setloading(false)
-        }catch(error){
+        }).catch(error => {
             alertMessage(error.message)
-        }
+        }); 
     }
 
     const validateSave = () =>{
-        var qtytotal = returnQty + proceedQty
+        var return_qty = returnQty ? returnQty : 0
+        var proceedQty_qty = proceedQty ? proceedQty : 0
+
+        var qtytotal = parseInt((return_qty !== null ? return_qty : return_qty)) + parseInt((proceedQty_qty !== null ? proceedQty_qty : 0))
+        
         if(qtytotal !== holdQtyDetails[0].ReceivedQty){
             alertMessage("Return QTY and Proceed Qty must be equal to Received QTY")
         }else{
@@ -89,35 +94,36 @@ const HoldQtyProcess = (props, {navigation}) =>{
         }
     }
   
-    const saveholdLot = async () =>{
-        setloading(true)
-        try{
-            const response = await fetch(domainSetting + "api/receiving/save-scrap-rework", {
-                method:'POST',
-                headers:{
-                    'Content-type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                },
-                body: JSON.stringify({
-                    HoldLotID: holdQtyDetails[0].HoldLotID,
-                    ProductionWorkID: holdQtyDetails[0].ProductionWorkID,
-                    LotNo: holdQtyDetails[0].LotNo,
-                    ReturnQty: returnQty,
-                    ProceedQty: proceedQty,
-                    IsStrip: IsStrip,
-                    IsReplate: IsReplate
-                })
+    const saveholdLot = () =>{
+        fetch(domainSetting + "api/receiving/save-scrap-rework", {
+            method:'POST',
+            headers:{
+                'Content-type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({
+                HoldLotID: holdQtyDetails[0].HoldLotID,
+                ProductionWorkID: holdQtyDetails[0].ProductionWorkID,
+                LotNo: holdQtyDetails[0].LotNo,
+                ReturnQty: returnQty ? returnQty : 0,
+                ProceedQty: proceedQty ? proceedQty : 0,
+                IsStrip: IsStrip,
+                IsReplate: IsReplate
             })
-            const responseData = await response.json();
-            setloading(false)
+        }).then(data => {
+            if (!data.ok) {
+                throw Error(data.status);
+            }
+            return data.json();
+        }).then(responseData => {
             if(responseData[0].status === true){
                 props.navigation.goBack()
             }else{
                 alertMessage(responseData[0].message)
             }
-        }catch(error){
-            alertMessage(error.message)
-        }
+        }).catch(error => {
+            alertMessage(error.message);
+        }); 
     }
 
     useEffect(() =>{
@@ -190,29 +196,10 @@ const HoldQtyProcess = (props, {navigation}) =>{
 
     const ButtonSaveCancel = () =>{
         return(
-            <View style={[
-                styles.flexRow,
-                styles.alignCenter,
-                styles.justifySpaceAround,
-            ]}>
-                <View style={[
-                    styles.mY1,
-                    styles.alignCenter,
-                    styles.justifyCenter,
-                    styles.flexRow,
-                ]}>
-                    <TouchableOpacity 
-                        onPress={() => validateSave()}
-                    >
-                        <View style={[
-                            styles.backgroundPrimary,
-                            styles.justifyCenter,
-                            styles.alignCenter,
-                            styles.border10,
-                            styles.pY100,
-                            styles.w100,
-                            styles.pX9,
-                        ]}>
+            <View style={[styles.flexRow,styles.alignCenter,styles.justifySpaceAround,]}>
+                <View style={[styles.mY1,styles.alignCenter,styles.justifyCenter,styles.flexRow,]}>
+                    <TouchableOpacity onPress={() => validateSave()}>
+                        <View style={[styles.backgroundPrimary,styles.justifyCenter,styles.alignCenter,styles.border10,styles.pY100,styles.w100,styles.pX9,]}>
                             <View style={[styles.flexRow]}>
                                 <Icon name={"save"} size={70} color={colors.lightColor}/>
                                 <Text style={[styles.font60, styles.mL2, styles.textWhite]}>Save</Text>
@@ -220,27 +207,12 @@ const HoldQtyProcess = (props, {navigation}) =>{
                         </View>
                     </TouchableOpacity>
                 </View> 
-                <View style={[
-                    styles.mY1
-                ]}>
+                <View style={[styles.mY1]}>
                     <TouchableOpacity onPress={() => props.navigation.goBack()}>
-                        <View style={[
-                            styles.bgWarning,
-                            styles.justifyCenter,
-                            styles.alignCenter,
-                            styles.border10,
-                            styles.pY100,
-                            styles.w100,
-                            styles.pX8
-                        ]}>
+                        <View style={[styles.bgWarning,styles.justifyCenter,styles.alignCenter,styles.border10,styles.pY100,styles.w100,styles.pX8]}>
                             <View style={[styles.flexRow]}>
-                                <Icon name={"times"}
-                                    size={70} 
-                                    color={colors.lightColor} 
-                                />
-                                <Text style={[styles.font60, styles.mL2, styles.textWhite]}>
-                                    Cancel
-                                </Text>
+                                <Icon name={"times"} size={70} color={colors.lightColor} />
+                                <Text style={[styles.font60, styles.mL2, styles.textWhite]}>Cancel</Text>
                             </View>
                         </View>
                     </TouchableOpacity>
@@ -255,11 +227,7 @@ const HoldQtyProcess = (props, {navigation}) =>{
                 loading 
                 ? 
                     <>
-                        <View style={[
-                                styles.alignCenter,
-                                styles.justifyCenter,
-                                styles.flex1
-                            ]}>
+                        <View style={[styles.alignCenter,styles.justifyCenter,styles.flex1]}>
                             <ActivityIndicator  size="large" color={colors.primaryColor}/>
                         </View>
                     </>

@@ -109,7 +109,7 @@ const ProductionScreen = [
         navigationScreen: "ProductionWorkEntryScreen",
         api: {
             url: "api/quality-inspection/outgoing-inspection/get",
-            method: "GET"
+            method: "POST"
         }
     },
     {
@@ -119,7 +119,7 @@ const ProductionScreen = [
         navigationScreen: "HoldLotEntry",
         api: {
             url: "api/receiving/get-hold-summary-list",
-            method: "GET"
+            method: "POST"
         }
     }
 ];

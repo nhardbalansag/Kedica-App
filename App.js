@@ -39,6 +39,8 @@ import {
   applyMiddleware
 } from 'redux';
 
+import {DefaultTheme,  Provider as PaperProvider } from 'react-native-paper';
+
 import {Provider} from 'react-redux';
 import ReduxThunk from 'redux-thunk';
 
@@ -49,6 +51,17 @@ import ProductionWorkEntryReducer from './src/redux/ProductionWork/ProductionWor
 //screen navigation
 import ScreensNavigation from "./src/navigator/ScreenNavigation";
 import AppStart from './src/view/AppStart/appstart';
+
+const theme = {
+  ...DefaultTheme,
+  roundness: 2,
+  fonts : "regular",
+  colors: {
+    ...DefaultTheme.colors,
+    primary: '#3498db',
+    accent: '#f1c40f',
+  },
+};
 
 const RootReducer = combineReducers({
   loginCredential:  LoginReducer,
@@ -86,7 +99,9 @@ const App = () => {
                 <NavigationContainer>
                   {/* navigation screen here */}
                   <View style = {[{height:windowHeight}, styles.backgroundWhite]}>
-                    <ScreensNavigation/>
+                    <PaperProvider theme={theme}>
+                      <ScreensNavigation/>
+                    </PaperProvider>
                   </View>
                   {/* navigation screen end */}
                 </NavigationContainer>

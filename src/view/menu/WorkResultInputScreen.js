@@ -13,7 +13,7 @@ import {
     Text,
     TouchableOpacity,
     Alert,
-    ActivityIndicator
+    ActivityIndicator,
 } from "react-native";
 
 import {
@@ -26,7 +26,8 @@ import {
     Actionsheet,
     useDisclose,
     Modal,
-    ScrollView
+    ScrollView,
+    Input
 } from 'native-base';
 
 import DeviceInfo from 'react-native-device-info';
@@ -53,6 +54,7 @@ const WorkResultInputScreen = (props) =>{
     const [lineId, setLineID] =  useState(null);
     const [productionLine, setProductionLine] =  useState(null);
     const [Qty, setQty] =  useState(0);
+    const [ActualQty, setActualQtyQty] =  useState(0);
     const [AMPM, setAMPM] =  useState();
     const [startedDatetime, setstartedDatetime] =  useState(null);
     const [endDatetime, setendDatetime] =  useState(null);
@@ -60,7 +62,11 @@ const WorkResultInputScreen = (props) =>{
     const [activeActionSheet, setactiveActionSheet] =  useState(false);
     const [activeActionSheetlabel, setactiveActionSheetlabel] =  useState(null);
     const [prodlineButton, setprodlineButton] =  useState(false);
+    const [actualqtyState, setactualqtyState] =  useState(false);
     const [plating, setPlating] =  useState(null);
+    const [lotnumber, setlotnumber] =  useState(null);
+    const [get_actualQTY, set_actualQTY] = useState(null)
+    const [get_actualQTY_display, set_actualQTY_display] = useState(null)
 
     const FactoryID = useSelector(state => state.loginCredential.FactoryId);
 
@@ -77,12 +83,12 @@ const WorkResultInputScreen = (props) =>{
         // current seconds
         let seconds = date_ob.getSeconds();
 
-        var ampm = hours >= 12 ? 'PM' : 'AM';
-        hours = hours % 12;
-        hours = hours ? hours : 12; // the hour '0' should be '12'
-        minutes = minutes < 10 ? '0' + minutes : minutes;
-        seconds = seconds < 10 ? '0' + seconds : seconds;
-        setAMPM(ampm)
+        // var ampm = hours >= 12 ? 'PM' : 'AM';
+        // hours = hours % 12;
+        // hours = hours ? hours : 12; // the hour '0' should be '12'
+        // minutes = minutes < 10 ? '0' + minutes : minutes;
+        // seconds = seconds < 10 ? '0' + seconds : seconds;
+        // setAMPM(ampm)
         var dateTimeNow = formatYmd(new Date()) + " " + hours + ":" + minutes + ":" + seconds
 
         return dateTimeNow;
@@ -94,14 +100,18 @@ const WorkResultInputScreen = (props) =>{
         }, 1000)
     }
 
-    const startProcess = async () =>{
+    const startProcess = () =>{
+        var actualqty = get_actualQTY ? get_actualQTY : 0
+        navigate()
         if(lineId !== null){
-            setBoolStartProcess(true)
-            setBoolEndProcess(false)
-            setstartProcessDateTime(getcurrentdate())
-            
-            try{
-                const response = await fetch(domainSetting + "api/production-work/production-work-entry/save-production", {
+            if(parseFloat(actualqty) < 0){
+                alertMessageNote("Actual Quantity must not less than 0.");
+            }else{
+                setBoolStartProcess(true)
+                setBoolEndProcess(false)
+                setstartProcessDateTime(getcurrentdate())
+                
+                fetch(domainSetting + "api/production-work/production-work-entry/save-production", {
                     method:'POST',
                     headers:{
                         'Content-type': 'application/json',
@@ -112,121 +122,186 @@ const WorkResultInputScreen = (props) =>{
                         LineID: lineId,
                         DateFrom: getcurrentdate(),
                         FactoryID: FactoryID,
+                        ActualQty:parseFloat(actualqty),
                         DateTo : "1900-01-01 00:00:00"
                     })
-                })
-
-                const responseData = await response.json();
-                props.navigation.navigate('ProductionWorkEntryScreen',
-                {
-                    title: "Work Result Input",
-                    url: "api/production-work/production-work-entry/index",
-                }
-            )
-            }catch(error){
-                alertMessage(error.message);
+                }).then(data => {
+                    if (!data.ok) {
+                        throw Error(data.status);
+                    }
+                    return data.json();
+                }).then(responseData => {
+                
+                }).catch(error => {
+                    alertMessage(error.message);
+                }); 
             }
-        }else{
+        }else if(lineId === null){
             alertMessageNote("Please Select Production Line");
         }
     }
     
-    const endProcess = async () =>{
-        try{
-            const response = await fetch(domainSetting + "api/production-work/production-work-entry/update-production-work-date-to", {
-                method:'POST',
-                headers:{
-                    'Content-type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                },
-                body: JSON.stringify({
-                    TravelSheetID: TravelSheetID,
-                    DateTo : getcurrentdate()
-                })
+    const endProcess = () =>{
+        var actualqty = get_actualQTY ? get_actualQTY : 0
+        fetch(domainSetting + "api/production-work/production-work-entry/update-production-work-date-to", {
+            method:'POST',
+            headers:{
+                'Content-type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({
+                TravelSheetID: TravelSheetID,
+                ActualQty:parseFloat(actualqty),
+                DateTo : getcurrentdate()
             })
+        }).then(data => {
+            if (!data.ok) {
+                throw Error(data.status);
+            }
+            return data.json();
+        }).then(responseData => {
             setBoolStartProcess(false)
-            props.navigation.navigate('ProductionWorkEntryScreen',
-                {
-                    title: "Work Result Input",
-                    url: "api/production-work/production-work-entry/index",
-                }
-            )
-            const responseData = await response.json();
-        }catch(error){
+            navigate()
+        }).catch(error => {
             alertMessage(error.message);
-        }
+        }); 
     }
 
-    const getProductLine = async () =>{
-        try{
-            const response = await fetch(domainSetting + "api/production-work/production-work-entry/linel-list/get/" + factoryId, {
-                method:'GET',
-                headers:{
-                    'Content-type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                }
+    const cancelProduction = () =>{
+        var actualqty = get_actualQTY ? get_actualQTY : 0
+        console.log("cancel => " + actualqty)
+        navigate()
+        fetch(domainSetting + "api/production-work/production-work-entry/cancel-production", {
+            method:'POST',
+            headers:{
+                'Content-type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({
+                TravelSheetID: TravelSheetID,
+                ActualQty:parseFloat(actualqty)
             })
-
-            const responseData = await response.json();
-            checkLineID(responseData[0].dataContent)
-        }catch(error){
+        }).then(data => {
+            if (!data.ok) {
+                throw Error(data.status);
+            }
+            return data.json();
+        }).then(responseData => {
+            
+        }).catch(error => {
             alertMessage(error.message);
-        }
+        }); 
+    }
+
+    const getProductLine = () =>{
+        fetch(domainSetting + "api/production-work/production-work-entry/linel-list/get/" + factoryId, {
+            method:'GET',
+            headers:{
+                'Content-type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            }
+        }).then(data => {
+            if (!data.ok) {
+                throw Error(data.status);
+            }
+            return data.json();
+        }).then(responseData => {
+            var datael = [];
+            for (const key in responseData[0].dataContent){
+                if(FactoryID === responseData[0].dataContent[key].LineFactoryID){
+                    datael.push(
+                        {
+                            LineID: responseData[0].dataContent[key].LineID,
+                            Line: responseData[0].dataContent[key].Line
+                        }
+                    )
+                }
+            }
+            checkLineID(datael)
+            console.warn(datael)
+        }).catch(error => {
+            alertMessage(error.message);
+        }); 
     }
 
     const search = async (tokendata, domainSetting) =>{
 
         const travelSheetNumber = props.route.params.dataContent.number;
- 
-        setloading(true)
-        try{
-            const response = await fetch(domainSetting + "api/production-work/production-work-entry/search-travelsheet-details/" + travelSheetNumber, {
-                method:'GET',
+       
+        if(travelSheetNumber.includes("-") && (travelSheetNumber.split("-").length === 3 || travelSheetNumber.split("-").length === 4) && travelSheetNumber.split("-")[0] === "TS"){
+            await fetch(domainSetting + "api/production-work/production-work-entry/search-travelsheet-details", {
+                method:'POST',
                 headers:{
                     'Content-type': 'application/json',
                     'Authorization': 'Bearer ' + tokendata
+                },
+                body: JSON.stringify({
+                    TravelSheetNo: travelSheetNumber,
+                    FactoryID : FactoryID
+                })
+            }).then(data => {
+                if (!data.ok) {
+                    throw Error(data.status);
                 }
-            })
-
-            const responseData = await response.json();
-            if(responseData[0].total > 0){
-                var tempvar = {
-                    ID:             responseData[0].dataContent[0].ID,
-                    TravelSheetID:  responseData[0].dataContent[0].TravelSheetID,
-                    TravelSheetNo:  responseData[0].dataContent[0].TravelSheetNo,
-                    ItemCode:       responseData[0].dataContent[0].ItemCode,
-                    ItemName:       responseData[0].dataContent[0].ItemName,
-                    Qty:            responseData[0].dataContent[0].Qty,
-                    Line:           responseData[0].dataContent[0].Line,
-                    PlatingLotNo:   responseData[0].dataContent[0].PlatingLotNo,
-                    DateFrom:       responseData[0].dataContent[0].DateFrom,
-                    DateTo:         responseData[0].dataContent[0].DateTo
-               }
-
-               tempvar.DateFrom == "1900-01-01 00:00:00" ? setBoolStartProcess(false) : setBoolStartProcess(true)
-               tempvar.DateTo == "1900-01-01 00:00:00" ? setBoolEndProcess(false) : setBoolEndProcess(true)
-               setstartedDatetime(tempvar.DateFrom == "1900-01-01 00:00:00" ? null : tempvar.DateFrom)
-               setendDatetime(tempvar.DateTo == "1900-01-01 00:00:00" ? null : tempvar.DateTo)
-               setQty(tempvar.Qty)
-               setTravelSheetID(tempvar.TravelSheetID)
-
-               if(tempvar.Line !== ""){
-                    setactiveActionSheetlabel(tempvar.Line)
-                    setPlating(tempvar.PlatingLotNo)
-                    setprodlineButton(true)
-               }else{
-                    getProductLine()
-               }
-
-               setloading(false)
-            }else{
-                alertMessage("No Data Available");
-            }
-        }catch(error){
-            alertMessage(error.message);
+                return data.json();
+            }).then(responseData => {
+                if(responseData[0].total > 0 && ((responseData[0].dataContent[0].DateTo === '1900-01-01 00:00:00' && responseData[0].dataContent[0].DateFrom === '1900-01-01 00:00:00') || (responseData[0].dataContent[0].DateTo === '1900-01-01 00:00:00' && responseData[0].dataContent[0].DateFrom !== '1900-01-01 00:00:00'))){
+                    var tempvar = {
+                        ID:             responseData[0].dataContent[0].ID,
+                        TravelSheetID:  responseData[0].dataContent[0].TravelSheetID,
+                        TravelSheetNo:  responseData[0].dataContent[0].TravelSheetNo,
+                        ItemCode:       responseData[0].dataContent[0].ItemCode,
+                        ItemName:       responseData[0].dataContent[0].ItemName,
+                        Qty:            responseData[0].dataContent[0].Qty,
+                        ActualQty:      responseData[0].dataContent[0].ActualQty,
+                        Line:           responseData[0].dataContent[0].Line,
+                        LotNo:          responseData[0].dataContent[0].LotNo,
+                        PlatingLotNo:   responseData[0].dataContent[0].PlatingLotNo,
+                        DateFrom:       responseData[0].dataContent[0].DateFrom,
+                        DateTo:         responseData[0].dataContent[0].DateTo
+                    }
+                    console.warn(responseData[0].dataContent[0])
+                    tempvar.DateFrom == "1900-01-01 00:00:00" ? setBoolStartProcess(false) : setBoolStartProcess(true)
+                    tempvar.DateTo == "1900-01-01 00:00:00" ? setBoolEndProcess(false) : setBoolEndProcess(true)
+                    setstartedDatetime(tempvar.DateFrom == "1900-01-01 00:00:00" ? null : tempvar.DateFrom)
+                    setendDatetime(tempvar.DateTo == "1900-01-01 00:00:00" ? null : tempvar.DateTo)
+                    setQty(tempvar.Qty)
+                    setTravelSheetID(tempvar.TravelSheetID)
+                    setlotnumber(tempvar.LotNo)
+                    if(tempvar.Qty > 0){
+                        setactualqtyState(true)
+                        setActualQtyQty(tempvar.ActualQty)
+                    }
+                    set_actualQTY(tempvar.ActualQty)
+                    set_actualQTY_display(tempvar.ActualQty)
+                    if(tempvar.Line !== ""){
+                        setactiveActionSheetlabel(tempvar.Line)
+                        setPlating(tempvar.PlatingLotNo)
+                        setprodlineButton(true)
+                    }else{
+                        getProductLine()
+                    }
+                    setloading(false)
+                }else{
+                    alertMessage("Please Scan Pending or Ongoing Travel Sheet");
+                }
+            }).catch(error => {
+                alertMessage(error.message);
+            }); 
+        }else{
+            alertMessage("Please scan a valid Travel Sheet")
         }
     }
-
+    const navigate = () =>{
+        props.navigation.navigate('ProductionWorkEntryScreen',
+            {
+                url: "api/production-work/production-work-entry/index",
+                method: "GET",
+                title: "Production Work Entry"
+            }
+        )
+        setloading(false)
+    }
     const alertMessage = (message) =>{
         Alert.alert(
             "Note",
@@ -234,12 +309,7 @@ const WorkResultInputScreen = (props) =>{
             [
               { 
                   text: "OK", 
-                  onPress: () => props.navigation.navigate('ProductionWorkEntryScreen',
-                  {
-                    url: "api/production-work/production-work-entry/index",
-                    method: "GET",
-                    title: "Production Work Entry"
-                })}
+                  onPress: () => navigate()}
             ]
         );
     }
@@ -254,23 +324,45 @@ const WorkResultInputScreen = (props) =>{
         );
     }
 
-    const actionsheet = () =>{
-        setactiveActionSheet(true)
-    }
-
     const checkLineID = async (data) =>{
         var name = await DeviceInfo.getDeviceName()
+        var temp = name.split(" ")
+        var number = null;
+        var displayTitle = ""
+        var main_display = ""
+        for(let i = 0; i < temp.length; i++){
+            if(temp[i].includes('-')){
+                var splitnumber = temp[i].split('-')
+                number = splitnumber[0]
+            }else{
+                displayTitle = displayTitle + (temp[i] + " ")
+            }
+        }
+
+        main_display = displayTitle + (number !== null ? number : "")
+
         if(data != null){
+            let catchPair = false
             for(let i = 0; i < data.length; i++){
-                if(data[i].Line === name){
+                setactiveActionSheetlabel(main_display)
+                setProductionLine(data)
+                var line_db = String(data[i].Line)
+                var line_dip = String(main_display)
+                // if(line_dip.charAt(line_dip.length - 1) === " "){
+                //     line_dip = line_dip.slice(0, -1)
+                // }
+                // if(line_db.includes(line_dip)){
+                //     setLineID(data[i].LineID)
+                //     catchPair = true
+                // }
+
+                if(line_db.includes(name)){
                     setLineID(data[i].LineID)
-                    setactiveActionSheetlabel(data[i].Line)
-                    setProductionLine(data)
-                    break;
-                }else{
-                    alertMessageNote("No Production line Connected to this device Please Setup your device in tablet settings.")
-                    break;
+                    catchPair = true
                 }
+            }
+            if(!catchPair){
+                alertMessageNote("No Production line Connected to this device Please Setup your device in tablet settings.")
             }
         }
     }
@@ -282,295 +374,178 @@ const WorkResultInputScreen = (props) =>{
     }
 
     useEffect(() =>{
-        search(token, domainSetting)
         realtime();
+        search(token, domainSetting)
     },[])
 
-    const mainContent = () =>{
-        return(
-            <NativeBaseProvider>
-<View style={[styles.flexRow]}>
-    <View style={[
-        styles.flexRow,
-        styles.alignCenter,
-        styles.mL2
-    ]}>
-        <Text style={[
-            styles.font30,
-            styles.textBold,
-            styles.mR1
-        ]}>
-            Travel Sheet No. :
-        </Text>
-        <Text style={[
-            styles.font40
-        ]}>
-            {travelSheetNumber}
-        </Text>
-    </View>
-    <View style={[
-        styles.flexRow,
-        styles.alignCenter,
-        styles.mL2
-    ]}>
-        <Text style={[
-            styles.font30,
-            styles.textBold,
-            styles.mR1
-        ]}>
-            Plating Lot No. :
-        </Text>
-        <Text style={[
-            styles.font40
-        ]}>
-            {plating == null ? "--" : plating}
-        </Text>
-    </View>
-</View>
-                <View style={[
-                    styles.flexRow,
-                    styles.alignCenter,
-                    styles.mL2
-                ]}>
-                    <Text style={[
-                        styles.font30,
-                        styles.textBold,
-                        styles.mR1
-                    ]}>
-                        From(Datetime) :
-                    </Text>
-                    <Text style={[
-                        styles.font40
-                    ]}>
+    const mainContent = () =>(
+        <NativeBaseProvider>
+            <View style={[styles.flexRow,styles.alignCenter,styles.mL2]}>
+                <Text style={[styles.font30,styles.textBold,styles.mR1]}>Travel Sheet No. :</Text>
+                <Text style={[styles.font40]}>{travelSheetNumber}</Text>
+            </View>
+            <View style={[styles.flexRow, styles.alignCenter ,styles.mL2]}>
+                <View style={[styles.flexRow]}>
+                    <View style={[styles.flexRow,styles.alignCenter, styles.w50]}>
+                        <Text style={[styles.font30,styles.textBold,styles.mR1]}>Material Lot No. :</Text>
+                        <Text style={[styles.font40]}>{lotnumber == null ? "--" : lotnumber}</Text>
+                    </View>
+                </View>
+                <View style={[styles.flexRow,styles.alignCenter]}>
+                    <Text style={[styles.font30,styles.textBold,styles.mR1]}>Plating Lot No. :</Text>
+                    <Text style={[styles.font40]}>{plating == null ? "--" : plating}</Text>
+                </View>
+            </View>
+            <View style={[styles.flexRow,styles.alignCenter,styles.mL2]}>
+                <View style={[styles.flexRow, styles.alignCenter, styles.w50]}>
+                    <Text style={[styles.font30,styles.textBold,styles.mR1]}>From(Datetime) :</Text>
+                    <Text style={[styles.font40]}>
                         {
                             startedDatetime == null
-                            ?
-                                (boolStartProcess ? startProcessDateTime + " " + AMPM : DisplayTime + " " + AMPM)
-                            :
-                                startedDatetime
+                                ?
+                                    (boolStartProcess ? startProcessDateTime : DisplayTime)
+                                :
+                                    startedDatetime
                         }
-                        
                     </Text>
                 </View>
-                <View style={[
-                    styles.flexRow,
-                    styles.alignCenter,
-                    styles.mL2
-                ]}>
-                    <Text style={[
-                        styles.font30,
-                        styles.textBold,
-                        styles.mR1
-                    ]}>
-                        To(Datetime) :
-                    </Text>
-                    <Text style={[
-                        styles.font40
-                    ]}>
-                        {
-                            endDatetime == null ? DisplayTime + " " + AMPM : endDatetime
-                        }
-                        
-                    </Text>
+                <View style={[styles.flexRow, styles.alignCenter]}>
+                    <Text style={[styles.font30, styles.textBold, styles.mR1]}>To(Datetime) :</Text>
+                    <Text style={[styles.font40]}>{endDatetime == null ? DisplayTime : endDatetime}</Text> 
                 </View>
-                
-                <View style={[
-                    styles.flexRow,
-                    styles.alignCenter,
-                    styles.mL2
-                ]}>
-                    <Text style={[
-                        styles.font30,
-                        styles.textBold,
-                        styles.mR1
-                    ]}>
-                        Prod. Line :
-                    </Text>
+            </View>
+            <View style={[styles.flexRow,styles.alignCenter,styles.mL2, styles.mB2]}>
+                <View style={[styles.flexRow, styles.alignCenter, styles.w50]}>
+                    <Text style={[styles.font30,styles.textBold,styles.mR1]}>Prod. Line :</Text>
                     <View>
-                        <TouchableOpacity disabled={prodlineButton} onPress={ () => actionsheet()}>
-                            <View style={[
-                                !prodlineButton ? styles.backgroundPrimary : styles.bgGray200,
-                                styles.justifyCenter,
-                                styles.alignCenter,
-                                styles.flexRow,
-                                styles.border10,
-                                styles.pY1,
-                                styles.pX2
-                            ]}>
+                        <TouchableOpacity disabled={prodlineButton} onPress={() => setactiveActionSheet(true)}>
+                            <View style={[!prodlineButton ? styles.backgroundPrimary : styles.bgGray200,styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.border10,styles.pY1,styles.pX2]}>
                                 <Text style={[styles.font30, styles.textWhite, styles.mR1]}>{activeActionSheetlabel !== null ? activeActionSheetlabel : "Select Production Line"}</Text>
                                 <Icon name="mouse-pointer" size={30} color={colors.lightColor} />
                             </View>
                         </TouchableOpacity>
                     </View>
                 </View>
-                <View style={[
-                    styles.flexRow,
-                    styles.alignCenter,
-                    styles.mL2
-                ]}>
-                    <Text style={[
-                        styles.font30,
-                        styles.textBold,
-                        styles.mR1
-                    ]}>
-                        Total Qty :
-                    </Text>
-                    <Text style={[
-                        styles.font40
-                    ]}>
-                        {Qty}
-                    </Text>
+                <View style={[styles.flexRow, styles.alignCenter]}>
+                    <Text style={[styles.font30, styles.textBold, styles.mR1]}>Total Qty :</Text>
+                    <Text style={[styles.font40]}>{Qty}</Text>
                 </View>
-                
-                <Actionsheet isOpen={activeActionSheet} onClose={onClose}  hideDragIndicator={true}>
-                    <Actionsheet.Content style={[styles.alignFlexStart]}>
-                        <Actionsheet.Item>
-                            <View>
-                                <TouchableOpacity onPress={() => setactiveActionSheet(false)}>
-                                    <View style={[
-                                        styles.flexRow,
-                                        styles.justifySpaceBetween,
-                                        styles.alignCenter,
-                                        styles.pL5,
-                                    ]}>
-                                        <Icon name="times" size={40} color={colors.dangerColor} />
-                                        <Text style={[styles.font40, styles.mL2, styles.textDanger]}>{productionLine == null ? "No production line connected to this device Please Setup your device name in tablet settings." : "Cancel"}</Text>
-                                    </View>
-                                </TouchableOpacity>
-                            </View>
-                        </Actionsheet.Item>
-                        <ScrollView>
-                        {
-                            productionLine != null?
-                            productionLine.map((data, index)=>
-                                <Actionsheet.Item key={index}>
-                                    <View>
-                                        <TouchableOpacity onPress={() => closeActionSheet(data.LineID, data.Line)}>
-                                            <View style={[
-                                                styles.flexRow,
-                                                styles.justifySpaceBetween,
-                                                styles.alignCenter,
-                                                styles.pL5,
-                                            ]}>
-                                                <Icon name="circle" size={40} color={lineId == data.LineID ? colors.primaryColor : colors.gray200} />
-                                                <Text style={[styles.font40, styles.mL2]}>{data.Line}</Text>
-                                            </View>
-                                        </TouchableOpacity>
-                                    </View>
-                                </Actionsheet.Item>
+            </View>
+            <View style={[styles.flexRow,styles.alignCenter,styles.mL2, styles.mB2]}>
+                <View style={[styles.flexRow, styles.alignCenter]}>
+                    <Text style={[styles.font30, styles.textBold, styles.mR1]}>Actual Qty :</Text>
+                    <Input
+                        disableFullscreenUI={true}
+                        size="2xl"
+                        _light={{
+                            placeholderTextColor: "blueGray.400",
+                        }}
+                        _dark={{
+                            placeholderTextColor: "blueGray.50",
+                        }}
+                        keyboardType={'numeric'}
+                        minLength={0}
+                        onChangeText={(text) => set_actualQTY(text)}
+                        value={String(get_actualQTY)}
+                    />      
+                </View>
+            </View>
+            <Actionsheet isOpen={activeActionSheet} onClose={onClose} hideDragIndicator={true}>
+                <Actionsheet.Content style={[styles.alignFlexStart]}>
+                    <Actionsheet.Item>
+                        <View>
+                            <TouchableOpacity onPress={() => setactiveActionSheet(false)}>
+                                <View style={[styles.flexRow,styles.justifySpaceBetween,styles.alignCenter,styles.pL5]}>
+                                    <Icon name="times" size={40} color={colors.dangerColor} />
+                                    <Text style={[styles.font40, styles.mL2, styles.textDanger]}>{productionLine == null ? "No production line connected to this device Please Setup your device name in tablet settings." : "Cancel"}</Text>
+                                </View>
+                            </TouchableOpacity>
+                        </View>
+                    </Actionsheet.Item>
+                    <ScrollView>
+                        {productionLine != null ?
+                            productionLine.map((data, index) => <Actionsheet.Item key={index}>
+                                <View>
+                                    <TouchableOpacity onPress={() => closeActionSheet(data.LineID, data.Line)}>
+                                        <View style={[styles.flexRow,styles.justifySpaceBetween,styles.alignCenter,styles.pL5]}>
+                                            <Icon name="circle" size={40} color={lineId == data.LineID ? colors.primaryColor : colors.gray200} />
+                                            <Text style={[styles.font40, styles.mL2]}>{data.Line}</Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                </View>
+                            </Actionsheet.Item>
                             )
                             :
-                            <></>
-                        }
-                        </ScrollView>
-                    </Actionsheet.Content>
-                </Actionsheet>
+                            <></>}
+                    </ScrollView>
+                </Actionsheet.Content>
+            </Actionsheet>
 
-                <View style={[
-                    styles.mX2,
-                    styles.flexRow,
-                    styles.alignCenter,
-                    styles.justifySpaceAround
-                ]}>
-                    <View style={[
-                        styles.mY1
-                    ]}>
-                        <TouchableOpacity
-                            disabled={boolStartProcess}
-                            onPress={() => startProcess()}
-                        >
-                            <View style={[
-                                boolStartProcess ? styles.bgGray200 :styles.bgSuccess ,
-                                styles.justifyCenter,
-                                styles.alignCenter,
-                                styles.flexRow,
-                                styles.border10,
-                                styles.pY100,
-                                styles.pX2
-                            ]}>
-                               <>
-                                    <Icon 
-                                        name={
-                                            startedDatetime == null
-                                            ?
-                                                "hourglass-start"
-                                            :
-                                                "exclamation-circle"
-                                        }
-                                        size={70} 
-                                        color={colors.lightColor} 
-                                    />
-                                </>
-                                
-                                <Text style={[styles.font60, styles.mL2, styles.textWhite]}> 
-                                    {
-                                        startedDatetime == null
-                                        ?
-                                            boolStartProcess ? "Process started" : "START PROCESS"
-                                        :
-                                            (endDatetime == null ? "Processing..." : "Process Ended")
-                                            
-                                    }
-                                </Text>
-                            </View>
-                        </TouchableOpacity>
-                    </View> 
-                    <View>
-                        <TouchableOpacity 
-                            onPress={() => endProcess()}
-                            disabled={
-                                !boolStartProcess ? true : (boolEndProcess)
-                            }
-                        >
-                            <View style={[
-                                !boolStartProcess ? styles.bgGray200 : (boolEndProcess ? styles.bgGray200 :styles.backgroundPrimary),
-                                styles.justifyCenter,
-                                styles.alignCenter,
-                                styles.flexRow,
-                                styles.border10,
-                                styles.pY100,
-                                styles.pX2
-                            ]}>
-                                <Icon 
-                                    name={
-                                        boolEndProcess == null
-                                        ?
-                                            "hourglass-end"
-                                        :
-                                            "exclamation-circle"
-                                    }
-                                    size={70} 
-                                    color={colors.lightColor} 
-                                />
-                                <Text style={[styles.font60, styles.mL2, styles.textWhite]}>
-                                    {boolEndProcess ? "Process Ended" : "END PROCESS"}
-                                </Text>
-                            </View>
-                        </TouchableOpacity>
-                    </View> 
+            <View style={[styles.flexRow,styles.alignCenter,styles.justifySpaceAround,styles.w100,styles.pB5]}>
+                <View style={[styles.w30]}>
+                    <TouchableOpacity
+                        disabled={boolStartProcess}
+                        onPress={() => startProcess()}
+                    >
+                        <View style={[boolStartProcess ? styles.bgGray200 : styles.bgSuccess,styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.border10,styles.pY100,styles.pX2]}>
+                            <>
+                                <Icon name={startedDatetime == null ? "hourglass-start" : "exclamation-circle"} size={70} color={colors.lightColor} />
+                            </>
+                            <Text style={[styles.font60, styles.mL2, styles.textWhite, styles.textCenter]}>
+                                {startedDatetime == null ? boolStartProcess ? "Started" : "Start" : (endDatetime == null ? "Ongoing" : "Ended")}
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
                 </View>
-            </NativeBaseProvider>
-        )
-    }
+                <View style={[styles.w30]}>
+                    <TouchableOpacity
+                        onPress={() => endProcess()}
+                        disabled={!boolStartProcess ? true : (boolEndProcess)}
+                    >
+                        <View style={[
+                            !boolStartProcess ? styles.bgGray200 : (boolEndProcess ? styles.bgGray200 : styles.backgroundPrimary),
+                            styles.justifyCenter,
+                            styles.alignCenter,
+                            styles.flexRow,
+                            styles.border10,
+                            styles.pY100,
+                            styles.pX2
+                        ]}>
+                            <Icon name={boolEndProcess == null ? "hourglass-end" : "exclamation-circle"} size={70} color={colors.lightColor} />
+                            <Text style={[styles.font60, styles.mL2, styles.textWhite, styles.textCenter]}>
+                                {boolEndProcess ? "Ended" : "End"}
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
+                </View>
+                <View style={[styles.w30]}>
+                    <TouchableOpacity onPress={() => cancelProduction()}>
+                        <View style={[styles.bgWarning,styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.border10,styles.pY100,styles.pX2]}>
+                            <Icon name="times" size={70} color={colors.lightColor} />
+                            <Text style={[styles.font60, styles.mL2, styles.textWhite, styles.textCenter]}> Cancel </Text>
+                        </View>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </NativeBaseProvider>
+    )
 
      return(
-        <>
-        {
-            !loading  
-            ?
-                mainContent()
-            :
-                <>
-                    <View style={[
-                            styles.alignCenter,
-                            styles.justifyCenter,
-                            styles.flex1
-                        ]}>
-                        <ActivityIndicator  size="large" color={colors.primaryColor}/>
-                    </View>
-                </>
-        }
-        </>
+        <NativeBaseProvider>
+            <ScrollView>
+            {
+                !loading  
+                ?
+                    mainContent()
+                :
+                    <>
+                        <View style={[styles.alignCenter,styles.justifyCenter,styles.flex1]}>
+                            <ActivityIndicator  size="large" color={colors.primaryColor}/>
+                        </View>
+                    </>
+            }
+            </ScrollView>
+        </NativeBaseProvider>
     )
 }
 
