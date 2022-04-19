@@ -46,6 +46,8 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { parse } from "react-native-svg";
 
+import DatePicker from 'react-native-datepicker'
+
 const table = {
     dataFilter: [
         {filterType: "Start Process",       value: "StartProcess"},
@@ -86,7 +88,7 @@ const ProductionWorkEntryScreen = (props) =>{
     const [factoryId, setfactoryId] =  useState(0);
 
     const [OutGoingDateFrom, setOutGoingDateFrom] =  useState("2022-01-01");
-    const [OutGoingDateTo, setOutGoingDateTo] =  useState("2022-01-02");
+    const [OutGoingDateTo, setOutGoingDateTo] =  useState("2022-01-01");
     const limiters = [19]
 
     const FactoryID = useSelector(state => state.loginCredential.FactoryId);
@@ -232,7 +234,10 @@ const ProductionWorkEntryScreen = (props) =>{
                 PageStart: PageStart ? PageStart : 0,
                 PageLength: PageLength ? PageLength : 5,
                 LineID: parseInt(lineid ? lineid : (lineId ? lineId : 0)),
-                DateFilter: parseInt(DateFilter ? DateFilter : 0)
+                DateFilter: parseInt(DateFilter ? DateFilter : 0),
+                QueryFilter: -1,
+                OutGoingDateFrom: OutGoingDateFrom,
+                OutGoingDateTo: OutGoingDateTo
             })
         )
         await fetch(domainSetting + apiUrl, {
@@ -379,7 +384,62 @@ const ProductionWorkEntryScreen = (props) =>{
             });
            return unsubscribe;
         }
-    },[travelSheetNo, isFocused, filterData, textInputRef])
+    },[travelSheetNo, isFocused, filterData, textInputRef, OutGoingDateTo, DateFilter])
+
+    const datepickerFrom = () => {
+        return(
+            <View style={[styles.flexRow]}>
+                <View style={[styles.mR1]}>
+                    <Text style={[styles.font20]}>From</Text>
+                    <DatePicker
+                        style={{width: 150}}
+                        date={OutGoingDateFrom}
+                        mode="date"
+                        placeholder="select date"
+                        format="YYYY-MM-DD"
+                        confirmBtnText="Confirm"
+                        cancelBtnText="Cancel"
+                        customStyles={{
+                            dateIcon: {
+                                position: 'absolute',
+                                left: 0,
+                                top: 4,
+                                marginLeft: 0
+                            },
+                            dateInput: {
+                                marginLeft: 36,
+                            }
+                        }}
+                        onDateChange={(date) => {setOutGoingDateFrom(date)}}
+                    />
+                </View>
+                <View>
+                    <Text style={[styles.font20]}>To</Text>
+                    <DatePicker
+                        style={{width: 150}}
+                        date={OutGoingDateTo}
+                        mode="date"
+                        placeholder="select date"
+                        format="YYYY-MM-DD"
+                        confirmBtnText="Confirm"
+                        cancelBtnText="Cancel"
+                        customStyles={{
+                            dateIcon: {
+                                position: 'absolute',
+                                left: 0,
+                                top: 4,
+                                marginLeft: 0
+                            },
+                            dateInput: {
+                                marginLeft: 36
+                            }
+                        }}
+                        onDateChange={(date) => {setOutGoingDateTo(date)}}
+                    />
+                </View>
+            </View>
+        )
+    }
 
     const tableComponent = () =>{
         return(
@@ -501,7 +561,10 @@ const ProductionWorkEntryScreen = (props) =>{
                         <View>
                             {
                                 currentComponent === "Outgoing Inspection" 
-                                ? <></> 
+                                ? 
+                                    <View>
+                                        {datepickerFrom()}
+                                    </View> 
                                 :
                                     <View style={[styles.flexRow]}>
                                         <TouchableOpacity onPress={() => actionsheetDateFilter()} >
