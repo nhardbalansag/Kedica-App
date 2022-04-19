@@ -109,7 +109,7 @@ const ProductionScreen = [
         navigationScreen: "ProductionWorkEntryScreen",
         api: {
             url: "api/quality-inspection/outgoing-inspection/get",
-            method: "GET"
+            method: "POST"
         }
     },
     {

@@ -47,16 +47,16 @@ const LoginScreen = () => {
    
     const domainSetting = useSelector(state => state.loginCredential.domainSetting);
 
-    const [username, setUsername] = useState("")
-    const [password, setPassword] = useState("")
-    // const [username, setUsername] = useState("sitpf1")
-    // const [password, setPassword] = useState("12345678")
+    //const [username, setUsername] = useState("")
+    //const [password, setPassword] = useState("")
+    const [username, setUsername] = useState("sitpf1")
+    const [password, setPassword] = useState("12345678")
  
     const [loadingstate, setloadingstate] = useState(false);
     const [modalVisible, setModalVisible] = useState(false)
     const [showModal, setShowModal] = useState(false)
-    // const [setting, setSetting] = useState("http:/192.168.200.100:1993/")
-    const [setting, setSetting] = useState("http:/172.18.5.9:8002/")
+    const [setting, setSetting] = useState("http://172.168.200.3:1991/")
+    //const [setting, setSetting] = useState("http:/172.18.5.9:8002/")
 
     const handleSizeClick = (newSize) => {
         setSize(newSize)

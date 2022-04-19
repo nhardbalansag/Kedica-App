@@ -75,13 +75,18 @@ const ProductionWorkEntryScreen = (props) =>{
     const [totaldata, settotaldata] = useState(null);
     const [refreshing, setRefreshing] = useState(false);
     const [activeActionSheet, setactiveActionSheet] =  useState(false);
+    const [activeActionSheetFilterdate, setactiveActionSheetFilterdate] =  useState(false);
     const [filterData, setfilterData] =  useState("All");
+    const [filterDate, setfilterDate] =  useState("Today");
     const [currentComponent, setcurrentComponent] =  useState("");
     const [column_state, set_column_state] = useState("StartProcess");
     const [sort_state, set_sort_state] = useState("desc");
     const [lineId, setLineID] =  useState(null);
+    const [DateFilter, setDateFilter] =  useState(0);
     const [factoryId, setfactoryId] =  useState(0);
 
+    const [OutGoingDateFrom, setOutGoingDateFrom] =  useState("2022-01-01");
+    const [OutGoingDateTo, setOutGoingDateTo] =  useState("2022-01-02");
     const limiters = [19]
 
     const FactoryID = useSelector(state => state.loginCredential.FactoryId);
@@ -98,6 +103,16 @@ const ProductionWorkEntryScreen = (props) =>{
         {filterType: "All", value: "All"},
     ]
 
+    const dateFilter = [
+        {title: "Today", value: 0},
+        {title: "3 days", value: 2},
+        {title: "7 days", value: 6},
+        {title: "14 days", value: 13},
+        {title: "21 days", value: 20},
+        {title: "28 days", value: 27},
+        {title: "All", value: -1}
+    ]
+
     const actionsheet = () =>{
         setactiveActionSheet(true)
     }
@@ -105,6 +120,16 @@ const ProductionWorkEntryScreen = (props) =>{
     const closeActionSheet = (filter) =>{
         setactiveActionSheet(false)
         setfilterData(filter)
+    }
+
+    const actionsheetDateFilter = () =>{
+        setactiveActionSheetFilterdate(true)
+    }
+
+    const closeActionSheetFilterdate = (filter, title) =>{
+        setactiveActionSheetFilterdate(false)
+        setfilterDate(title)
+        setDateFilter(filter)
     }
 
     const nextpage = () =>{
@@ -192,7 +217,6 @@ const ProductionWorkEntryScreen = (props) =>{
     const getProductionWorkEntryList = async (PageStart, PageLength, order_status, order_column, lineid = null) =>{
         console.warn(lineid)
         lineid > 0 ? setLineID(lineid) : lineid
-       
         setpagestart(PageStart)
         const apiUrl = props.route.params.url;
         const componentTitle = props.route.params.title;
@@ -200,6 +224,17 @@ const ProductionWorkEntryScreen = (props) =>{
         set_sort_state(order_status)
         setcurrentComponent(componentTitle)
         setRefreshing(true);
+        console.warn(
+            JSON.stringify({
+                sortColumnName:order_column,
+                sortDirection:order_status,
+                FactoryID: FactoryID,
+                PageStart: PageStart ? PageStart : 0,
+                PageLength: PageLength ? PageLength : 5,
+                LineID: parseInt(lineid ? lineid : (lineId ? lineId : 0)),
+                DateFilter: parseInt(DateFilter ? DateFilter : 0)
+            })
+        )
         await fetch(domainSetting + apiUrl, {
             method:"POST",
             headers:{
@@ -212,7 +247,12 @@ const ProductionWorkEntryScreen = (props) =>{
                 FactoryID: FactoryID,
                 PageStart: PageStart ? PageStart : 0,
                 PageLength: PageLength ? PageLength : 5,
-                LineID: parseInt(lineid ? lineid : (lineId ? lineId : 0))
+                LineID: parseInt(lineid ? lineid : (lineId ? lineId : 0)),
+                DateFilter: parseInt(DateFilter ? DateFilter : 0),
+
+                QueryFilter: -1,
+                OutGoingDateFrom: OutGoingDateFrom,
+                OutGoingDateTo: OutGoingDateTo
             })
         }).then(data => {
             if (!data.ok) {
@@ -220,6 +260,7 @@ const ProductionWorkEntryScreen = (props) =>{
             }
             return data.json();
         }).then(responseData => {
+            console.log(responseData)
             settotaldata(responseData[0].total)
             var datael = [];
             if(!responseData[0].status){
@@ -462,14 +503,21 @@ const ProductionWorkEntryScreen = (props) =>{
                                 currentComponent === "Outgoing Inspection" 
                                 ? <></> 
                                 :
-                                <TouchableOpacity onPress={() => actionsheet()} >
-                                    <View style={[ styles.backgroundLightBlue,styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.border10,styles.pY1,styles.pX2,styles.mT1]}>
-                                        <Icon name="filter" size={25} color={colors.lightColor} />
-                                        <Text style={[styles.font25, styles.textWhite, styles.mL1]}>{filterData}</Text>
+                                    <View style={[styles.flexRow]}>
+                                        <TouchableOpacity onPress={() => actionsheetDateFilter()} >
+                                            <View style={[ styles.mR1,styles.backgroundLightBlue,styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.border10,styles.pY1,styles.pX2,styles.mT1]}>
+                                                <Icon name="calendar" size={25} color={colors.lightColor} />
+                                                <Text style={[styles.font25, styles.textWhite, styles.mL1]}>{filterDate}</Text>
+                                            </View>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity onPress={() => actionsheet()} >
+                                            <View style={[ styles.backgroundLightBlue,styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.border10,styles.pY1,styles.pX2,styles.mT1]}>
+                                                <Icon name="filter" size={25} color={colors.lightColor} />
+                                                <Text style={[styles.font25, styles.textWhite, styles.mL1]}>{filterData}</Text>
+                                            </View>
+                                        </TouchableOpacity>
                                     </View>
-                                </TouchableOpacity>
                             }
-                            
                         </View>
                     </View>
                 </View>
@@ -512,6 +560,39 @@ const ProductionWorkEntryScreen = (props) =>{
                                             <View style={[styles.flexRow,styles.justifySpaceBetween,styles.alignCenter,styles.pL5]}>
                                                 <Icon name="circle" size={40} color={filterData == data.value ? colors.primaryColor : colors.gray200} />
                                                 <Text style={[styles.font40, styles.mL2]}>{data.filterType}</Text>
+                                            </View>
+                                        </TouchableOpacity>
+                                    </View>
+                                </Actionsheet.Item>
+                            )
+                            :
+                            <></>
+                        }
+                    </ScrollView>
+                </Actionsheet.Content>
+            </Actionsheet>
+            <Actionsheet isOpen={activeActionSheetFilterdate} onClose={onClose}  hideDragIndicator={true}>
+                <Actionsheet.Content style={[styles.alignFlexStart]}>
+                    <Actionsheet.Item>
+                        <View>
+                            <TouchableOpacity onPress={() => setactiveActionSheetFilterdate(false)}>
+                                <View style={[styles.flexRow,styles.justifySpaceBetween,styles.alignCenter,styles.pL5]}>
+                                    <Icon name="times" size={40} color={colors.dangerColor} />
+                                    <Text style={[styles.font40, styles.mL2, styles.textDanger]}>Cancel</Text>
+                                </View>
+                            </TouchableOpacity>
+                        </View>
+                    </Actionsheet.Item>
+                    <ScrollView>
+                        {
+                            dateFilter != null?
+                            dateFilter.map((data, index)=>
+                                <Actionsheet.Item key={index}>
+                                    <View>
+                                        <TouchableOpacity onPress={() => closeActionSheetFilterdate(data.value, data.title)}>
+                                            <View style={[styles.flexRow,styles.justifySpaceBetween,styles.alignCenter,styles.pL5]}>
+                                                <Icon name="circle" size={40} color={filterData == data.value ? colors.primaryColor : colors.gray200} />
+                                                <Text style={[styles.font40, styles.mL2]}>{data.title}</Text>
                                             </View>
                                         </TouchableOpacity>
                                     </View>
