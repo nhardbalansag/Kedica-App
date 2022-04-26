@@ -27,7 +27,8 @@ import {
     useDisclose,
     Modal,
     ScrollView,
-    Input
+    Input,
+    Button
 } from 'native-base';
 
 import DeviceInfo from 'react-native-device-info';
@@ -64,6 +65,11 @@ const WorkResultInputScreen = (props) =>{
     const [prodlineButton, setprodlineButton] =  useState(false);
     const [actualqtyState, setactualqtyState] =  useState(false);
     const [plating, setPlating] =  useState(null);
+    const [Prevplating, setPrevPlating] =  useState(null);
+    const [decBtn, setDecBtn] =  useState(true);
+    const [incBtn, setIncBtn] =  useState(true);
+    const [sequenceNo, setSequenceNo] =  useState(null);
+    const [basesequenceNo, setbaseSequenceNo] =  useState(null);
     const [lotnumber, setlotnumber] =  useState(null);
     const [get_actualQTY, set_actualQTY] = useState(null)
     const [get_actualQTY_display, set_actualQTY_display] = useState(null)
@@ -104,13 +110,28 @@ const WorkResultInputScreen = (props) =>{
         var actualqty = get_actualQTY ? get_actualQTY : 0
         navigate()
         if(lineId !== null){
+            var sequence_partial = sequenceNo;
+            sequence_partial = sequence_partial
+            var seq = basesequenceNo
             if(parseFloat(actualqty) < 0){
                 alertMessageNote("Actual Quantity must not less than 0.");
+            }else if(sequence_partial <= seq || (seq + 1) === sequence_partial){
+                alertMessageNote("Plating Lot sequence must not less than or equal to " + Prevplating);
             }else{
                 setBoolStartProcess(true)
                 setBoolEndProcess(false)
                 setstartProcessDateTime(getcurrentdate())
-                
+                console.warn(
+                    JSON.stringify({
+                        TravelSheetID: TravelSheetID,
+                        LineID: lineId,
+                        DateFrom: getcurrentdate(),
+                        FactoryID: FactoryID,
+                        InputSequence: sequenceNo,
+                        ActualQty:parseFloat(actualqty),
+                        DateTo : "1900-01-01 00:00:00"
+                    })
+                )
                 fetch(domainSetting + "api/production-work/production-work-entry/save-production", {
                     method:'POST',
                     headers:{
@@ -122,6 +143,7 @@ const WorkResultInputScreen = (props) =>{
                         LineID: lineId,
                         DateFrom: getcurrentdate(),
                         FactoryID: FactoryID,
+                        InputSequence: sequenceNo,
                         ActualQty:parseFloat(actualqty),
                         DateTo : "1900-01-01 00:00:00"
                     })
@@ -131,7 +153,7 @@ const WorkResultInputScreen = (props) =>{
                     }
                     return data.json();
                 }).then(responseData => {
-                
+                    console.log(responseData)
                 }).catch(error => {
                     alertMessage(error.message);
                 }); 
@@ -260,7 +282,8 @@ const WorkResultInputScreen = (props) =>{
                         DateFrom:       responseData[0].dataContent[0].DateFrom,
                         DateTo:         responseData[0].dataContent[0].DateTo
                     }
-                    console.warn(responseData[0].dataContent[0])
+                    console.warn(responseData[0].PlatingContent[0])
+
                     tempvar.DateFrom == "1900-01-01 00:00:00" ? setBoolStartProcess(false) : setBoolStartProcess(true)
                     tempvar.DateTo == "1900-01-01 00:00:00" ? setBoolEndProcess(false) : setBoolEndProcess(true)
                     setstartedDatetime(tempvar.DateFrom == "1900-01-01 00:00:00" ? null : tempvar.DateFrom)
@@ -268,6 +291,13 @@ const WorkResultInputScreen = (props) =>{
                     setQty(tempvar.Qty)
                     setTravelSheetID(tempvar.TravelSheetID)
                     setlotnumber(tempvar.LotNo)
+
+                    setPrevPlating(responseData[0].PlatingContent[0].PlatingLotNo)
+                    
+                    var seq = parseInt(responseData[0].PlatingContent[0].PlatingLotNo.split('-')[2]) + 1
+                    setSequenceNo(seq)
+                    setbaseSequenceNo(parseInt(responseData[0].PlatingContent[0].PlatingLotNo.split('-')[2]))
+
                     if(tempvar.Qty > 0){
                         setactualqtyState(true)
                         setActualQtyQty(tempvar.ActualQty)
@@ -283,13 +313,13 @@ const WorkResultInputScreen = (props) =>{
                     }
                     setloading(false)
                 }else{
-                    alertMessage("Please Scan Pending or Ongoing Travel Sheet");
+                    alertMessage("Please Scan Pending or Ongoing Travel Sheet " + travelSheetNumber);
                 }
             }).catch(error => {
                 alertMessage(error.message);
             }); 
         }else{
-            alertMessage("Please scan a valid Travel Sheet")
+            alertMessage("Please scan a valid Travel Sheet - " + travelSheetNumber)
         }
     }
     const navigate = () =>{
@@ -367,6 +397,27 @@ const WorkResultInputScreen = (props) =>{
         }
     }
 
+    const incrementOPlatingSequence = () => {
+        // sequenceNo, setSequenceNo
+        setSequenceNo(sequenceNo => (sequenceNo + 1))
+        var seq = basesequenceNo
+        if(sequenceNo > seq){
+            setDecBtn(false)
+            // alertMessageNote("Sequence No. must not less than or equal to previous plating Lot No.")
+        }
+    }
+
+    const decrementOPlatingSequence = () => {
+        // sequenceNo, setSequenceNo
+        setSequenceNo(sequenceNo => (sequenceNo - 1))
+        var sequence_partial = sequenceNo;
+        sequence_partial = sequence_partial - 1
+        var seq = basesequenceNo
+        if((seq + 1) === sequence_partial || sequence_partial < seq){
+            setDecBtn(true)
+        }
+    }
+
     const closeActionSheet = (prodline, labelTitle) =>{
         setactiveActionSheet(false)
         setLineID(prodline)
@@ -381,8 +432,23 @@ const WorkResultInputScreen = (props) =>{
     const mainContent = () =>(
         <NativeBaseProvider>
             <View style={[styles.flexRow,styles.alignCenter,styles.mL2]}>
-                <Text style={[styles.font30,styles.textBold,styles.mR1]}>Travel Sheet No. :</Text>
-                <Text style={[styles.font40]}>{travelSheetNumber}</Text>
+                <View style={[styles.flexRow,styles.alignCenter, styles.w50]}>
+                    <Text style={[styles.font30,styles.textBold,styles.mR1]}>Travel Sheet No. :</Text>
+                    <Text style={[styles.font40]}>{travelSheetNumber}</Text>
+                </View>
+                {
+                    plating
+                    ?
+                        <></>
+                    :
+                        <>
+                            <View style={[styles.flexRow,styles.alignCenter]}>
+                                <Text style={[styles.font30,styles.textBold,styles.mR1]}>Prev. Plate No. :</Text>
+                                <Text style={[styles.font40, styles.mX1, styles.textDanger]}>{Prevplating == null ? "--" : Prevplating}</Text>
+                            </View>
+                        </>
+                }
+                
             </View>
             <View style={[styles.flexRow, styles.alignCenter ,styles.mL2]}>
                 <View style={[styles.flexRow]}>
@@ -393,7 +459,39 @@ const WorkResultInputScreen = (props) =>{
                 </View>
                 <View style={[styles.flexRow,styles.alignCenter]}>
                     <Text style={[styles.font30,styles.textBold,styles.mR1]}>Plating Lot No. :</Text>
-                    <Text style={[styles.font40]}>{plating == null ? "--" : plating}</Text>
+                    <View style={[styles.flexRow, styles.alignCenter]}>
+                        {
+                            plating
+                            ?
+                                <><Text style={[styles.font40]}>{plating == null ? "--" : plating}</Text></>
+                            :
+                                <>
+                                    <Text style={[styles.font40]}>{Prevplating == null ? "--" : (Prevplating.split('-')[0] +"-"+Prevplating.split('-')[1] + "-")}</Text>
+                                    <Input
+                                        disableFullscreenUI={true}
+                                        size="2xl"
+                                        keyboardType={'numeric'}
+                                        minLength={0}
+                                        onChangeText={(text) => setSequenceNo(text)}
+                                        value={String(sequenceNo)}
+                                        style={[styles.textDanger, styles.textBold, styles.font30]}
+                                    />   
+                                    <View style={[styles.mL1]}>
+                                        <TouchableOpacity  onPress={() => incrementOPlatingSequence()}>
+                                            <View style={[incBtn ? styles.backgroundPrimary : styles.bgGray200,styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.border10,styles.pX1, styles.mR1]}>
+                                                <Icon name="caret-up" size={50} color={colors.lightColor} />
+                                            </View>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity disabled={decBtn ? true : false} onPress={() => decrementOPlatingSequence()}>
+                                            <View style={[!decBtn ? styles.backgroundPrimary : styles.bgGray200,styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.border10,styles.pX1, styles.mR1]}>
+                                                <Icon name="caret-down" size={50} color={colors.lightColor} />
+                                            </View>
+                                        </TouchableOpacity> 
+                                    </View>
+                                </>
+                        }
+                        {/* <Text style={[styles.font40]}>{plating == null ? "--" : plating}</Text> */}
+                    </View>
                 </View>
             </View>
             <View style={[styles.flexRow,styles.alignCenter,styles.mL2]}>

@@ -265,7 +265,7 @@ const ProductionWorkEntryScreen = (props) =>{
             }
             return data.json();
         }).then(responseData => {
-            console.log(responseData)
+            console.log(responseData.dataContent)
             settotaldata(responseData[0].total)
             var datael = [];
             if(!responseData[0].status){
@@ -332,6 +332,7 @@ const ProductionWorkEntryScreen = (props) =>{
                         )
                     }
                 }
+                console.log(datael, filterData)
                 setWorkEntry(datael)
             }
             setRefreshing(false);
@@ -493,47 +494,60 @@ const ProductionWorkEntryScreen = (props) =>{
     const loadbutton = () =>{
         return(
             <View style={[styles.flexRow, styles.justifySpaceAround,styles.alignCenter]}>
-                <View style={[styles.w30]}>
-                    <Text style={[styles.font25]}>Showing {pageStart + 1} to {parseInt(pageStart) + parseInt(pagelength)} of {totaldata} Items</Text>
-                </View>
-                <View style={[styles.w60, styles.flexRow, styles.justifyStart,styles.alignCenter,styles.mT2,styles.mB3]}>
-                    <TouchableOpacity disabled={(parseInt(pageStart)) > 0 ? false : true} onPress={() => prevpage()}>
-                        <View style={[(parseInt(pageStart)) > 0 ? styles.backgroundPrimary : styles.bgGray200,styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.border10,styles.pY1,styles.pX2, styles.mR1]}>
-                            {
-                                refreshing
-                                ?
-                                    <>
-                                        <ActivityIndicator style={[styles.w10]}  size={20} color={colors.lightColor}/>
-                                        <Text style={[styles.font30, styles.textWhite, styles.mL1]}>Prev</Text>
-                                    </>
-                                :
-                                <>
-                                    <Icon name="caret-left" size={30} style={[styles.w10]} color={colors.lightColor} />
-                                    <Text style={[styles.font30, styles.textWhite, styles.mL1]}>Prev</Text>
-                                </>
-                            }
-                        </View>
-                    </TouchableOpacity>
-                    
-                    <TouchableOpacity disabled={(parseInt(pageStart) + parseInt(pagelength)) >= totaldata ? true : false} onPress={() => nextpage()}>
-                        
-                        <View style={[(parseInt(pageStart) + parseInt(pagelength)) >= totaldata ? styles.bgGray200 : styles.backgroundPrimary,styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.border10,styles.pY1,styles.pX2, styles.mL1]}>
-                        {
-                            refreshing
-                            ?
-                                <>
-                                    <Text style={[styles.font30, styles.textWhite, styles.mR1]}>Next</Text>
-                                    <ActivityIndicator style={[styles.w10]} size={20} color={colors.lightColor}/>
-                                </>
-                            :
-                            <>
-                                <Text style={[styles.font30, styles.textWhite, styles.mR1]}>Next</Text>
-                                <Icon name="caret-right" style={[styles.w10]} size={30} color={colors.lightColor} />
-                            </>
-                        }
-                        </View>
-                    </TouchableOpacity>
-                </View>
+                {
+                    totaldata 
+                    ?
+                        <>
+                            <View style={[styles.w30]}>
+                                <Text style={[styles.font25]}>Showing {pageStart + 1} to {parseInt(pageStart) + parseInt(pagelength)} of {totaldata} Items</Text>
+                            </View>
+                            <View style={[styles.w60, styles.flexRow, styles.justifyStart,styles.alignCenter,styles.mT2,styles.mB3]}>
+                                <TouchableOpacity disabled={(parseInt(pageStart)) > 0 ? false : true} onPress={() => prevpage()}>
+                                    <View style={[(parseInt(pageStart)) > 0 ? styles.backgroundPrimary : styles.bgGray200,styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.border10,styles.pY1,styles.pX2, styles.mR1]}>
+                                        {
+                                            refreshing
+                                            ?
+                                                <>
+                                                    <ActivityIndicator style={[styles.w10]}  size={20} color={colors.lightColor}/>
+                                                    <Text style={[styles.font30, styles.textWhite, styles.mL1]}>Prev</Text>
+                                                </>
+                                            :
+                                            <>
+                                                <Icon name="caret-left" size={30} style={[styles.w10]} color={colors.lightColor} />
+                                                <Text style={[styles.font30, styles.textWhite, styles.mL1]}>Prev</Text>
+                                            </>
+                                        }
+                                    </View>
+                                </TouchableOpacity>
+                                
+                                <TouchableOpacity disabled={(parseInt(pageStart) + parseInt(pagelength)) >= totaldata ? true : false} onPress={() => nextpage()}>
+                                    
+                                    <View style={[(parseInt(pageStart) + parseInt(pagelength)) >= totaldata ? styles.bgGray200 : styles.backgroundPrimary,styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.border10,styles.pY1,styles.pX2, styles.mL1]}>
+                                    {
+                                        refreshing
+                                        ?
+                                            <>
+                                                <Text style={[styles.font30, styles.textWhite, styles.mR1]}>Next</Text>
+                                                <ActivityIndicator style={[styles.w10]} size={20} color={colors.lightColor}/>
+                                            </>
+                                        :
+                                        <>
+                                            <Text style={[styles.font30, styles.textWhite, styles.mR1]}>Next</Text>
+                                            <Icon name="caret-right" style={[styles.w10]} size={30} color={colors.lightColor} />
+                                        </>
+                                    }
+                                    </View>
+                                </TouchableOpacity>
+                            </View>
+                        </>
+                    :
+                        <>
+                            <View style={[styles.w30]}>
+                                <Text style={[styles.font25, styles.textCenter]}>No Items to show, please Reload</Text>
+                            </View>
+                        </>
+                }
+                
             </View>
         )
     }
