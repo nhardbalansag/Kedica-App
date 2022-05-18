@@ -519,16 +519,18 @@ const WorkResultInputScreen = (props) =>{
                             :
                                 <>
                                     <Text style={[styles.font40]}>{Prevplating == null ? "--" : (Prevplating.split('-')[0] +"-"+Prevplating.split('-')[1] + "-")}</Text>
-                                    <Input
-                                        disableFullscreenUI={true}
-                                        size="2xl"
-                                        keyboardType={'numeric'}
-                                        minLength={0}
-                                        // onChangeText={(text) => setSequenceNo(text)}
-                                        onChangeText={(text) => platingLotSequence(text)}
-                                        value={String(sequenceNo)}
-                                        style={[styles.textDanger, styles.textBold, styles.font30]}
-                                    />   
+                                    <View style={[styles.w15]}>
+                                        <Input
+                                            disableFullscreenUI={true}
+                                            size="2xl"
+                                            keyboardType={'numeric'}
+                                            minLength={0}
+                                            // onChangeText={(text) => setSequenceNo(text)}
+                                            onChangeText={(text) => platingLotSequence(text)}
+                                            value={String(sequenceNo)}
+                                            style={[styles.textDanger, styles.textBold, styles.font30]}
+                                        /> 
+                                    </View>  
                                     <View style={[styles.mL1]}>
                                         <TouchableOpacity  onPress={() => incrementOPlatingSequence()}>
                                             <View style={[incBtn ? styles.backgroundPrimary : styles.bgGray200,styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.border10,styles.pX1, styles.mR1]}>
