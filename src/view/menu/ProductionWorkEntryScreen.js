@@ -55,13 +55,13 @@ const table = {
         {filterType: "Travel Sheet No.",    value: "TravelSheetNo"},
         {filterType: "Plating Lot No.",     value: "PlatingLotNo"},
         {filterType: "Product Name",        value: "ItemName"},
-        {filterType: "Lot No.",             value: "LotNo"},
+        // {filterType: "Lot No.",             value: "LotNo"},
         {filterType: "Priority No.",        value: "PriorityNo"},
-        {filterType: "Age",                 value: "Age"},
-        {filterType: "Ship Date",           value: "ShipDate"}
+        {filterType: "Age",                 value: "Age"}
+        // {filterType: "Ship Date",           value: "ShipDate"}
     ],
-    data_width: [300, 300, 500, 500, 500, 500, 500, 300, 200],
-    tableHead: ['Start Process', 'End Process', 'Travel Sheet No.', 'Plating Lot No.', 'Product Name', 'Lot No.', 'Priority No.', 'Age', 'Ship Date'],
+    data_width: [300, 300, 500, 500, 500, 500, 300],
+    tableHead: ['Start Process', 'End Process', 'Travel Sheet No.', 'Plating Lot No.', 'Product Name', 'Priority No.', 'Age'],
 }
 
 const ProductionWorkEntryScreen = (props) =>{
@@ -155,6 +155,7 @@ const ProductionWorkEntryScreen = (props) =>{
 
     const checkLineID = async (data) =>{
         var name = await DeviceInfo.getDeviceName()
+        console.log("device name: " + name)
         var temp = name.split(" ")
         var number = null;
         var displayTitle = ""
@@ -174,10 +175,12 @@ const ProductionWorkEntryScreen = (props) =>{
             let catchPair = false
             for(let i = 0; i < data.length; i++){
                 var line_db = String(data[i].Line)
+                console.log(line_db + " AND " + name)
                 if(line_db.includes(name)){
                     setLineID(data[i].LineID)
                     getProductionWorkEntryList(0, 5, sort_state, column_state, data[i].LineID)
                     catchPair = true
+                    console.log("Line ID: " + data[i].LineID)
                 }
             }
             if(!catchPair){
@@ -281,10 +284,10 @@ const ProductionWorkEntryScreen = (props) =>{
                                     responseData[0].dataContent[key].TravelSheetNo,
                                     responseData[0].dataContent[key].PlatingLotNo,
                                     responseData[0].dataContent[key].ItemCode + "\n" + responseData[0].dataContent[key].ItemName,
-                                    responseData[0].dataContent[key].LotNo,
+                                    // responseData[0].dataContent[key].LotNo,
                                     responseData[0].dataContent[key].Priority,
                                     responseData[0].dataContent[key].Age + " Days",
-                                    responseData[0].dataContent[key].ShipDate,
+                                    // responseData[0].dataContent[key].ShipDate,
                                 ]
                             )
                         }else if(filterData === "Pending" && responseData[0].dataContent[key].StartProcess === "1900-01-01 00:00:00" && responseData[0].dataContent[key].EndProcess === "1900-01-01 00:00:00"){
@@ -295,10 +298,10 @@ const ProductionWorkEntryScreen = (props) =>{
                                     responseData[0].dataContent[key].TravelSheetNo,
                                     responseData[0].dataContent[key].PlatingLotNo,
                                     responseData[0].dataContent[key].ItemCode + "\n" + responseData[0].dataContent[key].ItemName,
-                                    responseData[0].dataContent[key].LotNo,
+                                    // responseData[0].dataContent[key].LotNo,
                                     responseData[0].dataContent[key].Priority,
                                     responseData[0].dataContent[key].Age + " Days",
-                                    responseData[0].dataContent[key].ShipDate,
+                                    // responseData[0].dataContent[key].ShipDate,
                                 ]
                             )
                         }else if(filterData === "All"){
@@ -309,10 +312,10 @@ const ProductionWorkEntryScreen = (props) =>{
                                     responseData[0].dataContent[key].TravelSheetNo,
                                     responseData[0].dataContent[key].PlatingLotNo,
                                     responseData[0].dataContent[key].ItemCode + "\n" + responseData[0].dataContent[key].ItemName,
-                                    responseData[0].dataContent[key].LotNo,
+                                    // responseData[0].dataContent[key].LotNo,
                                     responseData[0].dataContent[key].Priority,
                                     responseData[0].dataContent[key].Age + " Days",
-                                    responseData[0].dataContent[key].ShipDate,
+                                    // responseData[0].dataContent[key].ShipDate,
                                 ]
                             )
                         }
@@ -324,10 +327,10 @@ const ProductionWorkEntryScreen = (props) =>{
                                 responseData[0].dataContent[key].TravelSheetNo,
                                 responseData[0].dataContent[key].PlatingLotNo,
                                 responseData[0].dataContent[key].ItemCode + "\n" + responseData[0].dataContent[key].ItemName,
-                                responseData[0].dataContent[key].LotNo,
+                                // responseData[0].dataContent[key].LotNo,
                                 responseData[0].dataContent[key].Priority,
                                 responseData[0].dataContent[key].Age + " Days",
-                                responseData[0].dataContent[key].ShipDate,
+                                // responseData[0].dataContent[key].ShipDate,
                             ]
                         )
                     }
@@ -354,12 +357,15 @@ const ProductionWorkEntryScreen = (props) =>{
 
     const goToWorkResult = (component, travelsheetno) =>{
         const componentTitle = props.route.params.title;
+        var testlineid = lineId
+        console.warn("line id: " + testlineid)
         setTravelSheetNo(null)
         props.navigation.navigate(componentTitle === "Outgoing Inspection" ? "InscpectionDetails": component, 
             {
                 title: (component === "WorkResultInputScreen" ? "Work Result Input" : (component === "InscpectionDetails" ? "OQC Result Input" : "") ),
                 dataContent: {
                     number: travelsheetno,
+                    lineID: testlineid,
                 }
             }
         )

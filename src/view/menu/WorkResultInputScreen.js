@@ -41,6 +41,7 @@ const WorkResultInputScreen = (props) =>{
     const { isOpen, onOpen, onClose } = useDisclose()
 
     const travelSheetNumber = props.route.params.dataContent.number;
+    const propslineId = props.route.params.dataContent.lineID;
 
     const traveldata = useSelector(state => state.loginCredential.travelSheet);
 
@@ -108,15 +109,19 @@ const WorkResultInputScreen = (props) =>{
 
     const startProcess = () =>{
         var actualqty = get_actualQTY ? get_actualQTY : 0
-        navigate()
+        // navigate()
         if(lineId !== null){
-            var sequence_partial = sequenceNo;
-            sequence_partial = sequence_partial
-            var seq = basesequenceNo
+            var sequence_partial = parseInt(sequenceNo);
+            var baseseq = parseInt(basesequenceNo)
+
             if(parseFloat(actualqty) < 0){
                 alertMessageNote("Actual Quantity must not less than 0.");
-            }else if(sequence_partial <= seq || (seq + 1) === sequence_partial){
+            }else if(sequence_partial <= baseseq){
                 alertMessageNote("Plating Lot sequence must not less than or equal to " + Prevplating);
+                setSequenceNo(String(baseseq + 1))
+                setDecBtn(true)
+            }else if(isNaN(sequence_partial)){
+                alertMessageNote("Plating lot sequence must be a valid number.");
             }else{
                 setBoolStartProcess(true)
                 setBoolEndProcess(false)
@@ -215,7 +220,7 @@ const WorkResultInputScreen = (props) =>{
         }); 
     }
 
-    const getProductLine = () =>{
+    const getProductLine = (labelTitle) =>{
         fetch(domainSetting + "api/production-work/production-work-entry/linel-list/get/" + factoryId, {
             method:'GET',
             headers:{
@@ -239,15 +244,20 @@ const WorkResultInputScreen = (props) =>{
                     )
                 }
             }
-            checkLineID(datael)
+            checkLineID(datael, labelTitle)
             console.warn(datael)
         }).catch(error => {
             alertMessage(error.message);
         }); 
     }
 
-    const search = async (tokendata, domainSetting) =>{
-
+    const search = async (tokendata, domainSetting, propslineId, labelTitle = null) =>{
+        console.warn(JSON.stringify({
+            TravelSheetNo: travelSheetNumber,
+            FactoryID : FactoryID,
+            LineID : propslineId,
+        }))
+        console.warn("action sheet title: " + labelTitle)
         const travelSheetNumber = props.route.params.dataContent.number;
        
         if(travelSheetNumber.includes("-") && (travelSheetNumber.split("-").length === 3 || travelSheetNumber.split("-").length === 4) && travelSheetNumber.split("-")[0] === "TS"){
@@ -259,7 +269,8 @@ const WorkResultInputScreen = (props) =>{
                 },
                 body: JSON.stringify({
                     TravelSheetNo: travelSheetNumber,
-                    FactoryID : FactoryID
+                    FactoryID : FactoryID,
+                    LineID : propslineId,
                 })
             }).then(data => {
                 if (!data.ok) {
@@ -304,12 +315,13 @@ const WorkResultInputScreen = (props) =>{
                     }
                     set_actualQTY(tempvar.ActualQty)
                     set_actualQTY_display(tempvar.ActualQty)
+                    
                     if(tempvar.Line !== ""){
                         setactiveActionSheetlabel(tempvar.Line)
                         setPlating(tempvar.PlatingLotNo)
                         setprodlineButton(true)
                     }else{
-                        getProductLine()
+                        getProductLine(labelTitle)
                     }
                     setloading(false)
                 }else{
@@ -354,8 +366,9 @@ const WorkResultInputScreen = (props) =>{
         );
     }
 
-    const checkLineID = async (data) =>{
+    const checkLineID = async (data, label = null) =>{
         var name = await DeviceInfo.getDeviceName()
+        console.log("device name: " + name)
         var temp = name.split(" ")
         var number = null;
         var displayTitle = ""
@@ -374,7 +387,7 @@ const WorkResultInputScreen = (props) =>{
         if(data != null){
             let catchPair = false
             for(let i = 0; i < data.length; i++){
-                setactiveActionSheetlabel(main_display)
+                setactiveActionSheetlabel(label ? label : main_display)
                 setProductionLine(data)
                 var line_db = String(data[i].Line)
                 var line_dip = String(main_display)
@@ -389,6 +402,7 @@ const WorkResultInputScreen = (props) =>{
                 if(line_db.includes(name)){
                     setLineID(data[i].LineID)
                     catchPair = true
+                    console.log("Line ID: " + data[i].LineID)
                 }
             }
             if(!catchPair){
@@ -399,21 +413,31 @@ const WorkResultInputScreen = (props) =>{
 
     const incrementOPlatingSequence = () => {
         // sequenceNo, setSequenceNo
-        setSequenceNo(sequenceNo => (sequenceNo + 1))
-        var seq = basesequenceNo
-        if(sequenceNo > seq){
+        var tempCtr = parseInt(sequenceNo) + 1
+        var tempCtrDisplay = parseInt(sequenceNo)
+        var baseSequence = parseInt(basesequenceNo)
+        setSequenceNo(sequenceNo => (parseInt(tempCtr)))
+        
+        if((tempCtr - 1) > baseSequence){
             setDecBtn(false)
-            // alertMessageNote("Sequence No. must not less than or equal to previous plating Lot No.")
         }
     }
 
     const decrementOPlatingSequence = () => {
         // sequenceNo, setSequenceNo
-        setSequenceNo(sequenceNo => (sequenceNo - 1))
-        var sequence_partial = sequenceNo;
-        sequence_partial = sequence_partial - 1
-        var seq = basesequenceNo
-        if((seq + 1) === sequence_partial || sequence_partial < seq){
+        console.log(sequenceNo)
+
+        var tempCtr = parseInt(sequenceNo) - 1
+        var baseSequence = parseInt(basesequenceNo)
+        setSequenceNo(sequenceNo => (parseInt(tempCtr)))
+        console.log(tempCtr, baseSequence)
+        if(tempCtr > baseSequence){
+            setDecBtn(false)
+            setSequenceNo(sequenceNo => (parseInt(tempCtr)))
+            if((tempCtr - 1) <= baseSequence){
+                setDecBtn(true)
+            }
+        }else if((tempCtr - 1) <= baseSequence){
             setDecBtn(true)
         }
     }
@@ -421,12 +445,40 @@ const WorkResultInputScreen = (props) =>{
     const closeActionSheet = (prodline, labelTitle) =>{
         setactiveActionSheet(false)
         setLineID(prodline)
-        setactiveActionSheetlabel(labelTitle)
+        search(token, domainSetting, prodline, labelTitle)
+        console.warn("close Sheet", token, domainSetting, prodline)
+    }
+
+    const platingLotSequence = (data) =>{
+       
+        var futureSequence = parseInt(sequenceNo)
+
+        if(isNaN(parseInt(data))){
+            setSequenceNo(0)
+        }else if(futureSequence === 0 && parseInt(data) > futureSequence ){
+            var input = parseInt(data)
+            setSequenceNo(input)
+            if(input > futureSequence){
+                setDecBtn(false)
+            }else{
+                setDecBtn(true)
+            }
+            setSequenceNo(String(input))
+        }else if(parseInt(data) > 0){
+            var input = parseInt(data)
+            futureSequence = String(input)
+            setSequenceNo(String(futureSequence))
+            if(parseInt(futureSequence) > parseInt(basesequenceNo)){
+                setDecBtn(false)
+            }else{
+                setDecBtn(true)
+            }
+        }
     }
 
     useEffect(() =>{
         realtime();
-        search(token, domainSetting)
+        search(token, domainSetting, propslineId)
     },[])
 
     const mainContent = () =>(
@@ -472,7 +524,8 @@ const WorkResultInputScreen = (props) =>{
                                         size="2xl"
                                         keyboardType={'numeric'}
                                         minLength={0}
-                                        onChangeText={(text) => setSequenceNo(text)}
+                                        // onChangeText={(text) => setSequenceNo(text)}
+                                        onChangeText={(text) => platingLotSequence(text)}
                                         value={String(sequenceNo)}
                                         style={[styles.textDanger, styles.textBold, styles.font30]}
                                     />   
