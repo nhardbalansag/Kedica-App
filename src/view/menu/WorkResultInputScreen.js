@@ -163,10 +163,12 @@ const WorkResultInputScreen = (props) =>{
                     console.warn("return before validation: " + responseData[0])
                     if(responseData[0].message === "EXIST"){
                         console.log("current plating: " + plating)
+                        setBoolStartProcess(false)
                         alertMessageNote("Plating Sequence is already in process!! Try again..");
                         console.warn("exist")
                     }else{
                         setPlating(responseData[0].message)
+                        console.warn("new plating lot number: " + JSON.stringify(responseData[0]))
                         console.warn("success")
                     }
                     console.warn("return After validation", responseData[0])
@@ -305,7 +307,7 @@ const WorkResultInputScreen = (props) =>{
                         DateFrom:       responseData[0].dataContent[0].DateFrom,
                         DateTo:         responseData[0].dataContent[0].DateTo
                     }
-                    console.warn(responseData[0].PlatingContent[0])
+                    console.warn(responseData[0].PlatingContent)
 
                     tempvar.DateFrom == "1900-01-01 00:00:00" ? setBoolStartProcess(false) : setBoolStartProcess(true)
                     tempvar.DateTo == "1900-01-01 00:00:00" ? setBoolEndProcess(false) : setBoolEndProcess(true)
@@ -315,11 +317,11 @@ const WorkResultInputScreen = (props) =>{
                     setTravelSheetID(tempvar.TravelSheetID)
                     setlotnumber(tempvar.LotNo)
                     
-                    if(responseData[0].PlatingContent.length > 0){
-                        setPrevPlating(responseData[0].PlatingContent[0].PlatingLotNo)
-                        var seq = parseInt(responseData[0].PlatingContent[0].PlatingLotNo.split('-')[2]) + 1
+                    if(responseData[0].PlatingContent){
+                        setPrevPlating(responseData[0].PlatingContent)
+                        var seq = parseInt(responseData[0].PlatingContent.split('-')[2]) + 1
                         setSequenceNo(seq)
-                        setbaseSequenceNo(parseInt(responseData[0].PlatingContent[0].PlatingLotNo.split('-')[2]))
+                        setbaseSequenceNo(parseInt(responseData[0].PlatingContent.split('-')[2]))
                     }else{
                         setPrevPlating(null)
                         setSequenceNo(null)
