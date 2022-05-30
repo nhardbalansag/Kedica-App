@@ -64,6 +64,18 @@ const table = {
     tableHead: ['Start Process', 'End Process', 'Travel Sheet No.', 'Plating Lot No.', 'Product Name', 'Priority No.', 'Age'],
 }
 
+const getcurrentdate = () =>{
+    const formatYmd = date => date.toISOString().slice(0, 10);
+    var dateTimeNow = formatYmd(new Date())
+    return dateTimeNow;
+}
+
+const getTommorowDate = () =>{
+    const formatYmd = date => date.toISOString().slice(0, 10);
+    var dateTimeTom = formatYmd(new Date(Date.now() + (3600 * 1000 * 24)))
+    return dateTimeTom;
+}
+
 const ProductionWorkEntryScreen = (props) =>{
 
     const { isOpen, onOpen, onClose } = useDisclose()
@@ -72,6 +84,7 @@ const ProductionWorkEntryScreen = (props) =>{
     const isFocused = useIsFocused();
     const [isEnable, setIsEnable] = useState(false);
     const [travelSheetNo, setTravelSheetNo] = useState(null);
+    // const [travelSheetNo, setTravelSheetNo] = useState("TS-20220526-046");
     const [pageStart, setpagestart] = useState(0);
     const [pagelength, setpagelength] = useState(5);
     const [totaldata, settotaldata] = useState(null);
@@ -87,8 +100,8 @@ const ProductionWorkEntryScreen = (props) =>{
     const [DateFilter, setDateFilter] =  useState(0);
     const [factoryId, setfactoryId] =  useState(0);
 
-    const [OutGoingDateFrom, setOutGoingDateFrom] =  useState("2022-01-01");
-    const [OutGoingDateTo, setOutGoingDateTo] =  useState("2022-01-01");
+    const [OutGoingDateFrom, setOutGoingDateFrom] =  useState(getcurrentdate());
+    const [OutGoingDateTo, setOutGoingDateTo] =  useState(getTommorowDate());
     const limiters = [19]
 
     const FactoryID = useSelector(state => state.loginCredential.FactoryId);
@@ -181,8 +194,10 @@ const ProductionWorkEntryScreen = (props) =>{
                     getProductionWorkEntryList(0, 5, sort_state, column_state, data[i].LineID)
                     catchPair = true
                     console.log("Line ID: " + data[i].LineID)
+                    console.log("Catch pair: " + line_db + " AND " + name)
                 }
             }
+
             if(!catchPair){
                 alertMessage("No Production line Connected to this device Please Setup your device in tablet settings.")
             }
@@ -203,6 +218,7 @@ const ProductionWorkEntryScreen = (props) =>{
             return data.json();
         }).then(responseData => {
             var datael = [];
+            console.log("getProductLine", responseData[0].dataContent)
             for (const key in responseData[0].dataContent){
                 if(FactoryID === responseData[0].dataContent[key].LineFactoryID){
                     datael.push(
@@ -219,8 +235,8 @@ const ProductionWorkEntryScreen = (props) =>{
         }); 
     }
 
-    const getProductionWorkEntryList = async (PageStart, PageLength, order_status, order_column, lineid = null) =>{
-        console.warn(lineid)
+    const getProductionWorkEntryList = async (PageStart, PageLength, order_status, order_column, lineid) =>{
+        console.warn("start line id", lineid)
         lineid > 0 ? setLineID(lineid) : lineid
         setpagestart(PageStart)
         const apiUrl = props.route.params.url;
@@ -230,6 +246,8 @@ const ProductionWorkEntryScreen = (props) =>{
         setcurrentComponent(componentTitle)
         setRefreshing(true);
         console.warn(
+            "request link: " + domainSetting + apiUrl,
+            "component title: " + componentTitle,
             JSON.stringify({
                 sortColumnName:order_column,
                 sortDirection:order_status,
@@ -268,7 +286,8 @@ const ProductionWorkEntryScreen = (props) =>{
             }
             return data.json();
         }).then(responseData => {
-            console.log(responseData.dataContent)
+            console.log("getProductionWorkEntryList", responseData[0].dataContent)
+            console.log("total data", responseData[0].total)
             settotaldata(responseData[0].total)
             var datael = [];
             if(!responseData[0].status){
@@ -335,7 +354,7 @@ const ProductionWorkEntryScreen = (props) =>{
                         )
                     }
                 }
-                console.log(datael, filterData)
+                console.log("return data", datael, filterData)
                 setWorkEntry(datael)
             }
             setRefreshing(false);
@@ -549,7 +568,7 @@ const ProductionWorkEntryScreen = (props) =>{
                     :
                         <>
                             <View style={[styles.w30]}>
-                                <Text style={[styles.font25, styles.textCenter]}>No Items to show, please Reload</Text>
+                                <Text style={[styles.font25, styles.textCenter]}>{totaldata} Items to show, please Reload</Text>
                             </View>
                         </>
                 }

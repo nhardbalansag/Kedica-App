@@ -27,8 +27,7 @@ import {
     useDisclose,
     Modal,
     ScrollView,
-    Input,
-    Button
+    Input
 } from 'native-base';
 
 import DeviceInfo from 'react-native-device-info';
@@ -107,26 +106,29 @@ const WorkResultInputScreen = (props) =>{
         }, 1000)
     }
 
-    const startProcess = () =>{
+    const startProcess =  () =>{
         var actualqty = get_actualQTY ? get_actualQTY : 0
         // navigate()
         if(lineId !== null){
             var sequence_partial = parseInt(sequenceNo);
             var baseseq = parseInt(basesequenceNo)
-
             if(parseFloat(actualqty) < 0){
                 alertMessageNote("Actual Quantity must not less than 0.");
-            }else if(sequence_partial <= baseseq){
-                alertMessageNote("Plating Lot sequence must not less than or equal to " + Prevplating);
-                setSequenceNo(String(baseseq + 1))
-                setDecBtn(true)
-            }else if(isNaN(sequence_partial)){
+            }
+            /* this else statement is for validating the insertion of inputs for sequence number that is less than the previous sequence */
+            // else if(sequence_partial <= baseseq){
+            //     alertMessageNote("Plating Lot sequence must not less than or equal to " + Prevplating);
+            //     setSequenceNo(String(baseseq + 1))
+            //     setDecBtn(true)
+            // }
+            else if(isNaN(sequence_partial) && plating){
                 alertMessageNote("Plating lot sequence must be a valid number.");
             }else{
                 setBoolStartProcess(true)
                 setBoolEndProcess(false)
                 setstartProcessDateTime(getcurrentdate())
                 console.warn(
+                    "Start Process",
                     JSON.stringify({
                         TravelSheetID: TravelSheetID,
                         LineID: lineId,
@@ -137,7 +139,7 @@ const WorkResultInputScreen = (props) =>{
                         DateTo : "1900-01-01 00:00:00"
                     })
                 )
-                fetch(domainSetting + "api/production-work/production-work-entry/save-production", {
+                 fetch(domainSetting + "api/production-work/production-work-entry/save-production", {
                     method:'POST',
                     headers:{
                         'Content-type': 'application/json',
@@ -148,7 +150,7 @@ const WorkResultInputScreen = (props) =>{
                         LineID: lineId,
                         DateFrom: getcurrentdate(),
                         FactoryID: FactoryID,
-                        InputSequence: sequenceNo,
+                        InputSequence: sequenceNo ? sequenceNo : 0,
                         ActualQty:parseFloat(actualqty),
                         DateTo : "1900-01-01 00:00:00"
                     })
@@ -158,11 +160,21 @@ const WorkResultInputScreen = (props) =>{
                     }
                     return data.json();
                 }).then(responseData => {
-                    console.log(responseData)
+                    console.warn("return before validation: " + responseData[0])
+                    if(responseData[0].message === "EXIST"){
+                        console.log("current plating: " + plating)
+                        alertMessageNote("Plating Sequence is already in process!! Try again..");
+                        console.warn("exist")
+                    }else{
+                        setPlating(responseData[0].message)
+                        console.warn("success")
+                    }
+                    console.warn("return After validation", responseData[0])
                 }).catch(error => {
-                    alertMessage(error.message);
+                    alertMessageNote(error.message);
                 }); 
             }
+            
         }else if(lineId === null){
             alertMessageNote("Please Select Production Line");
         }
@@ -302,12 +314,17 @@ const WorkResultInputScreen = (props) =>{
                     setQty(tempvar.Qty)
                     setTravelSheetID(tempvar.TravelSheetID)
                     setlotnumber(tempvar.LotNo)
-
-                    setPrevPlating(responseData[0].PlatingContent[0].PlatingLotNo)
                     
-                    var seq = parseInt(responseData[0].PlatingContent[0].PlatingLotNo.split('-')[2]) + 1
-                    setSequenceNo(seq)
-                    setbaseSequenceNo(parseInt(responseData[0].PlatingContent[0].PlatingLotNo.split('-')[2]))
+                    if(responseData[0].PlatingContent.length > 0){
+                        setPrevPlating(responseData[0].PlatingContent[0].PlatingLotNo)
+                        var seq = parseInt(responseData[0].PlatingContent[0].PlatingLotNo.split('-')[2]) + 1
+                        setSequenceNo(seq)
+                        setbaseSequenceNo(parseInt(responseData[0].PlatingContent[0].PlatingLotNo.split('-')[2]))
+                    }else{
+                        setPrevPlating(null)
+                        setSequenceNo(null)
+                        setbaseSequenceNo(null)
+                    }
 
                     if(tempvar.Qty > 0){
                         setactualqtyState(true)
@@ -326,7 +343,7 @@ const WorkResultInputScreen = (props) =>{
                     setloading(false)
                 }else{
                     alertMessage("Please Scan Pending or Ongoing Travel Sheet " + travelSheetNumber);
-                }
+                }   
             }).catch(error => {
                 alertMessage(error.message);
             }); 
@@ -334,6 +351,7 @@ const WorkResultInputScreen = (props) =>{
             alertMessage("Please scan a valid Travel Sheet - " + travelSheetNumber)
         }
     }
+
     const navigate = () =>{
         props.navigation.navigate('ProductionWorkEntryScreen',
             {
@@ -344,6 +362,7 @@ const WorkResultInputScreen = (props) =>{
         )
         setloading(false)
     }
+
     const alertMessage = (message) =>{
         Alert.alert(
             "Note",
@@ -519,30 +538,38 @@ const WorkResultInputScreen = (props) =>{
                             :
                                 <>
                                     <Text style={[styles.font40]}>{Prevplating == null ? "--" : (Prevplating.split('-')[0] +"-"+Prevplating.split('-')[1] + "-")}</Text>
-                                    <View style={[styles.w15]}>
-                                        <Input
-                                            disableFullscreenUI={true}
-                                            size="2xl"
-                                            keyboardType={'numeric'}
-                                            minLength={0}
-                                            // onChangeText={(text) => setSequenceNo(text)}
-                                            onChangeText={(text) => platingLotSequence(text)}
-                                            value={String(sequenceNo)}
-                                            style={[styles.textDanger, styles.textBold, styles.font30]}
-                                        /> 
-                                    </View>  
-                                    <View style={[styles.mL1]}>
-                                        <TouchableOpacity  onPress={() => incrementOPlatingSequence()}>
-                                            <View style={[incBtn ? styles.backgroundPrimary : styles.bgGray200,styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.border10,styles.pX1, styles.mR1]}>
-                                                <Icon name="caret-up" size={50} color={colors.lightColor} />
-                                            </View>
-                                        </TouchableOpacity>
-                                        <TouchableOpacity disabled={decBtn ? true : false} onPress={() => decrementOPlatingSequence()}>
-                                            <View style={[!decBtn ? styles.backgroundPrimary : styles.bgGray200,styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.border10,styles.pX1, styles.mR1]}>
-                                                <Icon name="caret-down" size={50} color={colors.lightColor} />
-                                            </View>
-                                        </TouchableOpacity> 
-                                    </View>
+                                    {
+                                        Prevplating
+                                        ?
+                                            <>
+                                                <View style={[styles.w15]}>
+                                                    <Input
+                                                        disableFullscreenUI={true}
+                                                        size="2xl"
+                                                        keyboardType={'numeric'}
+                                                        minLength={0}
+                                                        // onChangeText={(text) => setSequenceNo(text)}
+                                                        onChangeText={(text) => platingLotSequence(text)}
+                                                        value={String(sequenceNo)}
+                                                        style={[styles.textDanger, styles.textBold, styles.font30]}
+                                                    /> 
+                                                </View>  
+                                                <View style={[styles.mL1]}>
+                                                    <TouchableOpacity  onPress={() => incrementOPlatingSequence()}>
+                                                        <View style={[incBtn ? styles.backgroundPrimary : styles.bgGray200,styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.border10,styles.pX1, styles.mR1]}>
+                                                            <Icon name="caret-up" size={50} color={colors.lightColor} />
+                                                        </View>
+                                                    </TouchableOpacity>
+                                                    <TouchableOpacity disabled={decBtn ? true : false} onPress={() => decrementOPlatingSequence()}>
+                                                        <View style={[!decBtn ? styles.backgroundPrimary : styles.bgGray200,styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.border10,styles.pX1, styles.mR1]}>
+                                                            <Icon name="caret-down" size={50} color={colors.lightColor} />
+                                                        </View>
+                                                    </TouchableOpacity> 
+                                                </View>
+                                            </>
+                                        :
+                                            <></>
+                                    }
                                 </>
                         }
                         {/* <Text style={[styles.font40]}>{plating == null ? "--" : plating}</Text> */}
@@ -692,12 +719,14 @@ const WorkResultInputScreen = (props) =>{
                     mainContent()
                 :
                     <>
-                        <View style={[styles.alignCenter,styles.justifyCenter,styles.flex1]}>
-                            <ActivityIndicator  size="large" color={colors.primaryColor}/>
+                        <View style={[styles.alignCenter,styles.justifyCenter, styles.flex2]}>
+                            <ActivityIndicator size="large" color={colors.primaryColor}/>
+                            <Text style={[styles.font30, styles.textLightBlue]}>Loading..</Text>
                         </View>
                     </>
             }
             </ScrollView>
+            
         </NativeBaseProvider>
     )
 }

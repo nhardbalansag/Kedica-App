@@ -84,6 +84,10 @@ const InscpectionDetails = (props, {navigation}) =>{
     
     const getOutgoingTravelSheetDetails = async (travelsheet) =>{
         setloading(true)
+        console.warn(JSON.stringify({
+            TravelSheetNo: travelsheet,
+            FactoryID : FactoryID
+        }))
         await fetch(domainSetting + "api/quality-inspection/get-travelsheet-details", {
             method:"POST",
             headers:{
@@ -95,11 +99,15 @@ const InscpectionDetails = (props, {navigation}) =>{
                 FactoryID : FactoryID
             })
         }).then(data => {
-            if (!data.ok) {
-                throw Error(data.status);
-            }
+            console.warn("logs OQC",data)
+            // if (!data.ok) {
+            //     throw Error(data.status + ": " + data.statusText);
+            // }else{
+            //     throw Error(data.status + ": " + data.statusText);
+            // }
             return data.json();
         }).then(responseData => {
+            console.warn("OQC result:", responseData)
             console.log(responseData[0].dataContent)
             if(responseData[0].status === true && responseData[0].dataContent.IsProcess === 0){
                 setOutgoingData([
@@ -118,9 +126,13 @@ const InscpectionDetails = (props, {navigation}) =>{
                 ])
                 setloading(false)
                 setActualQTY(responseData[0].dataContent.ActualQty)
-            }else{
+            }else if(responseData[0].status === true && responseData[0].dataContent.IsProcess === 1){
+                alertMessage("Scanned Travel sheet is already in shipment.")
                 props.navigation.goBack();
-                alertMessage("Please scan valid travelsheet.")
+            }else
+            {
+                alertMessage(responseData[0].message)
+                props.navigation.goBack();
             }
         }).catch(error => {
             setloading(false)
