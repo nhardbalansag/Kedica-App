@@ -127,11 +127,11 @@ const InscpectionDetails = (props, {navigation}) =>{
                 setloading(false)
                 setActualQTY(responseData[0].dataContent.ActualQty)
             }else if(responseData[0].status === true && responseData[0].dataContent.IsProcess === 1){
-                alertMessage("Scanned Travel sheet is already in shipment.")
+                alertMessage("Scanned Travel sheet is already in shipment. " + travelsheet)
                 props.navigation.goBack();
             }else
             {
-                alertMessage(responseData[0].message)
+                alertMessage(responseData[0].message + " " + travelsheet)
                 props.navigation.goBack();
             }
         }).catch(error => {
