@@ -46,6 +46,8 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { parse } from "react-native-svg";
 
+import DatePicker from 'react-native-datepicker'
+
 const table = {
     dataFilter: [
         {filterType: "Start Process",       value: "StartProcess"},
@@ -53,13 +55,25 @@ const table = {
         {filterType: "Travel Sheet No.",    value: "TravelSheetNo"},
         {filterType: "Plating Lot No.",     value: "PlatingLotNo"},
         {filterType: "Product Name",        value: "ItemName"},
-        {filterType: "Lot No.",             value: "LotNo"},
+        // {filterType: "Lot No.",             value: "LotNo"},
         {filterType: "Priority No.",        value: "PriorityNo"},
-        {filterType: "Age",                 value: "Age"},
-        {filterType: "Ship Date",           value: "ShipDate"}
+        {filterType: "Age",                 value: "Age"}
+        // {filterType: "Ship Date",           value: "ShipDate"}
     ],
-    data_width: [300, 300, 500, 500, 500, 500, 500, 300, 200],
-    tableHead: ['Start Process', 'End Process', 'Travel Sheet No.', 'Plating Lot No.', 'Product Name', 'Lot No.', 'Priority No.', 'Age', 'Ship Date'],
+    data_width: [300, 300, 500, 500, 500, 500, 300],
+    tableHead: ['Start Process', 'End Process', 'Travel Sheet No.', 'Plating Lot No.', 'Product Name', 'Priority No.', 'Age'],
+}
+
+const getcurrentdate = () =>{
+    const formatYmd = date => date.toISOString().slice(0, 10);
+    var dateTimeNow = formatYmd(new Date())
+    return dateTimeNow;
+}
+
+const getTommorowDate = () =>{
+    const formatYmd = date => date.toISOString().slice(0, 10);
+    var dateTimeTom = formatYmd(new Date(Date.now() + (3600 * 1000 * 24)))
+    return dateTimeTom;
 }
 
 const ProductionWorkEntryScreen = (props) =>{
@@ -70,6 +84,7 @@ const ProductionWorkEntryScreen = (props) =>{
     const isFocused = useIsFocused();
     const [isEnable, setIsEnable] = useState(false);
     const [travelSheetNo, setTravelSheetNo] = useState(null);
+    // const [travelSheetNo, setTravelSheetNo] = useState("TS-20220526-046");
     const [pageStart, setpagestart] = useState(0);
     const [pagelength, setpagelength] = useState(5);
     const [totaldata, settotaldata] = useState(null);
@@ -85,8 +100,8 @@ const ProductionWorkEntryScreen = (props) =>{
     const [DateFilter, setDateFilter] =  useState(0);
     const [factoryId, setfactoryId] =  useState(0);
 
-    const [OutGoingDateFrom, setOutGoingDateFrom] =  useState("2022-01-01");
-    const [OutGoingDateTo, setOutGoingDateTo] =  useState("2022-01-02");
+    const [OutGoingDateFrom, setOutGoingDateFrom] =  useState(getcurrentdate());
+    const [OutGoingDateTo, setOutGoingDateTo] =  useState(getTommorowDate());
     const limiters = [19]
 
     const FactoryID = useSelector(state => state.loginCredential.FactoryId);
@@ -153,6 +168,7 @@ const ProductionWorkEntryScreen = (props) =>{
 
     const checkLineID = async (data) =>{
         var name = await DeviceInfo.getDeviceName()
+        console.log("device name: " + name)
         var temp = name.split(" ")
         var number = null;
         var displayTitle = ""
@@ -172,12 +188,16 @@ const ProductionWorkEntryScreen = (props) =>{
             let catchPair = false
             for(let i = 0; i < data.length; i++){
                 var line_db = String(data[i].Line)
+                console.log(line_db + " AND " + name)
                 if(line_db.includes(name)){
                     setLineID(data[i].LineID)
                     getProductionWorkEntryList(0, 5, sort_state, column_state, data[i].LineID)
                     catchPair = true
+                    console.log("Line ID: " + data[i].LineID)
+                    console.log("Catch pair: " + line_db + " AND " + name)
                 }
             }
+
             if(!catchPair){
                 alertMessage("No Production line Connected to this device Please Setup your device in tablet settings.")
             }
@@ -198,6 +218,7 @@ const ProductionWorkEntryScreen = (props) =>{
             return data.json();
         }).then(responseData => {
             var datael = [];
+            console.log("getProductLine", responseData[0].dataContent)
             for (const key in responseData[0].dataContent){
                 if(FactoryID === responseData[0].dataContent[key].LineFactoryID){
                     datael.push(
@@ -214,8 +235,8 @@ const ProductionWorkEntryScreen = (props) =>{
         }); 
     }
 
-    const getProductionWorkEntryList = async (PageStart, PageLength, order_status, order_column, lineid = null) =>{
-        console.warn(lineid)
+    const getProductionWorkEntryList = async (PageStart, PageLength, order_status, order_column, lineid) =>{
+        console.warn("start line id", lineid)
         lineid > 0 ? setLineID(lineid) : lineid
         setpagestart(PageStart)
         const apiUrl = props.route.params.url;
@@ -225,6 +246,8 @@ const ProductionWorkEntryScreen = (props) =>{
         setcurrentComponent(componentTitle)
         setRefreshing(true);
         console.warn(
+            "request link: " + domainSetting + apiUrl,
+            "component title: " + componentTitle,
             JSON.stringify({
                 sortColumnName:order_column,
                 sortDirection:order_status,
@@ -232,7 +255,10 @@ const ProductionWorkEntryScreen = (props) =>{
                 PageStart: PageStart ? PageStart : 0,
                 PageLength: PageLength ? PageLength : 5,
                 LineID: parseInt(lineid ? lineid : (lineId ? lineId : 0)),
-                DateFilter: parseInt(DateFilter ? DateFilter : 0)
+                DateFilter: parseInt(DateFilter ? DateFilter : 0),
+                QueryFilter: -1,
+                OutGoingDateFrom: OutGoingDateFrom,
+                OutGoingDateTo: OutGoingDateTo
             })
         )
         await fetch(domainSetting + apiUrl, {
@@ -260,7 +286,8 @@ const ProductionWorkEntryScreen = (props) =>{
             }
             return data.json();
         }).then(responseData => {
-            console.log(responseData)
+            console.log("getProductionWorkEntryList", responseData[0].dataContent)
+            console.log("total data", responseData[0].total)
             settotaldata(responseData[0].total)
             var datael = [];
             if(!responseData[0].status){
@@ -276,10 +303,10 @@ const ProductionWorkEntryScreen = (props) =>{
                                     responseData[0].dataContent[key].TravelSheetNo,
                                     responseData[0].dataContent[key].PlatingLotNo,
                                     responseData[0].dataContent[key].ItemCode + "\n" + responseData[0].dataContent[key].ItemName,
-                                    responseData[0].dataContent[key].LotNo,
+                                    // responseData[0].dataContent[key].LotNo,
                                     responseData[0].dataContent[key].Priority,
                                     responseData[0].dataContent[key].Age + " Days",
-                                    responseData[0].dataContent[key].ShipDate,
+                                    // responseData[0].dataContent[key].ShipDate,
                                 ]
                             )
                         }else if(filterData === "Pending" && responseData[0].dataContent[key].StartProcess === "1900-01-01 00:00:00" && responseData[0].dataContent[key].EndProcess === "1900-01-01 00:00:00"){
@@ -290,10 +317,10 @@ const ProductionWorkEntryScreen = (props) =>{
                                     responseData[0].dataContent[key].TravelSheetNo,
                                     responseData[0].dataContent[key].PlatingLotNo,
                                     responseData[0].dataContent[key].ItemCode + "\n" + responseData[0].dataContent[key].ItemName,
-                                    responseData[0].dataContent[key].LotNo,
+                                    // responseData[0].dataContent[key].LotNo,
                                     responseData[0].dataContent[key].Priority,
                                     responseData[0].dataContent[key].Age + " Days",
-                                    responseData[0].dataContent[key].ShipDate,
+                                    // responseData[0].dataContent[key].ShipDate,
                                 ]
                             )
                         }else if(filterData === "All"){
@@ -304,10 +331,10 @@ const ProductionWorkEntryScreen = (props) =>{
                                     responseData[0].dataContent[key].TravelSheetNo,
                                     responseData[0].dataContent[key].PlatingLotNo,
                                     responseData[0].dataContent[key].ItemCode + "\n" + responseData[0].dataContent[key].ItemName,
-                                    responseData[0].dataContent[key].LotNo,
+                                    // responseData[0].dataContent[key].LotNo,
                                     responseData[0].dataContent[key].Priority,
                                     responseData[0].dataContent[key].Age + " Days",
-                                    responseData[0].dataContent[key].ShipDate,
+                                    // responseData[0].dataContent[key].ShipDate,
                                 ]
                             )
                         }
@@ -319,14 +346,15 @@ const ProductionWorkEntryScreen = (props) =>{
                                 responseData[0].dataContent[key].TravelSheetNo,
                                 responseData[0].dataContent[key].PlatingLotNo,
                                 responseData[0].dataContent[key].ItemCode + "\n" + responseData[0].dataContent[key].ItemName,
-                                responseData[0].dataContent[key].LotNo,
+                                // responseData[0].dataContent[key].LotNo,
                                 responseData[0].dataContent[key].Priority,
                                 responseData[0].dataContent[key].Age + " Days",
-                                responseData[0].dataContent[key].ShipDate,
+                                // responseData[0].dataContent[key].ShipDate,
                             ]
                         )
                     }
                 }
+                console.log("return data", datael, filterData)
                 setWorkEntry(datael)
             }
             setRefreshing(false);
@@ -348,12 +376,15 @@ const ProductionWorkEntryScreen = (props) =>{
 
     const goToWorkResult = (component, travelsheetno) =>{
         const componentTitle = props.route.params.title;
+        var testlineid = lineId
+        console.warn("line id: " + testlineid)
         setTravelSheetNo(null)
         props.navigation.navigate(componentTitle === "Outgoing Inspection" ? "InscpectionDetails": component, 
             {
                 title: (component === "WorkResultInputScreen" ? "Work Result Input" : (component === "InscpectionDetails" ? "OQC Result Input" : "") ),
                 dataContent: {
                     number: travelsheetno,
+                    lineID: testlineid,
                 }
             }
         )
@@ -379,7 +410,62 @@ const ProductionWorkEntryScreen = (props) =>{
             });
            return unsubscribe;
         }
-    },[travelSheetNo, isFocused, filterData, textInputRef])
+    },[travelSheetNo, isFocused, filterData, textInputRef, OutGoingDateTo, DateFilter])
+
+    const datepickerFrom = () => {
+        return(
+            <View style={[styles.flexRow]}>
+                <View style={[styles.mR1]}>
+                    <Text style={[styles.font20]}>From</Text>
+                    <DatePicker
+                        style={{width: 150}}
+                        date={OutGoingDateFrom}
+                        mode="date"
+                        placeholder="select date"
+                        format="YYYY-MM-DD"
+                        confirmBtnText="Confirm"
+                        cancelBtnText="Cancel"
+                        customStyles={{
+                            dateIcon: {
+                                position: 'absolute',
+                                left: 0,
+                                top: 4,
+                                marginLeft: 0
+                            },
+                            dateInput: {
+                                marginLeft: 36,
+                            }
+                        }}
+                        onDateChange={(date) => {setOutGoingDateFrom(date)}}
+                    />
+                </View>
+                <View>
+                    <Text style={[styles.font20]}>To</Text>
+                    <DatePicker
+                        style={{width: 150}}
+                        date={OutGoingDateTo}
+                        mode="date"
+                        placeholder="select date"
+                        format="YYYY-MM-DD"
+                        confirmBtnText="Confirm"
+                        cancelBtnText="Cancel"
+                        customStyles={{
+                            dateIcon: {
+                                position: 'absolute',
+                                left: 0,
+                                top: 4,
+                                marginLeft: 0
+                            },
+                            dateInput: {
+                                marginLeft: 36
+                            }
+                        }}
+                        onDateChange={(date) => {setOutGoingDateTo(date)}}
+                    />
+                </View>
+            </View>
+        )
+    }
 
     const tableComponent = () =>{
         return(
@@ -433,47 +519,60 @@ const ProductionWorkEntryScreen = (props) =>{
     const loadbutton = () =>{
         return(
             <View style={[styles.flexRow, styles.justifySpaceAround,styles.alignCenter]}>
-                <View style={[styles.w30]}>
-                    <Text style={[styles.font25]}>Showing {pageStart + 1} to {parseInt(pageStart) + parseInt(pagelength)} of {totaldata} Items</Text>
-                </View>
-                <View style={[styles.w60, styles.flexRow, styles.justifyStart,styles.alignCenter,styles.mT2,styles.mB3]}>
-                    <TouchableOpacity disabled={(parseInt(pageStart)) > 0 ? false : true} onPress={() => prevpage()}>
-                        <View style={[(parseInt(pageStart)) > 0 ? styles.backgroundPrimary : styles.bgGray200,styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.border10,styles.pY1,styles.pX2, styles.mR1]}>
-                            {
-                                refreshing
-                                ?
-                                    <>
-                                        <ActivityIndicator style={[styles.w10]}  size={20} color={colors.lightColor}/>
-                                        <Text style={[styles.font30, styles.textWhite, styles.mL1]}>Prev</Text>
-                                    </>
-                                :
-                                <>
-                                    <Icon name="caret-left" size={30} style={[styles.w10]} color={colors.lightColor} />
-                                    <Text style={[styles.font30, styles.textWhite, styles.mL1]}>Prev</Text>
-                                </>
-                            }
-                        </View>
-                    </TouchableOpacity>
-                    
-                    <TouchableOpacity disabled={(parseInt(pageStart) + parseInt(pagelength)) >= totaldata ? true : false} onPress={() => nextpage()}>
-                        
-                        <View style={[(parseInt(pageStart) + parseInt(pagelength)) >= totaldata ? styles.bgGray200 : styles.backgroundPrimary,styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.border10,styles.pY1,styles.pX2, styles.mL1]}>
-                        {
-                            refreshing
-                            ?
-                                <>
-                                    <Text style={[styles.font30, styles.textWhite, styles.mR1]}>Next</Text>
-                                    <ActivityIndicator style={[styles.w10]} size={20} color={colors.lightColor}/>
-                                </>
-                            :
-                            <>
-                                <Text style={[styles.font30, styles.textWhite, styles.mR1]}>Next</Text>
-                                <Icon name="caret-right" style={[styles.w10]} size={30} color={colors.lightColor} />
-                            </>
-                        }
-                        </View>
-                    </TouchableOpacity>
-                </View>
+                {
+                    totaldata 
+                    ?
+                        <>
+                            <View style={[styles.w30]}>
+                                <Text style={[styles.font25]}>Showing {pageStart + 1} to {parseInt(pageStart) + parseInt(pagelength)} of {totaldata} Items</Text>
+                            </View>
+                            <View style={[styles.w60, styles.flexRow, styles.justifyStart,styles.alignCenter,styles.mT2,styles.mB3]}>
+                                <TouchableOpacity disabled={(parseInt(pageStart)) > 0 ? false : true} onPress={() => prevpage()}>
+                                    <View style={[(parseInt(pageStart)) > 0 ? styles.backgroundPrimary : styles.bgGray200,styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.border10,styles.pY1,styles.pX2, styles.mR1]}>
+                                        {
+                                            refreshing
+                                            ?
+                                                <>
+                                                    <ActivityIndicator style={[styles.w10]}  size={20} color={colors.lightColor}/>
+                                                    <Text style={[styles.font30, styles.textWhite, styles.mL1]}>Prev</Text>
+                                                </>
+                                            :
+                                            <>
+                                                <Icon name="caret-left" size={30} style={[styles.w10]} color={colors.lightColor} />
+                                                <Text style={[styles.font30, styles.textWhite, styles.mL1]}>Prev</Text>
+                                            </>
+                                        }
+                                    </View>
+                                </TouchableOpacity>
+                                
+                                <TouchableOpacity disabled={(parseInt(pageStart) + parseInt(pagelength)) >= totaldata ? true : false} onPress={() => nextpage()}>
+                                    
+                                    <View style={[(parseInt(pageStart) + parseInt(pagelength)) >= totaldata ? styles.bgGray200 : styles.backgroundPrimary,styles.justifyCenter,styles.alignCenter,styles.flexRow,styles.border10,styles.pY1,styles.pX2, styles.mL1]}>
+                                    {
+                                        refreshing
+                                        ?
+                                            <>
+                                                <Text style={[styles.font30, styles.textWhite, styles.mR1]}>Next</Text>
+                                                <ActivityIndicator style={[styles.w10]} size={20} color={colors.lightColor}/>
+                                            </>
+                                        :
+                                        <>
+                                            <Text style={[styles.font30, styles.textWhite, styles.mR1]}>Next</Text>
+                                            <Icon name="caret-right" style={[styles.w10]} size={30} color={colors.lightColor} />
+                                        </>
+                                    }
+                                    </View>
+                                </TouchableOpacity>
+                            </View>
+                        </>
+                    :
+                        <>
+                            <View style={[styles.w30]}>
+                                <Text style={[styles.font25, styles.textCenter]}>{totaldata} Items to show, please Reload</Text>
+                            </View>
+                        </>
+                }
+                
             </View>
         )
     }
@@ -501,7 +600,10 @@ const ProductionWorkEntryScreen = (props) =>{
                         <View>
                             {
                                 currentComponent === "Outgoing Inspection" 
-                                ? <></> 
+                                ? 
+                                    <View>
+                                        {datepickerFrom()}
+                                    </View> 
                                 :
                                     <View style={[styles.flexRow]}>
                                         <TouchableOpacity onPress={() => actionsheetDateFilter()} >
