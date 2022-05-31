@@ -165,10 +165,12 @@ const WorkResultInputScreen = (props) =>{
                     console.warn("return before validation: " + responseData[0])
                     if(responseData[0].message === "EXIST"){
                         console.log("current plating: " + plating)
+                        setBoolStartProcess(false)
                         alertMessageNote("Plating Sequence is already in process!! Try again..");
                         console.warn("exist")
                     }else{
                         setPlating(responseData[0].message)
+                        console.warn("new plating lot number: " + JSON.stringify(responseData[0]))
                         console.warn("success")
                     }
                     console.warn("return After validation", responseData[0])
