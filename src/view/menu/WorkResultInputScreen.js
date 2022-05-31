@@ -73,6 +73,8 @@ const WorkResultInputScreen = (props) =>{
     const [lotnumber, setlotnumber] =  useState(null);
     const [get_actualQTY, set_actualQTY] = useState(null)
     const [get_actualQTY_display, set_actualQTY_display] = useState(null)
+    const [prodLineLastIndex, setProdLineLastIndex] = useState(null)
+    const [prodLineLastIndexDisp, setProdLineLastIndexDisp] = useState(null)
 
     const FactoryID = useSelector(state => state.loginCredential.FactoryId);
 
@@ -234,7 +236,7 @@ const WorkResultInputScreen = (props) =>{
         }); 
     }
 
-    const getProductLine = (labelTitle) =>{
+    const getProductLine = (labelTitle, propslineId) =>{
         fetch(domainSetting + "api/production-work/production-work-entry/linel-list/get/" + factoryId, {
             method:'GET',
             headers:{
@@ -258,19 +260,20 @@ const WorkResultInputScreen = (props) =>{
                     )
                 }
             }
-            checkLineID(datael, labelTitle)
+            checkLineID(datael, labelTitle, propslineId)
             console.warn(datael)
         }).catch(error => {
             alertMessage(error.message);
         }); 
     }
 
-    const search = async (tokendata, domainSetting, propslineId, labelTitle = null) =>{
-        console.warn(JSON.stringify({
+    const search = async (tokendata, domainSetting, propslineId, labelTitle = null, lastindexData = null) =>{
+        console.warn("search" + JSON.stringify({
             TravelSheetNo: travelSheetNumber,
             FactoryID : FactoryID,
             LineID : propslineId,
         }))
+        setLineID(propslineId)
         console.warn("action sheet title: " + labelTitle)
         const travelSheetNumber = props.route.params.dataContent.number;
        
@@ -307,7 +310,7 @@ const WorkResultInputScreen = (props) =>{
                         DateFrom:       responseData[0].dataContent[0].DateFrom,
                         DateTo:         responseData[0].dataContent[0].DateTo
                     }
-                    console.warn(responseData[0].PlatingContent)
+                    console.warn("all data:" + responseData[0].PlatingContent)
 
                     tempvar.DateFrom == "1900-01-01 00:00:00" ? setBoolStartProcess(false) : setBoolStartProcess(true)
                     tempvar.DateTo == "1900-01-01 00:00:00" ? setBoolEndProcess(false) : setBoolEndProcess(true)
@@ -320,6 +323,11 @@ const WorkResultInputScreen = (props) =>{
                     if(responseData[0].PlatingContent){
                         setPrevPlating(responseData[0].PlatingContent)
                         var seq = parseInt(responseData[0].PlatingContent.split('-')[2]) + 1
+                        
+                        var  newsequence = String(responseData[0].PlatingContent.slice(0, (responseData[0].PlatingContent.split('-')[0].length + responseData[0].PlatingContent.split('-')[1].length) + 1).slice(0, responseData[0].PlatingContent.slice(0, (responseData[0].PlatingContent.split('-')[0].length + responseData[0].PlatingContent.split('-')[1].length) + 1).length - 1))
+                        newsequence = lastindexData == " " ? newsequence : newsequence + lastindexData
+                        setProdLineLastIndexDisp(lastindexData ? newsequence : null)
+                        console.warn("new sequence: "+ lastindexData ? newsequence : responseData[0].PlatingContent)
                         setSequenceNo(seq)
                         setbaseSequenceNo(parseInt(responseData[0].PlatingContent.split('-')[2]))
                     }else{
@@ -340,7 +348,8 @@ const WorkResultInputScreen = (props) =>{
                         setPlating(tempvar.PlatingLotNo)
                         setprodlineButton(true)
                     }else{
-                        getProductLine(labelTitle)
+                        getProductLine(labelTitle, propslineId)
+                        console.warn("run")
                     }
                     setloading(false)
                 }else{
@@ -387,7 +396,7 @@ const WorkResultInputScreen = (props) =>{
         );
     }
 
-    const checkLineID = async (data, label = null) =>{
+    const checkLineID = async (data, label = null, checkLineID) =>{
         var name = await DeviceInfo.getDeviceName()
         console.log("device name: " + name)
         var temp = name.split(" ")
@@ -404,7 +413,7 @@ const WorkResultInputScreen = (props) =>{
         }
 
         main_display = displayTitle + (number !== null ? number : "")
-
+        console.warn("selected production line: " + data)
         if(data != null){
             let catchPair = false
             for(let i = 0; i < data.length; i++){
@@ -419,11 +428,18 @@ const WorkResultInputScreen = (props) =>{
                 //     setLineID(data[i].LineID)
                 //     catchPair = true
                 // }
-
-                if(line_db.includes(name)){
-                    setLineID(data[i].LineID)
-                    catchPair = true
-                    console.log("Line ID: " + data[i].LineID)
+                if(checkLineID){
+                    if(data[i].LineID === checkLineID){
+                        setLineID(data[i].LineID)
+                        catchPair = true
+                        console.log("Line ID: " + data[i].LineID)
+                    }
+                }else{
+                    if(line_db.includes(name)){
+                        setLineID(data[i].LineID)
+                        catchPair = true
+                        console.log("Line ID: " + data[i].LineID)
+                    }
                 }
             }
             if(!catchPair){
@@ -466,7 +482,17 @@ const WorkResultInputScreen = (props) =>{
     const closeActionSheet = (prodline, labelTitle) =>{
         setactiveActionSheet(false)
         setLineID(prodline)
-        search(token, domainSetting, prodline, labelTitle)
+        var tempIndex = null;
+        var tempLblTitle = String(labelTitle[labelTitle.length - 1])
+        
+        if(parseInt(tempLblTitle)){
+            // set plating lot line number in kp sequence
+            // setProdLineLastIndex(tempLblTitle)
+            tempIndex = tempLblTitle
+        }else{
+            tempIndex = " "
+        }
+        search(token, domainSetting, prodline, labelTitle, tempIndex)
         console.warn("close Sheet", token, domainSetting, prodline)
     }
 
@@ -539,7 +565,7 @@ const WorkResultInputScreen = (props) =>{
                                 <><Text style={[styles.font40]}>{plating == null ? "--" : plating}</Text></>
                             :
                                 <>
-                                    <Text style={[styles.font40]}>{Prevplating == null ? "--" : (Prevplating.split('-')[0] +"-"+Prevplating.split('-')[1] + "-")}</Text>
+                                    <Text style={[styles.font40]}>{Prevplating == null ? "--" : ((prodLineLastIndexDisp ? prodLineLastIndexDisp : (Prevplating.split('-')[0] +"-"+Prevplating.split('-')[1])) + "-")}</Text>
                                     {
                                         Prevplating
                                         ?
