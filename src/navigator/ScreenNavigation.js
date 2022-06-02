@@ -1,20 +1,13 @@
-import React,
-{
-    useState,
-    useEffect
-} from "react";
+import React from "react";
 
 import {View, Text} from "react-native"
 
 import {menuScreens, loginScreenData} from './appData'
 
-import LoginScreen from "../view/Login/LoginScreen";
-
 import { styles, colors } from "../asset/css/BaseStyle";
 
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { marginBottom } from "styled-system";
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 import { Popover, Button, Box, Center, NativeBaseProvider } from 'native-base';
