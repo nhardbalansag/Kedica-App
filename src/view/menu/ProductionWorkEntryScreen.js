@@ -256,6 +256,7 @@ const ProductionWorkEntryScreen = (props) =>{
                 PageLength: PageLength ? PageLength : 5,
                 LineID: parseInt(lineid ? lineid : (lineId ? lineId : 0)),
                 DateFilter: parseInt(DateFilter ? DateFilter : 0),
+                filterData: filterData,
                 QueryFilter: -1,
                 OutGoingDateFrom: OutGoingDateFrom,
                 OutGoingDateTo: OutGoingDateTo
@@ -275,7 +276,7 @@ const ProductionWorkEntryScreen = (props) =>{
                 PageLength: PageLength ? PageLength : 5,
                 LineID: parseInt(lineid ? lineid : (lineId ? lineId : 0)),
                 DateFilter: parseInt(DateFilter ? DateFilter : 0),
-
+                filterData: filterData,
                 QueryFilter: -1,
                 OutGoingDateFrom: OutGoingDateFrom,
                 OutGoingDateTo: OutGoingDateTo
@@ -295,49 +296,19 @@ const ProductionWorkEntryScreen = (props) =>{
             }else{
                 for (const key in responseData[0].dataContent){
                     if(componentTitle !== "Outgoing Inspection"){
-                        if(filterData === "Ongoing" && responseData[0].dataContent[key].StartProcess !== "1900-01-01 00:00:00" && responseData[0].dataContent[key].EndProcess === "1900-01-01 00:00:00"){
-                            datael.push(
-                                [
-                                    responseData[0].dataContent[key].StartProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].StartProcess,
-                                    responseData[0].dataContent[key].EndProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].EndProcess,
-                                    responseData[0].dataContent[key].TravelSheetNo,
-                                    responseData[0].dataContent[key].PlatingLotNo,
-                                    responseData[0].dataContent[key].ItemCode + "\n" + responseData[0].dataContent[key].ItemName,
-                                    // responseData[0].dataContent[key].LotNo,
-                                    responseData[0].dataContent[key].Priority,
-                                    responseData[0].dataContent[key].Age + " Days",
-                                    // responseData[0].dataContent[key].ShipDate,
-                                ]
-                            )
-                        }else if(filterData === "Pending" && responseData[0].dataContent[key].StartProcess === "1900-01-01 00:00:00" && responseData[0].dataContent[key].EndProcess === "1900-01-01 00:00:00"){
-                            datael.push(
-                                [
-                                    responseData[0].dataContent[key].StartProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].StartProcess,
-                                    responseData[0].dataContent[key].EndProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].EndProcess,
-                                    responseData[0].dataContent[key].TravelSheetNo,
-                                    responseData[0].dataContent[key].PlatingLotNo,
-                                    responseData[0].dataContent[key].ItemCode + "\n" + responseData[0].dataContent[key].ItemName,
-                                    // responseData[0].dataContent[key].LotNo,
-                                    responseData[0].dataContent[key].Priority,
-                                    responseData[0].dataContent[key].Age + " Days",
-                                    // responseData[0].dataContent[key].ShipDate,
-                                ]
-                            )
-                        }else if(filterData === "All"){
-                            datael.push(
-                                [
-                                    responseData[0].dataContent[key].StartProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].StartProcess,
-                                    responseData[0].dataContent[key].EndProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].EndProcess,
-                                    responseData[0].dataContent[key].TravelSheetNo,
-                                    responseData[0].dataContent[key].PlatingLotNo,
-                                    responseData[0].dataContent[key].ItemCode + "\n" + responseData[0].dataContent[key].ItemName,
-                                    // responseData[0].dataContent[key].LotNo,
-                                    responseData[0].dataContent[key].Priority,
-                                    responseData[0].dataContent[key].Age + " Days",
-                                    // responseData[0].dataContent[key].ShipDate,
-                                ]
-                            )
-                        }
+                        datael.push(
+                            [
+                                responseData[0].dataContent[key].StartProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].StartProcess,
+                                responseData[0].dataContent[key].EndProcess == "1900-01-01 00:00:00" ? "" : responseData[0].dataContent[key].EndProcess,
+                                responseData[0].dataContent[key].TravelSheetNo,
+                                responseData[0].dataContent[key].PlatingLotNo,
+                                responseData[0].dataContent[key].ItemCode + "\n" + responseData[0].dataContent[key].ItemName,
+                                // responseData[0].dataContent[key].LotNo,
+                                responseData[0].dataContent[key].Priority,
+                                responseData[0].dataContent[key].Age + " Days",
+                                // responseData[0].dataContent[key].ShipDate,
+                            ]
+                        )
                     }else{
                         datael.push(
                             [
@@ -410,7 +381,7 @@ const ProductionWorkEntryScreen = (props) =>{
             });
            return unsubscribe;
         }
-    },[travelSheetNo, isFocused, filterData, textInputRef, OutGoingDateTo, DateFilter])
+    },[travelSheetNo, isFocused, filterData, textInputRef, OutGoingDateTo, OutGoingDateFrom, DateFilter])
 
     const datepickerFrom = () => {
         return(

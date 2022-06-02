@@ -27,15 +27,15 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 import {ProductionScreen} from "../../navigator/appData"
-import { io } from "socket.io-client";
-import { backgroundTaskInit, updateTaskfunct } from "../../background/task";
-import { AppState } from 'react-native';
+// import { io } from "socket.io-client";
+// import { backgroundTaskInit, updateTaskfunct } from "../../background/task";
+// import { AppState } from 'react-native';
 
 const MainScreen = ({navigation}) =>{
 
-    const appState = useRef(AppState.currentState);
-    const [appStateVisible, setAppStateVisible] = useState(appState.current);
-    const [pageStatus, setPageStatus] = useState(null)
+    // const appState = useRef(AppState.currentState);
+    // const [appStateVisible, setAppStateVisible] = useState(appState.current);
+    // const [pageStatus, setPageStatus] = useState(null)
     const [refreshing, setRefreshing] = useState(true);
 
     const domainSetting = useSelector(state => state.loginCredential.domainSetting);
