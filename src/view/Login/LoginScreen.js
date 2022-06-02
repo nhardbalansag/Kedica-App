@@ -147,11 +147,12 @@ const LoginScreen = () => {
 
     return(
         <NativeBaseProvider>
-            <View style={[styles.mL1, styles.mT1]}>
+            <View>
                 <TouchableOpacity
                     onPress={() => setShowModal(true)}
+                    style={[styles.mL1, styles.mT1, styles.w5]}
                 >
-                    <Icon name="gear" size={30} color={colors.darkColor} />
+                    <Icon name="gear" size={60} color={colors.darkColor} />
                 </TouchableOpacity>
             </View>
             {
